@@ -1,0 +1,82 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <Spinner
+        android:id="@+id/orderRoomSpinner"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/shape_rect02"
+        android:padding="10dp"
+        android:layout_gravity="center"
+        android:drawableStart="@drawable/ic_loc_gray"
+        android:drawableEnd="@drawable/ic_down_gray"
+        app:errorEnabled="true"
+        />
+
+    <Spinner
+        android:id="@+id/objRoomSpinner"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/shape_rect02"
+        android:padding="10dp"
+        android:layout_gravity="center"
+        android:drawableStart="@drawable/ic_loc_gray"
+        android:drawableEnd="@drawable/ic_down_gray"
+        app:errorEnabled="true"
+        />
+
+    <EditText
+        android:id="@+id/objWidthET"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/addWidth"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/icon_dns_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="4dp"
+        android:inputType="numberDecimal"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
+
+    <EditText
+        android:id="@+id/objHeightET"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/addHeight"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/icon_dns_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="4dp"
+        android:inputType="numberDecimal"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
+
+    <EditText
+        android:id="@+id/objDescET"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/description"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/icon_dns_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="4dp"
+        android:inputType="text"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
+
+</LinearLayout>

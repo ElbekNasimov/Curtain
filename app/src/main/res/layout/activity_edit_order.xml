@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="15dp"
+    tools:context=".crud.EditOrder">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:padding="10dp"
+        android:background="@drawable/shape_rect01">
+        <ImageButton
+            android:id="@+id/backBtn"
+            android:src="@drawable/ic_back_white"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@null" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="@string/edit_product"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp">
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            app:endIconMode="clear_text"
+            android:hint="@string/orderNumber">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderNumberET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_numbers_gray"
+                android:drawablePadding="5dp"
+                android:inputType="text"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/labelOrderNumber"
+            android:hint="@string/category">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderCatET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_apps_gray"
+                android:drawableEnd="@drawable/ic_down_gray"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:drawablePadding="5dp"
+                android:inputType="none"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/labelOrderType"
+            app:endIconMode="clear_text"
+            android:hint="@string/orderName">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderNameET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_title_gray"
+                android:drawablePadding="5dp"
+                android:inputType="textPersonName|textCapSentences"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            app:endIconMode="clear_text"
+            android:layout_below="@id/labelOrderName"
+            android:hint="@string/phone">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderPhoneET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_numbers_gray"
+                android:drawablePadding="5dp"
+                android:inputType="phone"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderSum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            app:endIconMode="clear_text"
+            android:layout_below="@id/labelOrderPhone"
+            android:hint="@string/orderSum">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderSumET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_money_gray"
+                android:drawablePadding="5dp"
+                android:inputType="number"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderZaklad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            app:endIconMode="clear_text"
+            android:layout_below="@id/labelOrderSum"
+            android:hint="@string/orderZaklad">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderZakladET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_numbers_gray"
+                android:drawablePadding="5dp"
+                android:inputType="number"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderLoc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/labelOrderZaklad"
+            android:hint="@string/orderLoc">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderLocET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_loc_gray"
+                android:drawableEnd="@drawable/ic_down_gray"
+                android:drawablePadding="5dp"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="none"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelOrderDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/labelOrderLoc"
+            android:hint="@string/description">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editOrderDescET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_title_gray"
+                android:drawablePadding="5dp"
+                android:inputType="text|textMultiLine"
+                android:minHeight="60dp"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/editOrderBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="120dp"
+            android:text="@string/edit_order"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:backgroundTint="@color/colorPrimary" />
+    </RelativeLayout>
+
+</LinearLayout>

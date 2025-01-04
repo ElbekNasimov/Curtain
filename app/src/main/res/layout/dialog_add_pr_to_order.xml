@@ -1,0 +1,48 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/objProductET"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/addHeight"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/icon_dns_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="4dp"
+        android:inputType="numberDecimal"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/objProductRV"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/row_object_products_item"/>
+
+    <EditText
+        android:id="@+id/objLenET"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/addHeight"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/icon_dns_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="4dp"
+        android:inputType="numberDecimal"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
+
+</LinearLayout>
