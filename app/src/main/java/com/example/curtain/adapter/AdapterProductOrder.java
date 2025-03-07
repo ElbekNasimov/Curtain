@@ -77,6 +77,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
         String productId = modelProductOrder.getProductId();
         String orderId = modelProductOrder.getOrderId();
         String partStatusProductOrder = modelProductOrder.getPartStatusProductOrder();
+        String productPriceProductOrder = modelProductOrder.getProductPriceProductOrder();
 
         firestore = FirebaseFirestore.getInstance();
         DocumentReference reference = firestore.collection("ProductsOrder").document(productObjectOrderId);
@@ -107,28 +108,10 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
         holder.titleProductOrderTV.setText(productTitle);
         holder.lenProductOrderTV.setText(String.format("%s m", productLength));
-
-        DocumentReference prRef = firestore.collection("Products").document(productId);
-        prRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                DocumentSnapshot doc = task.getResult();
-                if (doc.exists()) {
-                    if (doc.contains("prPrice")){
-                        String prPrice = doc.getString("prPrice");
-                        if (prPrice!=null) {
-                            float price = Float.parseFloat(prPrice);
-                            float len = Float.parseFloat(productLength);
-                            float sum = price * len;
-                            holder.sumProductOrderTV.setText(String.format("%s $", sum));
-                        }
-                    }
-                } else {
-                    Toast.makeText(context, "bunaqa pr yo'q", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(context, "pr topishda xato " + task.getException(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        float price = Float.parseFloat(productPriceProductOrder);
+        float len = Float.parseFloat(productLength);
+        float sum = price * len;
+        holder.sumProductOrderTV.setText(String.format("%s $", sum));
 
         String sharedUserName = sharedPreferences.getString("username", "");
         if (holder.productOrderStatusTV.getText().toString().equals("kesildi")){
@@ -194,7 +177,8 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                                     + task.getException(), Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(e -> Toast.makeText(context, "Error at Deleted Part..."
-                            + e.getMessage(), Toast.LENGTH_SHORT).show())).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
+                            + e.getMessage(), Toast.LENGTH_SHORT).show())).setNegativeButton("No",
+                            (dialog, which) -> dialog.dismiss()).show();
         });
 
         holder.editProductOrderBtn.setOnClickListener(view -> {
@@ -430,7 +414,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
             }
 
-
 // Bu tayyor, deylik 12 metr zakas berildi. shundan katta kusokdan 12 metr kesilsa, ishlaydi
             if (zakasBerilganKusokUzunligiOrder == kesiladiganKusokUzunligi) {
                 float farq=0;
@@ -447,20 +430,21 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                 hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
                 hashMap.put("partStatusProductOrder", "" + kusokHolati);                          // holat - status
 
-                firestore.collection("CutPartProductOrder").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
-                    progressDialog.dismiss();
-                    if (task.isSuccessful()) {
-                        changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
-                        changeStatusPartPrOrder(orderId, "Kesilmoqda");
-                        changeStatusProductsOrder(productObjectOrderId, kusokHolati, farq, finalMyList);
-                        Intent intent = new Intent(context, OrderDetail.class);
-                        intent.putExtra("orderId", orderId);
-                        context.startActivity(intent);
-                    } else {
-                        Toast.makeText(context, "error to kesish"
-                                + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                firestore.collection("CutPartProductOrder").document(timestamps).set(hashMap).
+                        addOnCompleteListener(task -> {
+                            progressDialog.dismiss();
+                            if (task.isSuccessful()) {
+                                changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
+                                changeStatusPartPrOrder(orderId, "Kesilmoqda");
+                                changeStatusProductsOrder(productObjectOrderId, kusokHolati, farq, finalMyList);
+                                Intent intent = new Intent(context, OrderDetail.class);
+                                intent.putExtra("orderId", orderId);
+                                context.startActivity(intent);
+                            } else {
+                                Toast.makeText(context, "error to kesish"
+                                        + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
     }

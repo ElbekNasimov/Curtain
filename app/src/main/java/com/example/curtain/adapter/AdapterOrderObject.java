@@ -67,14 +67,12 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
 
     class HolderOrderObject extends RecyclerView.ViewHolder {
 
-        private TextView orderRoomTV, orderObjectTV, orderWidthTV, orderHeightTV, orderObjectDescTV;
+        private TextView orderRoomTV, orderObjectTV, orderObjectDescTV;
         public HolderOrderObject(@NonNull View itemView) {
             super(itemView);
 
             orderRoomTV = itemView.findViewById(R.id.orderRoomTV);
             orderObjectTV = itemView.findViewById(R.id.orderObjectTV);
-            orderWidthTV = itemView.findViewById(R.id.orderWidthTV);
-            orderHeightTV = itemView.findViewById(R.id.orderHeightTV);
             orderObjectDescTV = itemView.findViewById(R.id.orderObjectDescTV);
         }
     }
@@ -102,14 +100,10 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
 
         String orderRoom = modelOrderObject.getOrderRoom();
         String objRoom = modelOrderObject.getObjRoom();
-        String objWidth = modelOrderObject.getObjWidthET();
-        String objHeight = modelOrderObject.getObjHeightET();
         String objDesc = modelOrderObject.getObjDescET();
 
         holder.orderRoomTV.setText(orderRoom);
         holder.orderObjectTV.setText(objRoom);
-        holder.orderWidthTV.setText(String.format("Eni: %s ", objWidth));
-        holder.orderHeightTV.setText(String.format("Bo'yi: %s ", objHeight));
         if (objDesc!=null){
             holder.orderObjectDescTV.setText(objDesc);
         } else {
@@ -139,27 +133,20 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
         LinearLayout addExtraUstanovkaLL = view.findViewById(R.id.addExtraUstanovkaLL);
 
         TextView nameOrderObjectTV = view.findViewById(R.id.nameOrderObjectTV);
-        TextView widthPrOrderObjectTV = view.findViewById(R.id.widthPrOrderObjectTV);
-        TextView heightPrOrderObjectTV = view.findViewById(R.id.heightPrOrderObjectTV);
         TextView orderObjectPoshivPriceTV = view.findViewById(R.id.orderObjectPoshivPriceTV);
         TextView orderObjectUstanovkaPriceTV = view.findViewById(R.id.orderObjectUstanovkaPriceTV);
-        TextView addTV = view.findViewById(R.id.addTV);
-        TextView editTV = view.findViewById(R.id.editTV);
         TextView noPartsTxt = view.findViewById(R.id.NoPartsTxt);
         TextView descOrderObjectTV = view.findViewById(R.id.descOrderObjectTV);
 
-
         String orderRoom = modelOrderObject.getOrderRoom();
         String objRoom = modelOrderObject.getObjRoom();
-        String objWidthET = modelOrderObject.getObjWidthET();
-        String objHeightET = modelOrderObject.getObjHeightET();
         String orderObjectId = modelOrderObject.getOrderObjectId();
         String orderId = modelOrderObject.getOrderId();
         String objectDesc = modelOrderObject.getObjDescET();
         String objectPoshiv = modelOrderObject.getObjectPoshiv();
         String objectUstanovka = modelOrderObject.getObjectUstanovka();
 
-        if (sharedUserType.equals("sklad")){
+        if (sharedUserType.equals("sklad") || sharedUserType.equals("bichuvchi")){
             delOrderObjectBtn.setVisibility(View.GONE);
             editOrderObjectBtn.setVisibility(View.GONE);
             addPrToObjectBtn.setVisibility(View.GONE);
@@ -184,10 +171,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             addExtraUstanovkaLL.setVisibility(View.GONE);
         }
 
-
         nameOrderObjectTV.setText(String.format("%s, %s", orderRoom, objRoom));
-        widthPrOrderObjectTV.setText(String.format("Eni %s", objWidthET));
-        heightPrOrderObjectTV.setText(String.format("Balandligi %s", objHeightET));
 
         productObjectArrayList = new ArrayList<>();
 
@@ -251,6 +235,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             TextInputEditText searchPrObjET = view12.findViewById(R.id.searchPrObjET);
             TextInputEditText prObjLenET = view12.findViewById(R.id.prObjLenET);
             TextView searchPrIdObjET = view12.findViewById(R.id.searchPrIdObjET);
+            searchPrIdObjET.setVisibility(View.GONE);
 
             RecyclerView prObjRV = view12.findViewById(R.id.prObjRV);
             Button savePrObjBtn = view12.findViewById(R.id.savePrObjBtn);
@@ -321,19 +306,34 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                 hashMap.put("productId", productId);
                 hashMap.put("partStatusProductObject", "holat");
                 hashMap.put("created_by", firebaseAuth.getCurrentUser().getDisplayName());
-                firebaseFirestore.collection("ProductObjectOrder").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
-                    progressDialog.dismiss();
+
+                DocumentReference productRef = firebaseFirestore.collection("Products").document(productId);
+                productRef.get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()){
-                        Toast.makeText(context, "Q", Toast.LENGTH_SHORT).show();
-                        Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
-                        bottomSheetDialog1.dismiss();
-                        Intent intent = new Intent(context, OrderDetail.class);
-                        intent.putExtra("orderId", orderId);
-                        context.startActivity(intent);
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        if (documentSnapshot.exists()){
+                            hashMap.put("productPriceProductOrder", "" + documentSnapshot.getString("prPrice"));
+
+                            firebaseFirestore.collection("ProductObjectOrder").document(timestamps).set(hashMap).
+                                    addOnCompleteListener(task1 -> {
+                                        progressDialog.dismiss();
+                                        if (task1.isSuccessful()){
+                                            Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
+                                            bottomSheetDialog1.dismiss();
+                                            Intent intent = new Intent(context, OrderDetail.class);
+                                            intent.putExtra("orderId", orderId);
+                                            context.startActivity(intent);
+                                        } else {
+                                            Toast.makeText(context, "Qo'shishda muammo " +
+                                                    task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
                     } else {
-                        Toast.makeText(context, "Qo'shishda muammo " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Mahsulot topilmadi", Toast.LENGTH_SHORT).show();
                     }
                 });
+
             });
         });
 
@@ -354,7 +354,6 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             addExtraSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view12, int i, long l) {
-
                     if (!addExtraSpinner.getSelectedItem().toString().trim().equalsIgnoreCase("Tanlang:")){
                         addExtraTxt = addExtraSpinner.getSelectedItem().toString().trim();
                     } else {
@@ -389,14 +388,12 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                                         progressDialog.dismiss();
                                         if (task.isSuccessful()){
                                             Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
-
                                             if (addExtraTxt.equals("Poshiv")){
                                                 addExtraToOrder("orderPoshiv", addExtraPrice, orderId);
                                             }
                                             if (addExtraTxt.equals("Ustanovka")){
                                                 addExtraToOrder("orderUstanovka", addExtraPrice, orderId);
                                             }
-
                                             Intent intent = new Intent(context, OrderDetail.class);
                                             intent.putExtra("orderId", orderId);
                                             context.startActivity(intent);
@@ -415,7 +412,6 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             AlertDialog dialog = alertDialog.create();
             dialog.show();
         });
-
     }
 
     private void addExtraToOrder(String orderAddExtra, String addExtraPrice, String orderId) {
@@ -481,7 +477,6 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
     }
 
     private void deleteProductByObjects(String deletedProductId) {
-        Toast.makeText(context, "deleteProductByObjects " + deletedProductId, Toast.LENGTH_SHORT).show();
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         CollectionReference partsPref = firestore.collection("ProductObjectOrder");
         partsPref.whereEqualTo("objectOrderId", deletedProductId).get().addOnCompleteListener(task -> {

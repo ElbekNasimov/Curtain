@@ -2,7 +2,7 @@ package com.example.curtain.model;
 
 public class ModelProductOrder {
     private String created_by, orderId, productOrderId, productObjectOrderId, productId, partStatusProductOrder,
-             lenProductObjectOrder, productObjectOrder, qoldiqKusok, kesilganKusoklarList
+             lenProductObjectOrder, productObjectOrder, qoldiqKusok, kesilganKusoklarList, productPriceProductOrder
             ;
 
     public ModelProductOrder() {
@@ -10,7 +10,8 @@ public class ModelProductOrder {
 
     public ModelProductOrder(String created_by, String orderId, String productObjectOrderId, String productOrderId,
                              String partStatusProductOrder, String productId, String lenProductObjectOrder,
-                             String productObjectOrder,  String qoldiqKusok, String kesilganKusoklarList) {
+                             String productObjectOrder,  String qoldiqKusok, String kesilganKusoklarList,
+                             String productPriceProductOrder) {
         this.created_by = created_by; // kiritgan odam
         this.orderId = orderId; // smeta raqami
         this.productObjectOrderId = productObjectOrderId; // parda nomi
@@ -21,6 +22,7 @@ public class ModelProductOrder {
         this.partStatusProductOrder = partStatusProductOrder;
         this.qoldiqKusok = qoldiqKusok;
         this.kesilganKusoklarList = kesilganKusoklarList;
+        this.productPriceProductOrder = productPriceProductOrder;  // price product order
     }
 
     public String getKesilganKusoklarList() {
@@ -101,5 +103,13 @@ public class ModelProductOrder {
 
     public void setProductObjectOrder(String productObjectOrder) {
         this.productObjectOrder = productObjectOrder;
+    }
+
+    public String getProductPriceProductOrder() {
+        return productPriceProductOrder;
+    }
+
+    public void setProductPriceProductOrder(String productPriceProductOrder) {
+        this.productPriceProductOrder = productPriceProductOrder;
     }
 }

@@ -2,14 +2,15 @@ package com.example.curtain.model;
 
 public class ModelProductObject {
     String created_by, orderId, productObjectId, objectOrderId, lenProductObject, titleProductObject,
-            partStatusProductObject, productId, qoldiqKusok, kesilganKusoklarList;
+            partStatusProductObject, productId, qoldiqKusok, kesilganKusoklarList, productPriceProductOrder;
 
     public ModelProductObject() {
     }
 
     public ModelProductObject(String created_by, String orderId, String productObjectId, String objectOrderId,
                               String lenProductObject, String titleProductObject, String partStatusProductObject,
-                              String productId, String qoldiqKusok, String kesilganKusoklarList) {
+                              String productId, String qoldiqKusok, String kesilganKusoklarList, String productPriceProductOrder
+    ) {
         this.created_by = created_by;
         this.orderId = orderId;
         this.productObjectId = productObjectId;
@@ -20,6 +21,15 @@ public class ModelProductObject {
         this.productId = productId;
         this.qoldiqKusok = qoldiqKusok;
         this.kesilganKusoklarList = kesilganKusoklarList;
+        this.productPriceProductOrder = productPriceProductOrder;
+    }
+
+    public String getProductPriceProductOrder() {
+        return productPriceProductOrder;
+    }
+
+    public void setProductPriceProductOrder(String productPriceProductOrder) {
+        this.productPriceProductOrder = productPriceProductOrder;
     }
 
     public String getCreated_by() {

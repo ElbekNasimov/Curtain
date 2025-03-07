@@ -2,22 +2,19 @@ package com.example.curtain.model;
 
 public class ModelOrderObject {
 
-    private String orderObjectId, created_by, orderId, orderRoom, objRoom, objWidthET, objHeightET, objDescET,
-            objectPoshiv, objectUstanovka;
+    private String orderObjectId, created_by, orderId, orderRoom, objRoom, objDescET, objectPoshiv, objectUstanovka;
 
     public ModelOrderObject() {
     }
 
     public ModelOrderObject(String orderObjectId, String created_by, String orderId, String orderRoom,
-                            String objRoom, String objWidthET, String objHeightET, String objDescET,
+                            String objRoom, String objDescET,
                             String objectPoshiv, String objectUstanovka) {
         this.orderObjectId = orderObjectId;
         this.created_by = created_by;
         this.orderId = orderId;
         this.orderRoom = orderRoom;
         this.objRoom = objRoom;
-        this.objWidthET = objWidthET;
-        this.objHeightET = objHeightET;
         this.objDescET = objDescET;
         this.objectPoshiv = objectPoshiv;
         this.objectUstanovka = objectUstanovka;
@@ -61,22 +58,6 @@ public class ModelOrderObject {
 
     public void setObjRoom(String objRoom) {
         this.objRoom = objRoom;
-    }
-
-    public String getObjWidthET() {
-        return objWidthET;
-    }
-
-    public void setObjWidthET(String objWidthET) {
-        this.objWidthET = objWidthET;
-    }
-
-    public String getObjHeightET() {
-        return objHeightET;
-    }
-
-    public void setObjHeightET(String objHeightET) {
-        this.objHeightET = objHeightET;
     }
 
     public String getObjDescET() {

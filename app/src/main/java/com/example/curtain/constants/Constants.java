@@ -33,23 +33,27 @@ public class Constants {
     };
     public static final String [] categories = {
             "Portyer",
+            "Blekout",
             "Tyul",
+            "Odnoton",
             "Aksessuar",
             "Bahrama",
-            "Bubon",
-            "Gilam",
             "Makaron",
+            "Bubon",
+            "Derjatel",
     };
 
     public static final String [] categories1 = {
             "Hammasi",
             "Portyer",
+            "Blekout",
             "Tyul",
+            "Odnoton",
             "Aksessuar",
             "Bahrama",
-            "Bubon",
-            "Gilam",
             "Makaron",
+            "Bubon",
+            "Derjatel",
     };
 
     // product location
@@ -68,7 +72,9 @@ public class Constants {
 
     public static final String [] measurement = {
             "metr",
-            "dona"
+            "dona",
+            "ro'lon",
+            "pochka",
     };
 
     public static final String [] orderCats = {
@@ -87,7 +93,7 @@ public class Constants {
     };
 
     public static final String [] orderRooms = {
-            "Tanlang:",
+            "Xonani tanlang:",
             "Zal 1",
             "Zal 2",
             "Oshxona 1",
@@ -110,18 +116,47 @@ public class Constants {
             "Dush 2",
             "Namozxona 1",
             "Namozxona 2",
-            "Gastinniy",
             "Koridor 1",
             "Koridor 2",
     };
 
+    public static final String [] orderRooms1 = {
+            "Zal 1",
+            "Zal 2",
+            "Oshxona 1",
+            "Oshxona 2",
+            "Xol 1",
+            "Xol 2",
+            "Yotoqxona 1",
+            "Yotoqxona 2",
+            "Yotoqxona 3",
+            "O'gil xona 1",
+            "O'gil xona 2",
+            "Qiz xona 1",
+            "Qiz xona 2",
+            "Mehmonxona 1",
+            "Mehmonxona 2",
+            "Mansarda",
+            "Zina 1",
+            "Zina 2",
+            "Dush 1",
+            "Dush 2",
+            "Namozxona 1",
+            "Namozxona 2",
+            "Koridor 1",
+            "Koridor 2",
+    };
     public static final String [] objRooms = {
-            "Tanlang:",
-            "Eshik 1",
-            "Eshik 2",
-            "Eshik 3",
-            "Deraza 1",
-            "Deraza 2",
-            "Deraza 3",
+            "Etajni tanlang:",
+            "Podval",
+            "Etaj 1",
+            "Etaj 2",
+            "Etaj 3",
+    };
+    public static final String [] objRooms1 = {
+            "Podval",
+            "Etaj 1",
+            "Etaj 2",
+            "Etaj 3",
     };
 }

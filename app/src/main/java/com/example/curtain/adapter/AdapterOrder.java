@@ -67,13 +67,13 @@ public class AdapterOrder extends ArrayAdapter<ModelOrder> implements Filterable
         TextView orderSumTV = listItemView.findViewById(R.id.orderSumTV);
         TextView orderCreatedByTV = listItemView.findViewById(R.id.orderCreatedByTV);
         TextView orderCategoryTV = listItemView.findViewById(R.id.orderCategoryTV);
+        TextView orderStatusInCardTV = listItemView.findViewById(R.id.orderStatusInCardTV);
 
-        LinearLayout orderCreatedByLL = listItemView.findViewById(R.id.orderCreatedByLL);
         String orderId = modelOrder.getOrderId();
 
         String sharedUserType = sharedPreferences.getString("user_type", "");
         if (sharedUserType.equals("dizayner")){
-            orderCreatedByLL.setVisibility(View.GONE);
+            orderCreatedByTV.setVisibility(View.GONE);
         }
 
         orderNumberTV.setText(modelOrder.getOrderNumber());
@@ -82,6 +82,7 @@ public class AdapterOrder extends ArrayAdapter<ModelOrder> implements Filterable
         orderCreatedByTV.setText(modelOrder.getCreated_by());
         orderCreatedByTV.setPaintFlags(orderCreatedByTV.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         orderCategoryTV.setText(modelOrder.getOrderCat());
+        orderStatusInCardTV.setText(modelOrder.getOrderStatus());
 
         listItemView.setOnClickListener(view -> {
             Intent intent = new Intent(getContext(), OrderDetail.class);

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Curtain</string>
+    <string name="app_name">Zarina Design</string>
     <string name="login">Login</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
@@ -8,7 +8,7 @@
     <string name="register">Register</string>
     <string name="have_acc">Already have a account? Login</string>
     <string name="username">Username</string>
-    <string name="phone">Phone</string>
+    <string name="phone">Tel raqami</string>
     <string name="userDisabled">Foydalanuvchi faollashtirilmagan</string>
     <string name="userWait">Faollashtirishni kuting…</string>
     <string name="backToLogin">Login sahifaga qaytish</string>
@@ -47,7 +47,7 @@
     <string name="checkChB">Tekshirish</string>
     <string name="select">Tanlang</string>
     <string name="user_type">User type</string>
-    <string name="cost">Tannari</string>
+    <string name="cost">Tannarx</string>
     <string name="select_cat">Kategoriya</string>
     <string name="select_loc">Joylashuvini tanlang</string>
     <string name="select_user_type">User turi</string>
@@ -75,24 +75,26 @@
     <string name="orderSum">Smeta summasi</string>
     <string name="orderLoc">Mijoz manzili</string>
     <string name="orderDeadline">Muddat</string>
-    <string name="orderDesc">Smeta bo\'yicha izoh</string>
+    <string name="orderDesc">Izoh</string>
     <string name="payHistory">To\'lov tarixi</string>
+    <string name="addExtrasTotal">Total</string>
     <string name="orderZaklad">Zaklad</string>
     <string name="orderLoan">Qarz</string>
     <string name="room">Xona qo\'shish</string>
-    <string name="designerPercent">Dizayner foizi</string>
-    <string name="designerSum">Dizayner foydasi</string>
+    <string name="designerPercent">Diz foizi</string>
+    <string name="designerSum">Diz foydasi</string>
     <string name="designerPayStatusOff">Pulni olmadi</string>
     <string name="designerPayStatusOn">Pulni Oldi</string>
     <string name="orderType">Smeta turi</string>
-    <string name="add_object">Obyekt +</string>
+    <string name="add_object">Xona +</string>
     <string name="addWidth">Enini kiriting</string>
     <string name="addHeight">Bo\'yini kiriting</string>
     <string name="payHistoryOpen">To\'lov tarixi ochish</string>
-    <string name="payHistoryClose">Tolov tarixi yopish</string>
-    <string name="orderObjects">Obyektlar</string>
+    <string name="payHistoryClose">To\'lov tarixi yopish</string>
+    <string name="orderObjectsOpen">Xonalar ko\'rsatish</string>
+    <string name="orderObjectsClose">Xonalar yopish</string>
     <string name="orderRoom">Xona</string>
-    <string name="orderObject">Obyekt</string>
+    <string name="orderObject">Etaj</string>
     <string name="orderRoomWidth">Eni</string>
     <string name="orderRoomHeight">Balandligi</string>
     <string name="something">Nimadir</string>
@@ -101,6 +103,7 @@
     <string name="mass">1 metrga kilosi</string>
     <string name="company">Firmasi</string>
     <string name="len">Uzunligi</string>
+    <string name="prMass">Og`irligi</string>
     <string name="orderCat">Order cat</string>
     <string name="orderBy">Smeta egasi</string>
     <string name="orderStatus">Yangi</string>
@@ -136,4 +139,7 @@
     <string name="no_internet">Internet yo\'q</string>
     <string name="check_connection">Aloqani tekshiring</string>
     <string name="retry">Tekshirish</string>
+    <string name="info">Info</string>
+    <string name="allSum">Umumiy summa</string>
+    <string name="getSum">Hisoblash</string>
 </resources>

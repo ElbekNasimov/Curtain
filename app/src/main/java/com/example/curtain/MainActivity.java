@@ -16,7 +16,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -58,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
     private RelativeLayout productsRL, ordersRL;
-    private LinearLayout orderCreatedByLL;
     private GridView ordersGV;
     private ImageButton addProductBtn, logoutBtn, filterPrBtn, scannerPrBtn;
     private ImageButton addOrderBtn;
@@ -216,10 +214,12 @@ public class MainActivity extends AppCompatActivity {
         productsRL = findViewById(R.id.productsRL);
         addProductBtn = findViewById(R.id.addProductBtn);
         ordersRL = findViewById(R.id.ordersRL);
+
         addOrderBtn = findViewById(R.id.addOrderBtn);
         filterPrBtn = findViewById(R.id.filterPrBtn);
         scannerPrBtn = findViewById(R.id.scannerPrBtn);
         logoutBtn = findViewById(R.id.logoutBtn);
+
         ordersGV = findViewById(R.id.ordersGV);
         usernameTV = findViewById(R.id.usernameTV);
         userTypeTV = findViewById(R.id.userTypeTV);
@@ -232,7 +232,6 @@ public class MainActivity extends AppCompatActivity {
         usersListTV = findViewById(R.id.usersListTV);
 
         productRV = findViewById(R.id.productRV);
-        orderCreatedByLL = findViewById(R.id.orderCreatedByLL);
 
         productList = new ArrayList<>();
         orderList = new ArrayList<>();
@@ -258,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadProducts(String selected){
         progressDialog.show();
-
+        String sharedUserType = sharedPreferences.getString("user_type", "");
         CollectionReference collectionReference  = firebaseFirestore.collection("Products");
         collectionReference.addSnapshotListener((snapshots, error) -> {
             if (error!=null){
@@ -286,6 +285,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             adapterProduct = new AdapterProduct(MainActivity.this, productList, sharedPreferences);
+            if (sharedUserType.equals("superAdmin")) {
+                Toast.makeText(this, "products" + productList.size(), Toast.LENGTH_SHORT).show();
+            }
             productRV.setAdapter(adapterProduct);
         });
     }
@@ -315,6 +317,9 @@ public class MainActivity extends AppCompatActivity {
                     orderList.add(modelOrder);
                 }
                 adapterOrder = new AdapterOrder(MainActivity.this, orderList, sharedPreferences);
+                if (sharedUserType.equals("superAdmin")) {
+                    Toast.makeText(this, "orders" + orderList.size(), Toast.LENGTH_SHORT).show();
+                }
                 ordersGV.setAdapter(adapterOrder);
             } else {
                 progressDialog.dismiss();

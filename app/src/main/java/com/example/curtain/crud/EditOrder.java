@@ -129,8 +129,11 @@ public class EditOrder extends AppCompatActivity {
             intent.putExtra("orderId", orderID);
             startActivity(intent);
             finish();
-        }).addOnFailureListener(e -> Toast.makeText(this,
-                "Not updated: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e ->{
+            progressDialog.dismiss();
+            Toast.makeText(this,
+                    "Not updated: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
 
     }
     private void loadEditOrder() {

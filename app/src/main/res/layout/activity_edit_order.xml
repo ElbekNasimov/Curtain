@@ -32,7 +32,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp">
+        android:paddingTop="15dp">
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/labelOrderNumber"
             android:layout_width="match_parent"

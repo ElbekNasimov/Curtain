@@ -151,6 +151,9 @@ public class AddProduct extends AppCompatActivity {
             return;
         }
 
+        progressDialog.setMessage("Adding Product...");
+        progressDialog.show();
+
         addPrToFireStore.collection("Products").whereEqualTo("prTitle", title.toLowerCase()).get()
                 .addOnCompleteListener(task -> {
             if (task.isSuccessful()){
@@ -168,8 +171,6 @@ public class AddProduct extends AppCompatActivity {
     }
 
     private void productAdd(String productID) {
-        progressDialog.setMessage("Adding Product...");
-        progressDialog.show();
 
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("prId", "" + productID);

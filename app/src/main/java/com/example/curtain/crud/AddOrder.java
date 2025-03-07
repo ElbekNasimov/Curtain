@@ -100,6 +100,8 @@ public class AddOrder extends AppCompatActivity {
 
     private String ordNumber, ordName, ordPhone, ordSum, ordZaklad, ordCat, ordLoc, ordDeadline, ordDesc;
     private void input_data() {
+
+
         ordNumber = orderNumberET.getText().toString().trim();
         ordName = orderNameET.getText().toString().trim();
         ordPhone = orderPhoneET.getText().toString().trim();
@@ -127,6 +129,8 @@ public class AddOrder extends AppCompatActivity {
             return;
         }
 
+        progressDialog.setMessage("Adding Smeta...");
+        progressDialog.show();
         addOrderToFirestore.collection("Orders").whereEqualTo("orderNumber", ordNumber).
                 get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
@@ -144,9 +148,6 @@ public class AddOrder extends AppCompatActivity {
     }
 
     private void orderAdd() {
-        progressDialog.setMessage("Adding Smeta...");
-        progressDialog.show();
-
         String orderID = "" + System.currentTimeMillis();
 
         HashMap<String, Object> hashMap = new HashMap<>();

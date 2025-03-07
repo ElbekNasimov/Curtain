@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,6 +60,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
     private AdapterPart adapterPart;
     private String location, measurement;
     private SharedPreferences sharedPreferences;
+    boolean click = false;  //       To hide/open product cost status
 
     public AdapterProduct(Context context, ArrayList<ModelProduct> productList, SharedPreferences sharedPreferences) {
         this.context = context;
@@ -99,7 +101,6 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
     @Override
     public void onBindViewHolder(@NonNull AdapterProduct.HolderProduct holder, int position) {
 
-
         auth = FirebaseAuth.getInstance();
 
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -123,6 +124,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                 holder.priceTV.setText(String.format("$ %s", price));
             } else {
                 holder.priceTV.setText(String.format("$ %s", "0"));
+                holder.priceTV.setTextColor(Color.RED);
             }
             holder.discPriceTV.setVisibility(View.GONE);
             holder.discNoteTV.setVisibility(View.GONE);
@@ -160,10 +162,13 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         ImageButton addLenBtn = view.findViewById(R.id.addLenBtn);
         ImageButton discountBtn = view.findViewById(R.id.discountBtn);
         RecyclerView partRV = view.findViewById(R.id.partRV);
+        ImageButton hideCostStatus = view.findViewById(R.id.hideCostStatus);
 
         TextView nameTV = view.findViewById(R.id.nameTV);
         TextView priceTV = view.findViewById(R.id.priceTV);
         TextView costTV = view.findViewById(R.id.costTV);
+        TextView prHeightTV = view.findViewById(R.id.prHeightTV);
+        TextView prMassTV = view.findViewById(R.id.prMassTV);
         TextView addTV = view.findViewById(R.id.addTV);
         TextView editTV = view.findViewById(R.id.editTV);
         TextView descTV = view.findViewById(R.id.descTV);
@@ -179,6 +184,8 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         String editBy = modelProduct.getPrEditBy();
         String editAt = modelProduct.getPrEditAt();
         String cat = modelProduct.getPrCat();
+        String prHeight = modelProduct.getPrHeight();
+        String prMass = modelProduct.getPrMass();
         String desc = modelProduct.getPrDesc();
         String prId = modelProduct.getPrId();
 
@@ -223,6 +230,17 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             priceTV.setVisibility(View.GONE);
         }
 
+        costTV.setVisibility(View.GONE);
+        hideCostStatus.setOnClickListener(view3 -> {
+            if (!click){
+                costTV.setVisibility(View.VISIBLE);
+                click = true;
+            } else {
+                costTV.setVisibility(View.GONE);
+                click = false;
+            }
+        });
+
         if (cost!=null){
             if (cost.length()==0) {
                 costTV.setVisibility(View.GONE);
@@ -238,6 +256,26 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         }
 
         catTV.setText(cat);
+
+        if (prHeight!=null){
+            if (prHeight.length()==0) {
+                prHeightTV.setVisibility(View.GONE);
+            } else {
+                prHeightTV.setText(String.format("Eni %s", prHeight));
+            }
+        } else {
+            prHeightTV.setVisibility(View.GONE);
+        }
+// 1 grga massagi
+        if (prMass!=null){
+            if (prMass.length()==0) {
+                prMassTV.setVisibility(View.GONE);
+            } else {
+                prMassTV.setText(String.format("%s gr/%s", prMass, Html.fromHtml("m<sup>2</sup")));
+            }
+        } else {
+            prMassTV.setVisibility(View.GONE);
+        }
 
         if (desc!=null){
             if (desc.length()==0) {

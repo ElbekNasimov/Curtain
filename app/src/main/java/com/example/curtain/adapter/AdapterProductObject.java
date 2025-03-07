@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,6 +78,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         String productId = modelProductObject.getProductId();
         String orderId = modelProductObject.getOrderId();
         String partStatusProductObject = modelProductObject.getPartStatusProductObject();
+        String productPriceProductOrder = modelProductObject.getProductPriceProductOrder();
 
         firestore = FirebaseFirestore.getInstance();
 
@@ -106,8 +108,52 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         });
 
 
+        DocumentReference prObjRef = firestore.collection("ProductObjectOrder").document(productObjectId);
+
+        // delete items from objects
         holder.delProductOrderBtn.setOnClickListener(view -> {
-            Toast.makeText(context, "productId " + productId, Toast.LENGTH_SHORT).show();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Delete").setMessage("O'chirmoqchimisiz?")
+                    .setPositiveButton("Delete", (dialog, which) ->
+                            prObjRef.delete().addOnCompleteListener(task -> {
+                                if (task.isSuccessful()){
+                                    Toast.makeText(context, "Kusok o'chirildi", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(context, "kusok o'chirishda xato "
+                                            + task.getException(), Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(e -> Toast.makeText(context, "Error at Deleted Part..."
+                                    + e.getMessage(), Toast.LENGTH_SHORT).show())).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
+        });
+
+        // update len items from objects
+        holder.editProductOrderBtn.setOnClickListener(view -> {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+            LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
+            View dialogView = inflater.inflate(R.layout.dialog_edit_part, null);
+            alertDialog.setTitle("Change");
+
+            EditText editPartET = dialogView.findViewById(R.id.editPartET);
+
+            alertDialog.setView(dialogView)
+                    .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("lenProductObjectOrder", editPartET.getText().toString().trim());
+                        if (!TextUtils.isEmpty(editPartET.getText())) {
+                            prObjRef.update(hashMap).addOnSuccessListener(unused ->
+                                            Toast.makeText(context, "Updated...", Toast.LENGTH_SHORT).show())
+                                    .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
+                                            + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        } else {
+                            Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss());
+
+            alertDialog.setView(dialogView);
+            AlertDialog dialog = alertDialog.create();
+            dialog.show();
         });
 
         if (sharedUserType.equals("sklad")){
@@ -115,37 +161,13 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
             holder.editProductOrderBtn.setVisibility(View.GONE);
         }
 
-
-
         holder.titleProductOrderTV.setText(productTitle);
-        holder.lenProductOrderTV.setText(productLength);
+        holder.lenProductOrderTV.setText(String.format("%s m", productLength));
 
-        DocumentReference prRef = firestore.collection("Products").document(productId);
-        prRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                DocumentSnapshot doc = task.getResult();
-                if (doc.exists()) {
-                    if (doc.contains("prPrice")){
-                        String prPrice = doc.getString("prPrice");
-                        if (prPrice!=null) {
-                            float price = Float.parseFloat(prPrice);
-                            float len = Float.parseFloat(productLength);
-                            float sum = price * len;
-                            holder.sumProductOrderTV.setText(String.format("%s $", sum));
-                        }
-                    }
-
-                } else {
-                    Toast.makeText(context, "bunaqa pr yo'q", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(context, "pr topishda xato " + task.getException(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-
-
-
+        float price = Float.parseFloat(productPriceProductOrder);
+        float len = Float.parseFloat(productLength);
+        float sum = price * len;
+        holder.sumProductOrderTV.setText(String.format("%s $", sum));
 
         holder.qoldiqKusokTV.setVisibility(View.GONE);
         holder.cutPartsPrOrderTV.setVisibility(View.GONE);
@@ -287,7 +309,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
 
             if ((Float.parseFloat(chosenPartPrOrder) > Float.parseFloat(partCutPrObjLen))){
                 if ((Float.parseFloat(partCutPrObjLen) < zakasBerilganKusokUzunligiOrder)) {
-                    Toast.makeText(context, "keldi", Toast.LENGTH_SHORT).show();
+
                     float keyingiQoldiq;
                     if (!kelganQoldiqKusok.isEmpty()) {
                         keyingiQoldiq = Float.parseFloat(kelganQoldiqKusok) - Float.parseFloat(partCutPrObjLen);
@@ -311,7 +333,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                     firestore.collection("CutPartProductObject").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
-                            Toast.makeText(context, "Sheyda", Toast.LENGTH_SHORT).show();
+
                             changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
                             changeStatusPartPrOrder(orderId, "kesilmoqda");
                             changeStatusProductsObjectOrder(productObjectId, kusokHolati, keyingiQoldiq, finalMyList);

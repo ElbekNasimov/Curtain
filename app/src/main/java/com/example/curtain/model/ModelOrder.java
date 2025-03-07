@@ -1,8 +1,9 @@
 package com.example.curtain.model;
 public class ModelOrder {
-    private String created_at, created_by, orderId, orderNumber, orderCat, orderName, orderPhone, orderSum, orderLoc, orderDesc,
+    private String created_at, created_by, orderId, orderNumber, orderCat, orderName, orderPhone, orderSum, orderLoc,
+            orderDesc,
             orderStatus, orderPercent, edited_at, edit_by, orderCloseDate, orderZaklad, orderDeadline, orderUstanovka,
-            orderPoshiv, orderDesignerSalary;
+            orderPoshiv, orderDesignerSalary, orderTotal;
     /*
     orderNumber - smeta raqami,
     orderStatus - smeta holati,
@@ -10,6 +11,8 @@ public class ModelOrder {
     orderName - mijoz ismi,
     orderPercent - dizayner foizi,
     orderCloseDate - smeta yopilgan sana
+    orderSum - dizayner yozgan summasi,
+    orderTotal - avtomatik hisoblangan summa
      */
 
     public ModelOrder() {
@@ -19,7 +22,7 @@ public class ModelOrder {
                       String orderName, String orderPhone, String orderZaklad, String orderDeadline,
                       String orderSum, String orderLoc, String orderDesc, String orderStatus, String orderPercent,
                       String edited_at, String edit_by, String orderCloseDate, String orderUstanovka, String orderPoshiv,
-                      String orderDesignerSalary) {
+                      String orderDesignerSalary, String orderTotal) {
         this.created_at = created_at;
         this.created_by = created_by;
         this.orderId = orderId;
@@ -40,6 +43,7 @@ public class ModelOrder {
         this.orderUstanovka = orderUstanovka;
         this.orderPoshiv = orderPoshiv;
         this.orderDesignerSalary = orderDesignerSalary;
+        this.orderTotal = orderTotal;
     }
 
     public String getOrderUstanovka() {
@@ -196,4 +200,8 @@ public class ModelOrder {
     public void setOrderDesignerSalary(String orderDesignerSalary) {
         this.orderDesignerSalary = orderDesignerSalary;
     }
+
+    public String getOrderTotal() {return orderTotal;}
+
+    public void setOrderTotal(String orderTotal) {this.orderTotal = orderTotal;}
 }

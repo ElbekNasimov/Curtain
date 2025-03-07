@@ -123,6 +123,16 @@
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/hideCostStatus"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_eye_blue"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="20dp"
+                android:layout_gravity="center"
+                />
         </LinearLayout>
         <TextView
             android:id="@+id/descTV"
@@ -132,14 +142,44 @@
             android:text="@string/description"
             android:textColor="@color/black"
             android:textSize="18sp" />
-        <TextView
-            android:id="@+id/catTV"
-            android:layout_width="wrap_content"
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/category"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/catTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/category"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/prHeightTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/len"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/prMassTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/mass"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
 
             <TextView
                 android:id="@+id/addTV"
