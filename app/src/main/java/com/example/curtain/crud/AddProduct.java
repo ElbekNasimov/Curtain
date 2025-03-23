@@ -49,8 +49,8 @@ public class AddProduct extends AppCompatActivity {
     private TextView barcodeET;
     private FirebaseAuth mAuth;
     private FirebaseFirestore addPrToFireStore;
-    private ProgressDialog progressDialog;
     private String currentUser, currentUsername;
+    private ProgressDialog progressDialog;
 
     NetworkChangeListener networkChangeListener = new NetworkChangeListener();
 
@@ -86,7 +86,6 @@ public class AddProduct extends AppCompatActivity {
         addPrdBtn.setOnClickListener(view -> input_data());
 
         barcodeET.setOnClickListener(v -> {
-            Toast.makeText(AddProduct.this, "ScanCode", Toast.LENGTH_SHORT).show();
             scanCode();
         });
     }

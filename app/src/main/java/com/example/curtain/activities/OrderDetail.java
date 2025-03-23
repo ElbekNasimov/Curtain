@@ -70,6 +70,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,7 +94,7 @@ public class OrderDetail extends AppCompatActivity {
     private ArrayList<ModelOrderObject> objectsArrayList;
     private ArrayList<ModelProductObject> productObjectsArrayList;
     private ArrayList<ModelProduct> productList;
-    private ImageButton backBtn, delBtn, editBtn, orderPrintBtn, orderPayBtn, hidePayStatus,
+    private ImageButton backBtn, delBtn, editBtn,stockPrintBtn, orderPrintBtn, orderPayBtn, hidePayStatus,
             editOrderPoshivIB, editOrderUstanovkaIB;
     private TextView orderNumberTV,orderTypeTV ,orderNameTV, orderPhoneTV, orderLocTV, orderDeadlineTV, orderSumTV, orderZakladTV,
             orderLoanTV, designerPercentTV, designerSumTV, designerPayStatusTV, payHistoryTV, orderObjectsTV,
@@ -149,8 +150,6 @@ public class OrderDetail extends AppCompatActivity {
                 payHistoryTV.setText(open);
             }
         });
-
-
 
         designerPercentTV.setVisibility(View.GONE);
         designerSumTV.setVisibility(View.GONE);
@@ -360,10 +359,9 @@ public class OrderDetail extends AppCompatActivity {
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         String timestamps = "" + System.currentTimeMillis();
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("orderPayId", "" + timestamps);
+                        hashMap.put("orderPayId", timestamps);
                         hashMap.put("orderNumber", "" + orderId);
-//                            hashMap.put("prId", "" + prId);
-                        hashMap.put("orderPay", "" + dialPayET.getText().toString().trim());
+                        hashMap.put("orderPay", dialPayET.getText().toString().trim());
 
                         Date prDate = new Date(Long.parseLong(timestamps));
                         SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
@@ -472,8 +470,8 @@ public class OrderDetail extends AppCompatActivity {
                         }
                         hashMap.put("created_by", firebaseAuth.getCurrentUser().getDisplayName());
 
-                        if (!orderRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase("Tanlang:") &&
-                                !objRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase("Tanlang:")) {
+                        if (!orderRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase(Constants.orderRooms[0]) &&
+                                !objRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase(Constants.objRooms[0])) {
                             firestore.collection("OrderObjects").document(timestamps).set(hashMap)
                                     .addOnCompleteListener(task -> {
                                 progressDialog.dismiss();
@@ -496,11 +494,153 @@ public class OrderDetail extends AppCompatActivity {
             dialog.show();
         });
 
+        stockPrintBtn.setVisibility(View.GONE);
+        stockPrintBtn.setOnClickListener(view -> {
+            progressDialog.setMessage("Ombor smeta saqlanmoqda");
+            progressDialog.show();
+            generateStockPdf();
+        });
+
         orderPrintBtn.setOnClickListener(view -> {
             progressDialog.setMessage("Faylga saqlanmoqda");
             progressDialog.show();
             generatePdf();
         });
+    }
+
+    private void generateStockPdf() {
+        if (orderTypeTV.getText().equals("Parda")) {
+            fetchProductObjects(orderId);
+        } else {
+            goToStockPdf();
+        }
+    }
+
+    private void goToStockPdf() {
+        PdfDocument pdfDocument = new PdfDocument();
+        Paint paint = new Paint();
+        Paint titlePaint = new Paint();
+
+        int pageNumber = 1;
+        PdfDocument.PageInfo pageInfo =new PdfDocument.PageInfo.
+                Builder(1240, 1754,pageNumber).create();
+        PdfDocument.Page page = pdfDocument.startPage(pageInfo);
+        Canvas canvas = page.getCanvas();
+
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
+        scaledBitmap = Bitmap.createScaledBitmap(bitmap, 128, 128, false);
+        canvas.drawBitmap(scaledBitmap, 20, 20, paint);
+
+        int startY = 290;
+        int spacing = 40;
+        int pageWidth = 1240;
+        int pageHeight = 1754;
+
+        titlePaint.setTextSize(36f);
+        titlePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        float textSizeInPoints = 28f;
+
+        paint.setTextSize(textSizeInPoints);
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setColor(Color.BLACK);
+
+        canvas.drawText(orderTypeTV.getText().toString()+" ombor buyurtma # " +
+                orderNumberTV.getText().toString(), 450, 50, titlePaint);
+        String orderOwn = orderCreateTV.getText().toString();
+        String[] parts = orderOwn.split(" ");
+        if (parts.length > 1){
+            canvas.drawText("Dizayner: " + parts[3], 170,100, paint);
+        }
+
+        canvas.drawText("Mijoz: " + orderNameTV.getText().toString(), 500,100, paint);
+        if (orderPhoneTV.getText().toString().equals("Tel raqami")) {
+            canvas.drawText("Tel raqami: ", 850, 100, paint);
+            canvas.drawLine(1000, 100, 1200, 100, paint);
+        } else {
+            canvas.drawText("Tel raqami: " + orderPhoneTV.getText(), 850, 100, paint);
+        }
+
+        if (orderSumTV.getText().toString().equals("Smeta summasi")){
+            canvas.drawText("Zakaz: ", 170,140, paint);
+            canvas.drawLine(280, 140, 400, 140, paint);
+        } else {
+            canvas.drawText( orderSumTV.getText().toString(), 170,140, paint);
+        }
+
+        if (orderZakladTV.getText().toString().equals("Zaklad")){
+            canvas.drawText("Zaklad: ", 500, 140, paint);
+            canvas.drawLine(600, 140, 770, 140, paint);
+        } else {
+            canvas.drawText(orderZakladTV.getText().toString(), 500, 140, paint);
+        }
+        if (orderDeadlineTV.getText().toString().equals("Muddat")){
+            canvas.drawText("Topshiriladi: ", 850, 140, paint);
+            canvas.drawLine(1000, 140, 1200, 140, paint);
+        } else {
+            canvas.drawText("Topshiriladi: " +
+                    orderDeadlineTV.getText().toString(), 850, 140, paint);
+        }
+
+        if (orderDescTV.getText().toString().equals("Izoh")){
+            canvas.drawText("Izoh: ", 170, 180, paint);
+            canvas.drawLine(280, 180, 1200, 180, paint);
+        } else {
+            canvas.drawText("Izoh: " + orderDescTV.getText().toString(), 170, 180, paint);
+        }
+        // ramka chizish
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(2);
+        canvas.drawRect(20, 200, pageWidth-20, 820, paint); // first
+        canvas.drawLine(20, 260, pageWidth-20, 260, paint);
+
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawText("№", 30, 240, paint);
+        canvas.drawText("Mahsulot", 85, 240, paint);
+        canvas.drawText("Metr", 460, 240, paint);
+        canvas.drawText("Narx", 540, 240, paint);
+        canvas.drawText("Jami", 620, 240, paint);
+
+        canvas.drawLine(75, 200, 75, 820, paint);  // name
+        canvas.drawLine(450, 200, 450, 820, paint);  // len
+        canvas.drawLine(530, 200, 530, 820, paint);  // price
+        canvas.drawLine(610, 200, 610, 820, paint);  // total
+        canvas.drawLine(710, 200, 710, 820, paint);  // end total
+        canvas.drawLine(pageWidth-20, 200, pageWidth-20, 820, paint); // last
+
+        paint.setTextSize(25f);
+
+        for (int i1 = 260; i1 < pageHeight/2-40; i1+=spacing) {
+            canvas.drawLine(20, i1, pageWidth-20, i1, paint);
+        }
+        int number = 1;
+        for (ModelProductOrder productOrder: productOrderArrayList){
+            canvas.drawText( productOrder.getProductObjectOrder(), 90, startY, paint);
+            canvas.drawText( productOrder.getLenProductObjectOrder(), 465, startY, paint);
+            canvas.drawText( productOrder.getProductPriceProductOrder(), 545, startY, paint);
+
+            float len = Float.parseFloat(productOrder.getLenProductObjectOrder());
+            float price = Float.parseFloat(productOrder.getProductPriceProductOrder());
+            float sum = len * price;
+            DecimalFormat df = new DecimalFormat("#.0");
+            canvas.drawText(df.format(sum), 625, startY, paint);
+            canvas.drawText(String.valueOf(number), 40, startY, paint);
+            number ++;
+
+            startY += spacing;
+        }
+
+        if (!orderPoshivPriceTV.getText().toString().isEmpty()){
+            int lastValue = (pageHeight/2-40 - spacing) / spacing * spacing+10;
+            canvas.drawText("Poshiv", 90, lastValue, paint);
+            canvas.drawText(orderPoshivPriceTV.getText().toString(), 625, lastValue, paint);
+        }
+
+        pdfDocument.finishPage(page);
+        String fileName = orderNameTV.getText().toString()+"_"+orderTypeTV.getText().toString()+"_"
+                +orderNumberTV.getText().toString()+"_ombor";
+        //        Pdf ga saqlash
+        savePDF(pdfDocument, fileName);
     }
 
     private void addPoshivToOrderTotal(String orderId, String addExtraPrice) {
@@ -634,7 +774,6 @@ public class OrderDetail extends AppCompatActivity {
             });
         });
     }
-
     private void init(){
         context = this;
         firebaseAuth = FirebaseAuth.getInstance();
@@ -650,6 +789,7 @@ public class OrderDetail extends AppCompatActivity {
         addExtraBtn = findViewById(R.id.addExtraBtn);
         orderStatusBtn = findViewById(R.id.orderStatusBtn);
         editBtn = findViewById(R.id.editBtn);
+        stockPrintBtn = findViewById(R.id.stockPrintBtn);
         orderPrintBtn = findViewById(R.id.orderPrintBtn);
         orderPayBtn = findViewById(R.id.orderPayBtn);
         editOrderUstanovkaIB = findViewById(R.id.editOrderUstanovkaIB);
@@ -706,54 +846,16 @@ public class OrderDetail extends AppCompatActivity {
         progressDialog.setTitle(this.getResources().getString(R.string.wait));
         progressDialog.setCanceledOnTouchOutside(false);
     }
-
     private void generatePdf() {
 
         if (orderTypeTV.getText().equals("Parda")) {
-
             fetchProductObjects(orderId);
-
         } else {
-            // tekshirish kerak, balki kerakmasdir
-
-            Map<String, Float> productPriceMap = new HashMap<>();
-            List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
-
-            for (ModelProductOrder productOrder : productOrderArrayList) {
-
-                DocumentReference prRef = firestore.collection("Products").document(productOrder.getProductId());
-                Task<DocumentSnapshot> task = prRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()){
-                            DocumentSnapshot doc = task.getResult();
-                            if (doc.exists() && doc.contains("prPrice")){
-                                String prPrice = doc.getString("prPrice");
-                                if (prPrice != null){
-                                    float price = Float.parseFloat(prPrice);
-                                    productPriceMap.put(productOrder.getProductObjectOrder(), price);
-                                }
-                            } else {
-                                Toast.makeText(OrderDetail.this, "Narxi yuklanmadi", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                });
-                tasks.add(task);
-            }
-
-            Tasks.whenAllComplete(tasks).addOnCompleteListener(task -> {
-                if (task.isSuccessful()){
-                    goToPdf(productPriceMap);
-                } else {
-                    Toast.makeText(OrderDetail.this, "o'xshamadi", Toast.LENGTH_SHORT).show();
-                }
-            });
+            goToPdf();
         }
     }
 
     private void fetchProductObjects(String orderId) {
-
         firestore.collection("ProductObjectOrder")
                 .whereEqualTo("orderId", orderId)
                 .get()
@@ -763,6 +865,7 @@ public class OrderDetail extends AppCompatActivity {
                             ModelProductObject productObject = document.toObject(ModelProductObject.class);
                             productObjectsArrayList.add(productObject);
                         }
+
                         fetchProducts();
                     }
                 });
@@ -774,25 +877,45 @@ public class OrderDetail extends AppCompatActivity {
             productIds.add(productObject.getProductId());
         }
 
+        // whereIn uchun productIds ro'yxatini 30 tadan iborat guruhlarga bo'lamiz
+        List<List<String>> chunks = chunkList(new ArrayList<>(productIds), 30);
         if (!productIds.isEmpty()) {
-            firestore.collection("Products")
-                    .whereIn("prId", new ArrayList<>(productIds))
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                ModelProduct product = document.toObject(ModelProduct.class);
-                                productList.add(product);
+            for (List<String> chunk:chunks){
+                firestore.collection("Products").whereIn("prId", chunk).get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    ModelProduct product = document.toObject(ModelProduct.class);
+                                    productList.add(product);
+                                }
+                                // Barcha so'rovlar tugagandan so'ng PDF yaratish
+                                if (productList.size() == productIds.size()) {
+                                    createPdf();
+                                }
+                            } else {
+                                Toast.makeText(context, "Mahsulotlar yuklanmadi " +
+                                        task.getException(), Toast.LENGTH_SHORT).show();
                             }
-                            createPdf();
-                        }
-                    });
-        } else {
-            Toast.makeText(context, "Xonalar qo'shib, urinib ko'ring", Toast.LENGTH_SHORT).show();
+                        });
+            }
         }
+
+    }
+
+    // whereIn uchun Ro'yxatni berilgan o'lchamdagi guruhlarga bo'lish uchun yordamchi metod
+    public static <T> List<List<T>> chunkList(List<T> list, int size) {
+        List<List<T>> chunks = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            int endIndex = Math.min(i + size, list.size());
+            List<T> chunk = list.subList(i, endIndex);
+            chunks.add(chunk);
+        }
+        return chunks;
     }
 
     private void createPdf() {
+        progressDialog.dismiss();
+        Toast.makeText(context, "create pdf", Toast.LENGTH_SHORT).show();
         PdfDocument pdfDocument = new PdfDocument();
         Paint paint = new Paint();
         Paint titlePaint = new Paint();
@@ -856,10 +979,12 @@ public class OrderDetail extends AppCompatActivity {
             }
             if (orderDescTV.getText().toString().equals("Izoh")) {
                 canvas.drawText("Izoh: ", 170, 180, paint);
-                canvas.drawLine(280, 180, 1200, 180, paint);
+                canvas.drawLine(280, 180, 800, 180, paint);
             } else {
                 canvas.drawText("Izoh: " + orderDescTV.getText().toString(), 170, 180, paint);
             }
+            canvas.drawText("Tasdiqlash: ", 850, 170, paint);
+            canvas.drawLine(1000, 170, 1200, 170, paint);
 
             pageNumberPaint.setTextSize(20f);
             int pageNum = (int) Math.ceil(objectsArrayList.size()/2.0);
@@ -898,7 +1023,7 @@ public class OrderDetail extends AppCompatActivity {
                     canvas.drawLine(450, 200, 450, pageInfo.getPageHeight()-40, paint);  // len
                     canvas.drawLine(530, 200, 530, pageInfo.getPageHeight()-40, paint);  // price
                     canvas.drawLine(610, 200, 610, pageInfo.getPageHeight()-40, paint);  // total
-                    canvas.drawLine(695, 200, 695, pageInfo.getPageHeight()-40, paint);  // end total
+                    canvas.drawLine(710, 200, 710, pageInfo.getPageHeight()-40, paint);  // end total
                     canvas.drawLine(pageInfo.getPageWidth()-20, 200,
                             pageInfo.getPageWidth()-20, pageInfo.getPageHeight()-40, paint); // last
 
@@ -907,8 +1032,17 @@ public class OrderDetail extends AppCompatActivity {
                         canvas.drawLine(20, 260, pageInfo.getPageWidth()-20, 260, paint);
 
                         for (int i1 = yPosition-30; i1 < pageInfo.getPageHeight()/2; i1+=38) {
-                            canvas.drawLine(20, i1, 695, i1, paint);
+                            canvas.drawLine(20, i1, 710, i1, paint);
                         }
+
+                        paint.setTextSize(20f);
+                        canvas.drawText("Eni: ", 720, yPosition, paint);
+                        canvas.drawText("Bo'yi: ", 720, yPosition+28, paint);
+                        canvas.drawText("Nisha: ", 720, yPosition+28*2, paint);
+
+                        canvas.drawText("Eni: ", 950, yPosition, paint);
+                        canvas.drawText("Bo'yi: ", 950, yPosition+28, paint);
+                        canvas.drawText("Nisha: ", 950, yPosition+28*2, paint);
 
                         paint.setTextSize(25f);
                         int number = 1;
@@ -933,22 +1067,19 @@ public class OrderDetail extends AppCompatActivity {
                             }
                         }
 
-                        // bunda poshiv/ustanovka umumiysi print bo'larkan
+                        if (orderObject.getObjectUstanovka()!=null){
+                            int spacing = 38;
+                            int lastValue = (pageInfo.getPageHeight()/2 - spacing) / spacing * spacing+20-spacing;
+                            canvas.drawText("Ustanovka", 90, lastValue, paint);
+                            canvas.drawText(orderObject.getObjectUstanovka(), 625, lastValue, paint);
+                        }
 
-
-//                        if (!orderPoshivPriceTV.getText().toString().isEmpty()){
-//                            int spacing = 40;
-//                            int lastValue = (pageInfo.getPageHeight()/2-40 - spacing) / spacing * spacing+20;
-//                            canvas.drawText("Poshiv", 90, lastValue, paint);
-//                            canvas.drawText(orderPoshivPriceTV.getText().toString(), 625, lastValue, paint);
-//                        }
-//
-//                        if (!orderUstanovkaPriceTV.getText().toString().isEmpty()){
-//                            int spacing = 40;
-//                            int lastValue = (pageInfo.getPageHeight()/2-80 - spacing) / spacing * spacing+20;
-//                            canvas.drawText("Ustanovka", 90, lastValue, paint);
-//                            canvas.drawText(orderUstanovkaPriceTV.getText().toString(), 625, lastValue, paint);
-//                        }
+                        if (orderObject.getObjectPoshiv()!=null){
+                            int spacing = 38;
+                            int lastValue = (pageInfo.getPageHeight()/2-40 - spacing) / spacing * spacing+20-spacing;
+                            canvas.drawText("Poshiv", 90, lastValue, paint);
+                            canvas.drawText(orderObject.getObjectPoshiv(), 625, lastValue, paint);
+                        }
 
                     } else if (yPosition==(pageInfo.getPageHeight() / 2+80)){
                         canvas.drawLine(20, yPosition-89, pageInfo.getPageWidth()-20,
@@ -957,8 +1088,17 @@ public class OrderDetail extends AppCompatActivity {
                                 yPosition-40, paint);
 
                         for (int i1 = yPosition-40; i1 < pageInfo.getPageHeight()-40; i1+=38) {
-                            canvas.drawLine(20, i1, 695, i1, paint);
+                            canvas.drawLine(20, i1, 710, i1, paint);
                         }
+
+                        paint.setTextSize(20f);
+                        canvas.drawText("Eni: ", 720, yPosition-10, paint);
+                        canvas.drawText("Bo'yi: ", 720, yPosition-10+28, paint);
+                        canvas.drawText("Nisha: ", 720, yPosition-10+28*2, paint);
+
+                        canvas.drawText("Eni: ", 950, yPosition-10, paint);
+                        canvas.drawText("Bo'yi: ", 950, yPosition-10+28, paint);
+                        canvas.drawText("Nisha: ", 950, yPosition-10+28*2, paint);
 
                         paint.setTextSize(25f);
                         int number = 1;
@@ -981,18 +1121,18 @@ public class OrderDetail extends AppCompatActivity {
                             }
                         }
 
-                        if (!orderPoshivPriceTV.getText().toString().isEmpty()){
-                            int spacing = 40;
+                        if (orderObject.getObjectUstanovka()!=null){
+                            int spacing = 38;
                             int lastValue = (pageInfo.getPageHeight()-40 - spacing) / spacing * spacing-5;
-                            canvas.drawText("Poshiv", 90, lastValue, paint);
-                            canvas.drawText(orderPoshivPriceTV.getText().toString(), 625, lastValue, paint);
+                            canvas.drawText("Ustanovka", 90, lastValue, paint);
+                            canvas.drawText(orderObject.getObjectUstanovka(), 625, lastValue, paint);
                         }
 
-                        if (!orderUstanovkaPriceTV.getText().toString().isEmpty()){
-                            int spacing = 40;
+                        if (orderObject.getObjectPoshiv()!=null){
+                            int spacing = 38;
                             int lastValue = (pageInfo.getPageHeight()-80 - spacing) / spacing * spacing-4;
-                            canvas.drawText("Ustanovka", 90, lastValue, paint);
-                            canvas.drawText(orderPoshivPriceTV.getText().toString(), 625, lastValue, paint);
+                            canvas.drawText("Poshiv", 90, lastValue, paint);
+                            canvas.drawText(orderObject.getObjectPoshiv(), 625, lastValue, paint);
                         }
                     }
 
@@ -1010,10 +1150,11 @@ public class OrderDetail extends AppCompatActivity {
         savePDF(pdfDocument, fileName);
     }
 
-    private void goToPdf(Map<String, Float> productPriceMap) {
+    private void goToPdf() {
         PdfDocument pdfDocument = new PdfDocument();
         Paint paint = new Paint();
         Paint titlePaint = new Paint();
+        Paint eniPaint = new Paint();
 
         int pageNumber = 1;
         PdfDocument.PageInfo pageInfo =new PdfDocument.PageInfo.
@@ -1100,13 +1241,17 @@ public class OrderDetail extends AppCompatActivity {
         canvas.drawLine(450, 200, 450, 820, paint);  // len
         canvas.drawLine(530, 200, 530, 820, paint);  // price
         canvas.drawLine(610, 200, 610, 820, paint);  // total
-        canvas.drawLine(695, 200, 695, 820, paint);  // end total
+        canvas.drawLine(705, 200, 705, 820, paint);  // end total
         canvas.drawLine(pageWidth-20, 200, pageWidth-20, 820, paint); // last
+
+        paint.setTextSize(20f);
+        canvas.drawText("Eni: ", 720, 290, paint);
+        canvas.drawText("Bo'yi: ", 1000, 290, paint);
 
         paint.setTextSize(25f);
 
         for (int i1 = 260; i1 < pageHeight/2-40; i1+=spacing) {
-            canvas.drawLine(20, i1, 695, i1, paint);
+            canvas.drawLine(20, i1, 705, i1, paint);
         }
         int number = 1;
         for (ModelProductOrder productOrder: productOrderArrayList){
@@ -1117,7 +1262,8 @@ public class OrderDetail extends AppCompatActivity {
             float len = Float.parseFloat(productOrder.getLenProductObjectOrder());
             float price = Float.parseFloat(productOrder.getProductPriceProductOrder());
             float sum = len * price;
-            canvas.drawText( String.valueOf(sum), 625, startY, paint);
+            DecimalFormat df = new DecimalFormat("#.0");
+            canvas.drawText(df.format(sum), 625, startY, paint);
             canvas.drawText(String.valueOf(number), 40, startY, paint);
             number ++;
 
@@ -1228,18 +1374,21 @@ public class OrderDetail extends AppCompatActivity {
                         if (status.equals("Yangi")) {
 
                             orderStatusBtn.setOnClickListener(view -> {
-                                HashMap<String, Object> hashMap = new HashMap<>();
-                                hashMap.put("orderStatus", "Skladga");  // kesish holati
-                                DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
-                                orderReference1.update(hashMap).addOnSuccessListener(unused ->{
-                                    Toast.makeText(this, "Skladga yuborildi", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(this, OrderDetail.class);
-                                    intent.putExtra("orderId", orderId);
-                                    startActivity(intent);
-                                    finish();
-
-                                }).addOnFailureListener(e -> Toast.makeText(this, "part not updated "
-                                        + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                AlertDialog.Builder builder = new AlertDialog.Builder(OrderDetail.this);
+                                builder.setTitle("Skladga").setMessage("Skladga yubormoqchimisiz?")
+                                        .setPositiveButton("Yuborish", (dialog, which) -> {
+                                    HashMap<String, Object> hashMap = new HashMap<>();
+                                    hashMap.put("orderStatus", "Skladga");  // kesish holati
+                                    DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
+                                    orderReference1.update(hashMap).addOnSuccessListener(unused -> {
+                                        Toast.makeText(this, "Skladga yuborildi", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(this, OrderDetail.class);
+                                        intent.putExtra("orderId", orderId);
+                                        startActivity(intent);
+                                        finish();
+                                    }).addOnFailureListener(e -> Toast.makeText(this, "part not updated "
+                                            + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
                             });
 
                             if (!sharedUserType.equals(Constants.userTypes[4])
@@ -1421,6 +1570,15 @@ public class OrderDetail extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        if (adapterOrderObject != null) {
+            adapterOrderObject.dismissAllDialogs(); // Adapterdagi barcha dialoglarni dismiss qilish
+        }
+        super.onBackPressed(); // Activityni yakunlash va oldingi activityga qaytish
+    }
+
     private void changeOrderZaklad(String orderId, String amountPay) {
         DocumentReference orderRef = firestore.collection("Orders").document(orderId);
         orderRef.get().addOnCompleteListener(task -> {
@@ -1428,6 +1586,9 @@ public class OrderDetail extends AppCompatActivity {
                 DocumentSnapshot doc = task.getResult();
                 if (doc.exists()) {
                     String ordZaklad = doc.getString("orderZaklad");
+
+                    Toast.makeText(this, "ordZaklad " + ordZaklad, Toast.LENGTH_SHORT).show();
+
                     HashMap<String, Object> hashMap = new HashMap<>();
                     float newZaklad;
                     if (ordZaklad != null) {

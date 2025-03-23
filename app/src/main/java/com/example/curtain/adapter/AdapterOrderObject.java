@@ -58,6 +58,8 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
     private FirebaseAuth firebaseAuth;
     private SharedPreferences sharedPreferences;
 
+    BottomSheetDialog bottomSheetDialog, bottomSheetDialog1;
+
     private String addExtraTxt;
     public AdapterOrderObject(Context context, ArrayList<ModelOrderObject> objectsArrayList, SharedPreferences sharedPreferences) {
         this.context = context;
@@ -114,7 +116,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
     }
 
     private void orderObjectBottomSheet(ModelOrderObject modelOrderObject,  SharedPreferences sharedPreferences){
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        bottomSheetDialog = new BottomSheetDialog(context);
         View view = LayoutInflater.from(context).inflate(R.layout.bs_order_object, null);
         // set view to bottomSheet
         bottomSheetDialog.setContentView(view);
@@ -228,7 +230,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
 
         addPrToObjectBtn.setOnClickListener(view12 -> {
 
-            BottomSheetDialog bottomSheetDialog1 = new BottomSheetDialog(context);
+            bottomSheetDialog1 = new BottomSheetDialog(context);
             view12 = LayoutInflater.from(context).inflate(R.layout.bs_pr_to_object, null);
             bottomSheetDialog1.setContentView(view12);
 
@@ -239,6 +241,8 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
 
             RecyclerView prObjRV = view12.findViewById(R.id.prObjRV);
             Button savePrObjBtn = view12.findViewById(R.id.savePrObjBtn);
+
+            bottomSheetDialog1.show();
 
             CollectionReference collectionReference  = firebaseFirestore.collection("Products");
             collectionReference.addSnapshotListener((value, error) -> {
@@ -280,8 +284,6 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                 }
             });
 
-            bottomSheetDialog1.show();
-
             savePrObjBtn.setOnClickListener(view1 -> {
                 String productObject =  searchPrObjET.getText().toString().trim();
                 String lenProductOrder = prObjLenET.getText().toString().trim();
@@ -312,7 +314,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                     if (task.isSuccessful()){
                         DocumentSnapshot documentSnapshot = task.getResult();
                         if (documentSnapshot.exists()){
-                            hashMap.put("productPriceProductOrder", "" + documentSnapshot.getString("prPrice"));
+                            hashMap.put("productPriceProductOrder", documentSnapshot.getString("prPrice"));
 
                             firebaseFirestore.collection("ProductObjectOrder").document(timestamps).set(hashMap).
                                     addOnCompleteListener(task1 -> {
@@ -320,8 +322,10 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                                         if (task1.isSuccessful()){
                                             Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
                                             bottomSheetDialog1.dismiss();
+                                            bottomSheetDialog.dismiss();
                                             Intent intent = new Intent(context, OrderDetail.class);
                                             intent.putExtra("orderId", orderId);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
                                             context.startActivity(intent);
                                         } else {
                                             Toast.makeText(context, "Qo'shishda muammo " +
@@ -412,6 +416,16 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             AlertDialog dialog = alertDialog.create();
             dialog.show();
         });
+
+    }
+
+    public void dismissAllDialogs() {
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+            bottomSheetDialog.dismiss();
+        }
+            if (bottomSheetDialog1 != null && bottomSheetDialog1.isShowing()) {
+                bottomSheetDialog1.dismiss();
+            }
     }
 
     private void addExtraToOrder(String orderAddExtra, String addExtraPrice, String orderId) {
@@ -490,6 +504,8 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             }
         });
     }
+
+
 
     @Override
     public int getItemCount() {

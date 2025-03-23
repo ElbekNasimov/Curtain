@@ -62,12 +62,12 @@
     <string name="successful">Muvaffaqqiyatli bajarildi!</string>
     <string name="sm_error">Muammo bor: </string>
     <string name="back">Orqaga: </string>
-    <string name="cancel">Bekor qilish: </string>
+    <string name="cancel">Bekor qilish</string>
     <string name="wait">Biroz kuting</string>
     <string name="loading">Yuklanmoqda</string>
     <string name="logout">Logging Out User…</string>
     <string name="sale">Chegirma</string>
-    <string name="no_parts">Kusoklari yo\'q</string>
+    <string name="no_parts">Kusoklari yo\'q yoki yuklanmoqda</string>
     <string name="meas">o\'lchov birligi</string>
     <string name="add_order">Smeta qo\'shish</string>
     <string name="orderNumber">Smeta raqami</string>
@@ -142,4 +142,6 @@
     <string name="info">Info</string>
     <string name="allSum">Umumiy summa</string>
     <string name="getSum">Hisoblash</string>
+    <string name="isReserve">Bron qilish</string>
+    <string name="byUser">User tomonidan</string>
 </resources>

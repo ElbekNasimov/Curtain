@@ -142,7 +142,6 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         holder.itemView.setOnClickListener(view -> {
             detailsBottomSheet(modelProduct, sharedPreferences);
         });
-
     }
 
     private void detailsBottomSheet(ModelProduct modelProduct, SharedPreferences sharedPreferences) {
@@ -154,7 +153,6 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         View view = LayoutInflater.from(context).inflate(R.layout.bs_pr_detail, null);
         // set view to bottomSheet
         bottomSheetDialog.setContentView(view);
-
 
         ImageButton backBtn = view.findViewById(R.id.backBtn);
         ImageButton delBtn = view.findViewById(R.id.delBtn);
@@ -191,26 +189,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
 
         partsList = new ArrayList<>();
 
-        CollectionReference partsRef = firebaseFirestore.collection("Parts");
-        partsRef.whereEqualTo("prId", prId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                progressDialog.dismiss();
-                partsList.clear();
-                for (DocumentSnapshot snapshot : task.getResult()){
-                    ModelPart modelPart = snapshot.toObject(ModelPart.class);
-                    partsList.add(modelPart);
-                }
-                if (partsList.isEmpty()){
-                    partRV.setVisibility(View.GONE);
-                    noPartsTxt.setVisibility(View.VISIBLE);
-                } else {
-                    noPartsTxt.setVisibility(View.GONE);
-                }
-            } else {
-                progressDialog.dismiss();
-                Toast.makeText(context, "qismlar yuklashada xato " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        loadParts(prId, partRV, noPartsTxt);
 
         bottomSheetDialog.show();
 
@@ -396,12 +375,6 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                         hashMap.put("partMeas", "" + measurement);
                         hashMap.put("partLoc", "" +location);
 
-//                        Date prDate = new Date(Long.parseLong(timestamps));
-//                        SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-//                        String created_at = sdfFormat.format(prDate);
-//                        hashMap.put("created_at", "" + created_at);
-//                        hashMap.put("created_by", sharedUserType);
-
                         bottomSheetDialog.show();
 
                         if (!TextUtils.isEmpty(dialAlenET.getText()) &&
@@ -410,6 +383,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                                 progressDialog.dismiss();
                                 if (task.isSuccessful()){
                                     Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
+                                    loadParts(prId, partRV, noPartsTxt);
                                 } else {
                                     Toast.makeText(context, "Qo'shishda muammo " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                 }
@@ -447,6 +421,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                                 }
                                 productRef.delete().addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()){
+                                        loadParts(prId, partRV, noPartsTxt);
                                         Toast.makeText(context, "Mahsulot o'chirildi", Toast.LENGTH_SHORT).show();
                                         if (deletedProductId!=null){
                                             deleteItemsByTitle(deletedProductId);
@@ -459,7 +434,8 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                                 Toast.makeText(context, "Mahsulot topilmadi", Toast.LENGTH_SHORT).show();
                             }
                         });
-                    }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
+                    })
+                    .setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
         });
 
         discountBtn.setOnClickListener(view13 -> {
@@ -510,6 +486,29 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                         }
                     })
                     .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss()).show();
+        });
+    }
+
+    private void loadParts(String prId, RecyclerView partRV, TextView noPartsTxt) {
+        CollectionReference partsRef = firebaseFirestore.collection("Parts");
+        partsRef.whereEqualTo("prId", prId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                progressDialog.dismiss();
+                partsList.clear();
+                for (DocumentSnapshot snapshot : task.getResult()){
+                    ModelPart modelPart = snapshot.toObject(ModelPart.class);
+                    partsList.add(modelPart);
+                }
+                if (partsList.isEmpty()){
+                    partRV.setVisibility(View.GONE);
+                    noPartsTxt.setVisibility(View.VISIBLE);
+                } else {
+                    noPartsTxt.setVisibility(View.GONE);
+                }
+            } else {
+                progressDialog.dismiss();
+                Toast.makeText(context, "qismlar yuklashada xato " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

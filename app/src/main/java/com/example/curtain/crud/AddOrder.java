@@ -73,8 +73,6 @@ public class AddOrder extends AppCompatActivity {
 
     }
 
-
-
     private void init(){
         saveOrderBtn = findViewById(R.id.saveOrderBtn);
         orderNumberET = findViewById(R.id.orderNumberET);
@@ -100,7 +98,6 @@ public class AddOrder extends AppCompatActivity {
 
     private String ordNumber, ordName, ordPhone, ordSum, ordZaklad, ordCat, ordLoc, ordDeadline, ordDesc;
     private void input_data() {
-
 
         ordNumber = orderNumberET.getText().toString().trim();
         ordName = orderNameET.getText().toString().trim();

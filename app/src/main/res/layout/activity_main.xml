@@ -40,8 +40,17 @@
             android:text="@string/userStatus"
             android:textSize="20sp"
             android:textColor="@color/white"
-            android:layout_toStartOf="@id/addOrderBtn"
+            android:layout_toStartOf="@id/excelPrintBtn"
             android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/excelPrintBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="15dp"
+            android:layout_toStartOf="@id/addOrderBtn"
+            android:background="@null"
+            android:src="@drawable/ic_download_white" />
 
         <!--    Add product button    -->
         <ImageButton
@@ -215,7 +224,6 @@
             android:src="@drawable/ic_dashboard_gray"
             android:scaleType="fitXY"
             android:background="@null" />
-
         <!--    scanner    -->
 
         <!--    show scanned products title    -->

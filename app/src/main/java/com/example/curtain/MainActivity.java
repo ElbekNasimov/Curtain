@@ -1,6 +1,7 @@
 package com.example.curtain;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
@@ -20,7 +22,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ import com.example.curtain.crud.AddProduct;
 import com.example.curtain.model.ModelOrder;
 import com.example.curtain.model.ModelProduct;
 import com.example.curtain.utilities.NetworkChangeListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -46,6 +48,14 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     private RelativeLayout productsRL, ordersRL;
     private GridView ordersGV;
-    private ImageButton addProductBtn, logoutBtn, filterPrBtn, scannerPrBtn;
+    private ImageButton addProductBtn, logoutBtn, filterPrBtn, scannerPrBtn, excelPrintBtn;
     private ImageButton addOrderBtn;
     private TextView usernameTV, userTypeTV, tabProdsTV, tabOrdersTV, filterPrTV, emptyTV, usersListTV;
     private EditText searchET, searchOrderET;
@@ -77,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        Fragmenti  4 ta bo'ladi - Main, Orders, Statistics nad History'
+//        Fragmenti  4 ta bo'ladi - Main, Orders, Statistics and History'
 
         init();
 
@@ -188,20 +198,112 @@ public class MainActivity extends AppCompatActivity {
                 loadProducts(selected);
             }).show();
         });
-        
 
         scannerPrBtn.setOnClickListener(view -> scanBarcode());
 
-        logoutBtn.setOnClickListener(view -> {
-            progressDialog.setMessage(getResources().getString(R.string.wait));
-            SharedPreferences preferences = getSharedPreferences("USER_TYPE", MODE_PRIVATE);
-            preferences.edit().remove("user_type").apply();
-            preferences.edit().remove("username").apply();
-            preferences.edit().remove("user_status").apply();
-            mAuth.signOut();
-            finishAffinity();
-            checkUser();
+        if (!sharedUserType.equals("superAdmin")){
+            excelPrintBtn.setVisibility(View.GONE);
+        }
+
+        excelPrintBtn.setOnClickListener(view -> {
+            progressDialog.setMessage("Faylga saqlanmoqda");
+            progressDialog.show();
+            downloadExcel();
         });
+
+        logoutBtn.setOnClickListener(view -> {
+//            if (sharedUserType.equals("superAdmin")) {
+                progressDialog.setMessage(getResources().getString(R.string.wait));
+                SharedPreferences preferences = getSharedPreferences("USER_TYPE", MODE_PRIVATE);
+                preferences.edit().remove("user_type").apply();
+                preferences.edit().remove("username").apply();
+                preferences.edit().remove("user_status").apply();
+                mAuth.signOut();
+                finishAffinity();
+                checkUser();
+//            } else {
+//                Toast.makeText(MainActivity.this, "Sizga ruxsat berilmagan", Toast.LENGTH_SHORT).show();
+//            }
+        });
+    }
+
+    private void downloadExcel() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Products")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<DocumentSnapshot> documents = task.getResult().getDocuments();
+                        if (documents != null && !documents.isEmpty()){
+                            createExcelFile(documents);
+                        } else {
+                            progressDialog.dismiss();
+                            Toast.makeText(this, " excel saqlashda Ma'lumot topilmadi", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        progressDialog.dismiss();
+                        Exception exception = task.getException();
+                        if (exception != null) {
+                            Toast.makeText(this, "excel saqlashda xatolik " + exception.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "No'malum xatolik excel saqlashda",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).addOnFailureListener(e -> {
+                   progressDialog.dismiss();
+                    Toast.makeText(this, "Excel saqlashda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void createExcelFile(List<DocumentSnapshot> documents) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Products");
+
+        // sarlavha qatorini yozish
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Nomi");
+        headerRow.createCell(1).setCellValue("Barcode");
+        headerRow.createCell(2).setCellValue("Narxi");
+
+        // ma'lumotlarni yozish
+        int rowNum = 1;
+        for (DocumentSnapshot document: documents){
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(document.getString("prTitle"));
+            row.createCell(1).setCellValue(document.getString("prBarcode"));
+            row.createCell(2).setCellValue(document.getString("prPrice"));
+        }
+
+        // Excel faylini saqlash
+        try {
+            File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                    "Smetalar");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            File file = new File(directory, "products.xlsx");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream fileOut = new FileOutputStream(file);
+            workbook.write(fileOut);
+            fileOut.close();
+            workbook.close();
+            progressDialog.dismiss();
+            Toast.makeText(this, "Excel fayl saqlandi", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            progressDialog.dismiss();
+            Toast.makeText(this, "Excel faylni saqlashda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        } finally {
+            progressDialog.dismiss();
+            try {
+                workbook.close();
+            } catch (IOException e){
+                Toast.makeText(this, "Workbookni yopishda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private String getUserType(SharedPreferences sharedPreferences) {
@@ -218,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
         addOrderBtn = findViewById(R.id.addOrderBtn);
         filterPrBtn = findViewById(R.id.filterPrBtn);
         scannerPrBtn = findViewById(R.id.scannerPrBtn);
+        excelPrintBtn = findViewById(R.id.excelPrintBtn);
         logoutBtn = findViewById(R.id.logoutBtn);
 
         ordersGV = findViewById(R.id.ordersGV);

@@ -2,7 +2,8 @@ package com.example.curtain.model;
 
 public class ModelPart {
 
-    private String created_at, created_by, partLen, partLoc, partMeas, prId, partId, prTitle, partEditAt, partEditBy;
+    private String created_at, created_by, partLen, partLoc, partMeas, prId, partId, prTitle, partEditAt, partEditBy,
+    isReservePart, byReservedPart;
 
     public ModelPart() {
     }
@@ -16,7 +17,8 @@ public class ModelPart {
     }
 
     public ModelPart(String created_at, String created_by, String partLen, String partLoc, String partMeas, String prId,
-                     String partId, String prTitle, String partEditAt, String partEditBy) {
+                     String partId, String prTitle, String partEditAt, String partEditBy, String isReservePart,
+                     String byReservedPart) {
         this.created_at = created_at;
         this.created_by = created_by;
         this.partLen = partLen;
@@ -27,6 +29,8 @@ public class ModelPart {
         this.prTitle = prTitle;
         this.partEditAt = partEditAt;
         this.partEditBy = partEditBy;
+        this.isReservePart = isReservePart;
+        this.byReservedPart = byReservedPart;
     }
 
     public String getCreated_at() {
@@ -99,5 +103,21 @@ public class ModelPart {
 
     public void setPartEditBy(String partEditBy) {
         this.partEditBy = partEditBy;
+    }
+
+    public String getIsReservePart() {
+        return isReservePart;
+    }
+
+    public void setIsReservePart(String isReservePart) {
+        this.isReservePart = isReservePart;
+    }
+
+    public String getByReservedPart() {
+        return byReservedPart;
+    }
+
+    public void setByReservedPart(String byReservedPart) {
+        this.byReservedPart = byReservedPart;
     }
 }

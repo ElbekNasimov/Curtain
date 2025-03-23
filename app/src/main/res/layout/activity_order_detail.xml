@@ -53,6 +53,17 @@
             android:background="@null"
             android:src="@drawable/ic_edit_white" />
         <ImageButton
+            android:id="@+id/stockPrintBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_toStartOf="@id/orderPrintBtn"
+            android:background="@null"
+            android:src="@drawable/ic_stock_pdf_white" />
+        <ImageButton
             android:id="@+id/orderPrintBtn"
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -102,6 +113,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbarRL"
+        android:layout_above="@id/buttonsLL"
         android:layout_marginTop="10dp"
         android:orientation="vertical"
         android:layout_marginStart="10dp"
@@ -356,7 +368,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/orderObjectsRV"
             android:layout_width="match_parent"
-            android:layout_height="420dp"
+            android:layout_height="wrap_content"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/row_order_object" />
 
@@ -421,6 +433,5 @@
             android:backgroundTint="@color/colorPrimary"
             />
     </LinearLayout>
-
 
 </RelativeLayout>

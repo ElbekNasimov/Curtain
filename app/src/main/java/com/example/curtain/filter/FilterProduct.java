@@ -46,7 +46,7 @@ public class FilterProduct extends Filter {
             }
             results.count = filterModels.size();
             results.values = filterModels;
-            Log.i("ModelOrder", String.valueOf(filterModels.size()));
+            Log.i("ModelProduct", String.valueOf(filterModels.size()));
         } else {
             // search field empty, not searching, return original/all/complete list
             results.count = filterList.size();

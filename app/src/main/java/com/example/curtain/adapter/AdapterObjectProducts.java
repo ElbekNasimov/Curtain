@@ -72,9 +72,7 @@ public class AdapterObjectProducts extends RecyclerView.Adapter<AdapterObjectPro
             searchPrObjET.setText(title);
             searchPrIdObjET.setText(productId);
         });
-
     }
-
 
     @Override
     public int getItemCount() {

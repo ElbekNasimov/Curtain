@@ -24,8 +24,6 @@ public class Constants {
             "Yopildi",
     };
 
-
-
     public static final String [] extraOrder = {
             "Tanlang:",
             "Poshiv",
@@ -41,6 +39,7 @@ public class Constants {
             "Makaron",
             "Bubon",
             "Derjatel",
+            "Karniz",
     };
 
     public static final String [] categories1 = {
@@ -54,6 +53,7 @@ public class Constants {
             "Makaron",
             "Bubon",
             "Derjatel",
+            "Karniz",
     };
 
     // product location
@@ -159,4 +159,11 @@ public class Constants {
             "Etaj 2",
             "Etaj 3",
     };
+
+    public static String capitalizeFirstLetter(String input) {
+        if (input == null || input.isEmpty()) {
+            return input; // Agar input null yoki bo'sh bo'lsa, o'zgartirmasdan qaytar
+        }
+        return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
+    }
 }
