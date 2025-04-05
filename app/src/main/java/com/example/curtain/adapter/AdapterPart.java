@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
 
@@ -34,6 +35,11 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
     public AdapterPart(Context context, ArrayList<ModelPart> partList){
         this.context = context;
         this.partList = partList;
+    }
+
+    public void setPartsList(ArrayList<ModelPart> partsList) {
+        this.partList = partsList;
+        notifyDataSetChanged(); // UI ni yangilash
     }
 
     @NonNull
@@ -71,21 +77,19 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
         String partId = modelPart.getPartId();
         String isReserve = modelPart.getIsReservePart();
         String byReserved = modelPart.getByReservedPart();
-        String formattedByReserved = Constants.capitalizeFirstLetter(byReserved); // B
+        String formattedByReserved = byReserved != null ? Constants.capitalizeFirstLetter(byReserved) : "";
 
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         DocumentReference partRef = firestore.collection("Parts").document(partId);
 
-        holder.quanTV.setText(qty);
-        holder.measTV.setText(meas);
-        holder.locTV.setText(loc);
+        holder.quanTV.setText(qty != null ? qty : "0");
+        holder.measTV.setText(meas != null ? meas : "");
+        holder.locTV.setText(loc != null ? loc : "");
 
         sharedPreferences = context.getApplicationContext().getSharedPreferences("USER_TYPE", context.MODE_PRIVATE);
 
         String sharedUserType = sharedPreferences.getString("user_type", "");
         String sharedUserName = sharedPreferences.getString("username", "");
-
-        // DeepSeek //
 
         if (isReserve != null && isReserve.equals("true") && !byReserved.isEmpty()) {
             // Agar mahsulot bron qilingan bo'lsa
@@ -100,7 +104,7 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
                 holder.isReservePartTV.setTextColor(context.getResources().getColor(R.color.red));
                 holder.isReservePartTV.setEnabled(false);
             }
-            holder.byReservedPartTV.setText(String.format("%s tomonidan", formattedByReserved.toUpperCase()));
+            holder.byReservedPartTV.setText(String.format("%s tomonidan", formattedByReserved));
             holder.byReservedPartTV.setVisibility(View.VISIBLE);
         } else {
             // Agar mahsulot bron qilinmagan bo'lsa
@@ -110,24 +114,28 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
             holder.byReservedPartTV.setVisibility(View.GONE);
         }
 
-        if (!sharedUserType.equals("sklad") && !sharedUserType.equals("admin") && !sharedUserType.equals("superAdmin")){
+        if (sharedUserType == null || !sharedUserType.equals("sklad") && !sharedUserType.equals("admin")
+                && !sharedUserType.equals("superAdmin")){
             holder.delPartBtn.setVisibility(View.GONE);
             holder.editPartBtn.setVisibility(View.GONE);
         }
 
         holder.delPartBtn.setOnClickListener(view ->{
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Delete Part").setMessage("O'chirmoqchimisiz?")
-                    .setPositiveButton("Delete", (dialog, which) -> {
+            builder.setTitle("Kusok o'chirish").setMessage("O'chirmoqchimisiz?")
+                    .setPositiveButton("O'chirish", (dialog, which) -> {
                         // delete
                         partRef.delete().addOnCompleteListener(task -> {
                             if (task.isSuccessful()){
+                                partList.remove(position); // Ro'yxatdan o'chirish
+                                notifyItemRemoved(position); // UI ni yangilash
+                                notifyItemRangeChanged(position, partList.size());
                                 Toast.makeText(context, "Kusok o'chirildi", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(context, "kusok o'chirishda xato "
                                         + task.getException(), Toast.LENGTH_SHORT).show();
                             }
-                        }).addOnFailureListener(e -> Toast.makeText(context, "Error at Deleted Part..."
+                        }).addOnFailureListener(e -> Toast.makeText(context, "Xatolik: Qism o'chirilmadi"
                                 + e.getMessage(), Toast.LENGTH_SHORT).show());
                     }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
         });
@@ -137,7 +145,7 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
             LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
             View dialogView = inflater.inflate(R.layout.dialog_edit_part, null);
-            alertDialog.setTitle("Change");
+            alertDialog.setTitle("O'zgartirish");
 
             EditText editPartET = dialogView.findViewById(R.id.editPartET);
 
@@ -145,10 +153,13 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("partLen", editPartET.getText().toString().trim());
-                        if (!TextUtils.isEmpty(editPartET.getText())) {
-                            partRef.update(hashMap).addOnSuccessListener(unused ->
-                                    Toast.makeText(context, "Updated...", Toast.LENGTH_SHORT).show())
-                                    .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
+                        if (!TextUtils.isEmpty(editPartET.getText().toString().trim())) {
+                            partRef.update(hashMap).addOnSuccessListener(unused -> {
+                                        modelPart.setPartLen(editPartET.getText().toString().trim()); // Modelni yangilash
+                                        notifyItemChanged(position); // UI ni yangilash
+                                        Toast.makeText(context, "O'zgardi", Toast.LENGTH_SHORT).show();
+                                 })
+                                    .addOnFailureListener(e -> Toast.makeText(context, "Xatolik: Qism o'zgarmadi: "
                                                     + e.getMessage(), Toast.LENGTH_SHORT).show());
                         } else {
                             Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();

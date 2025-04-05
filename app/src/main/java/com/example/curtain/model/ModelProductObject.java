@@ -13,15 +13,15 @@ public class ModelProductObject {
     ) {
         this.created_by = created_by;
         this.orderId = orderId;
-        this.productObjectId = productObjectId;
-        this.objectOrderId = objectOrderId;
-        this.lenProductObject = lenProductObject;
-        this.titleProductObject = titleProductObject;
+        this.productObjectId = productObjectId;   // id
+        this.objectOrderId = objectOrderId;   // object id
+        this.lenProductObject = lenProductObject;   // tanlangan parda kiritilgan (kerakli) uzunligi
+        this.titleProductObject = titleProductObject;  // tanlangan parda nomi
         this.partStatusProductObject = partStatusProductObject;
-        this.productId = productId;
-        this.qoldiqKusok = qoldiqKusok;
-        this.kesilganKusoklarList = kesilganKusoklarList;
-        this.productPriceProductOrder = productPriceProductOrder;
+        this.productId = productId;      // parda narxi, tannarxi olish uchun productId
+        this.qoldiqKusok = qoldiqKusok;        // keyin qaraymiz, hozir shartmas
+        this.kesilganKusoklarList = kesilganKusoklarList;       // keyin qaraymiz, hozir shartmas
+        this.productPriceProductOrder = productPriceProductOrder;  // keyin qaraymiz, hozir shartmas
     }
 
     public String getProductPriceProductOrder() {

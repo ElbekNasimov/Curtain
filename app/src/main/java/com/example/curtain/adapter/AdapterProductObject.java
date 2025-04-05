@@ -119,41 +119,21 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                             prObjRef.delete().addOnCompleteListener(task -> {
                                 if (task.isSuccessful()){
                                     Toast.makeText(context, "Kusok o'chirildi", Toast.LENGTH_SHORT).show();
+                                    updateOrderObjectsSumAndCost(orderId);
                                 } else {
                                     Toast.makeText(context, "kusok o'chirishda xato "
                                             + task.getException(), Toast.LENGTH_SHORT).show();
                                 }
                             }).addOnFailureListener(e -> Toast.makeText(context, "Error at Deleted Part..."
                                     + e.getMessage(), Toast.LENGTH_SHORT).show())).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
+
         });
 
         // update len items from objects
         holder.editProductOrderBtn.setOnClickListener(view -> {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
-            LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
-            View dialogView = inflater.inflate(R.layout.dialog_edit_part, null);
-            alertDialog.setTitle("Change");
 
-            EditText editPartET = dialogView.findViewById(R.id.editPartET);
+            showEditProductDialog(modelProductObject, position, productObjectId);
 
-            alertDialog.setView(dialogView)
-                    .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
-                        HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("lenProductObjectOrder", editPartET.getText().toString().trim());
-                        if (!TextUtils.isEmpty(editPartET.getText())) {
-                            prObjRef.update(hashMap).addOnSuccessListener(unused ->
-                                            Toast.makeText(context, "Updated...", Toast.LENGTH_SHORT).show())
-                                    .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
-                                            + e.getMessage(), Toast.LENGTH_SHORT).show());
-                        } else {
-                            Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss());
-
-            alertDialog.setView(dialogView);
-            AlertDialog dialog = alertDialog.create();
-            dialog.show();
         });
 
         if (sharedUserType.equals("sklad")){
@@ -214,6 +194,57 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                 }
             }
         });
+    }
+
+    private void updateOrderObjectsSumAndCost(String orderId) {
+
+    }
+
+    private void showEditProductDialog(ModelProductObject modelProductObject, int position, String productObjectId) {
+
+        DocumentReference prObjRef = firestore.collection("ProductObjectOrder").document(productObjectId);
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
+        View dialogView = inflater.inflate(R.layout.dialog_edit_part, null);
+        alertDialog.setView(dialogView);
+        alertDialog.setTitle("O'zgartirish");
+
+        EditText editPartET = dialogView.findViewById(R.id.editPartET);
+        editPartET.setText(modelProductObject.getLenProductObject());
+
+//        alertDialog.setView(dialogView)
+//                .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
+//                    HashMap<String, Object> hashMap = new HashMap<>();
+//                    hashMap.put("lenProductObjectOrder", editPartET.getText().toString().trim());
+//                    if (!TextUtils.isEmpty(editPartET.getText())) {
+//                        prObjRef.update(hashMap).addOnSuccessListener(unused ->
+//                                        Toast.makeText(context, "Updated...", Toast.LENGTH_SHORT).show())
+//                                .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
+//                                        + e.getMessage(), Toast.LENGTH_SHORT).show());
+//                    } else {
+//                        Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss());
+        alertDialog.setPositiveButton("O'zgartirish", (dialogInterface, i) -> {
+            String newLen = editPartET.getText().toString().trim();
+            if (TextUtils.isEmpty(newLen)){
+                Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            updateProductLength(modelProductObject, newLen, position);
+            }).setNegativeButton("Bekor qilish", (dialogInterface, i) -> dialogInterface.dismiss());
+
+        alertDialog.create().show();
+    }
+
+    private void updateProductLength(ModelProductObject modelProductObject, String newLen, int position) {
+        double oldLen = Double.parseDouble(modelProductObject.getLenProductObject());
+        double newLength = Double.parseDouble(newLen);
+        double price = modelProductObject.getProductPriceProductOrder() != null ?
+                Double.parseDouble(modelProductObject.getProductPriceProductOrder()) : 0;
+
     }
 
     private void cuttingBottomSheetDialog(String productTitle, String productId, String productLength,

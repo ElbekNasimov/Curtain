@@ -2,22 +2,26 @@ package com.example.curtain.model;
 
 public class ModelOrderObject {
 
-    private String orderObjectId, created_by, orderId, orderRoom, objRoom, objDescET, objectPoshiv, objectUstanovka;
+    private String orderObjectId, created_by, orderId, orderRoom, objRoom, objDescET, objectPoshiv, objectUstanovka,
+            objectSum, objectCost, objectProfit;
 
     public ModelOrderObject() {
     }
 
     public ModelOrderObject(String orderObjectId, String created_by, String orderId, String orderRoom,
-                            String objRoom, String objDescET,
-                            String objectPoshiv, String objectUstanovka) {
-        this.orderObjectId = orderObjectId;
-        this.created_by = created_by;
-        this.orderId = orderId;
-        this.orderRoom = orderRoom;
-        this.objRoom = objRoom;
-        this.objDescET = objDescET;
-        this.objectPoshiv = objectPoshiv;
-        this.objectUstanovka = objectUstanovka;
+                            String objRoom, String objDescET, String objectPoshiv, String objectUstanovka,
+                            String objectSum, String objectCost, String objectProfit) {
+        this.orderObjectId = orderObjectId;    // id
+        this.created_by = created_by;     // kim tomonidan kiritildi
+        this.orderId = orderId;         // qaysi orderdan
+        this.orderRoom = orderRoom;       // qaysi o'rin, xol, oshxona
+        this.objRoom = objRoom;           // etaj - 1-etaj, 2-etaj
+        this.objDescET = objDescET;       // object description
+        this.objectPoshiv = objectPoshiv;    // poshiv
+        this.objectUstanovka = objectUstanovka;    // ustanovka
+        this.objectSum = objectSum;     // object mahsulotlari tanlangan uzunligiga mahsulot narxi ko'paytirib qo'shib boriladi
+        this.objectCost = objectCost;      // object mahsulotlari tanlangan uzunligiga mahsulot tannarxi ko'paytirib qo'shib boriladi
+        this.objectProfit = objectProfit;    // orderSum - objectCost
     }
 
     public String getOrderObjectId() {
@@ -82,5 +86,29 @@ public class ModelOrderObject {
 
     public void setObjectUstanovka(String objectUstanovka) {
         this.objectUstanovka = objectUstanovka;
+    }
+
+    public String getObjectSum() {
+        return objectSum;
+    }
+
+    public void setObjectSum(String objectSum) {
+        this.objectSum = objectSum;
+    }
+
+    public String getObjectCost() {
+        return objectCost;
+    }
+
+    public void setObjectCost(String objectCost) {
+        this.objectCost = objectCost;
+    }
+
+    public String getObjectProfit() {
+        return objectProfit;
+    }
+
+    public void setObjectProfit(String objectProfit) {
+        this.objectProfit = objectProfit;
     }
 }

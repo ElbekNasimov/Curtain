@@ -42,8 +42,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.HolderOrderObject> {
 
@@ -65,6 +67,18 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
         this.context = context;
         this.objectArrayList = objectsArrayList;
         this.sharedPreferences = sharedPreferences;
+    }
+
+    public void setOrderObjects(ArrayList<ModelOrderObject> objectArrayList) {
+        this.objectArrayList = objectArrayList;
+        notifyDataSetChanged(); // UI ni yangilash
+    }
+
+    public void deleteOrderObject(int position) {
+        if (position >0 && position < objectArrayList.size()){
+            objectArrayList.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
     class HolderOrderObject extends RecyclerView.ViewHolder {
@@ -111,11 +125,12 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
         } else {
             holder.orderObjectDescTV.setVisibility(View.GONE);
         }
-
-        holder.itemView.setOnClickListener(view -> orderObjectBottomSheet(modelOrderObject, sharedPreferences));
+        holder.itemView.setOnClickListener(view -> orderObjectBottomSheet(modelOrderObject,
+                objectArrayList, position, sharedPreferences));
     }
 
-    private void orderObjectBottomSheet(ModelOrderObject modelOrderObject,  SharedPreferences sharedPreferences){
+    private void orderObjectBottomSheet(ModelOrderObject modelOrderObject, ArrayList<ModelOrderObject> objectArrayList,
+                                        int position, SharedPreferences sharedPreferences){
         bottomSheetDialog = new BottomSheetDialog(context);
         View view = LayoutInflater.from(context).inflate(R.layout.bs_order_object, null);
         // set view to bottomSheet
@@ -134,12 +149,21 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
         LinearLayout addExtraPoshivLL = view.findViewById(R.id.addExtraPoshivLL);
         LinearLayout addExtraUstanovkaLL = view.findViewById(R.id.addExtraUstanovkaLL);
 
+        TextView objectSumTV = view.findViewById(R.id.objectSumTV);
+        TextView objectCostTV = view.findViewById(R.id.objectCostTV);
+        TextView objectProfitTV = view.findViewById(R.id.objectProfitTV);
         TextView nameOrderObjectTV = view.findViewById(R.id.nameOrderObjectTV);
         TextView orderObjectPoshivPriceTV = view.findViewById(R.id.orderObjectPoshivPriceTV);
         TextView orderObjectUstanovkaPriceTV = view.findViewById(R.id.orderObjectUstanovkaPriceTV);
         TextView noPartsTxt = view.findViewById(R.id.NoPartsTxt);
         TextView descOrderObjectTV = view.findViewById(R.id.descOrderObjectTV);
 
+        objectCostTV.setVisibility(View.GONE);
+        objectProfitTV.setVisibility(View.GONE);
+
+        String objectSum = modelOrderObject.getObjectSum();
+        String objectCost = modelOrderObject.getObjectCost();
+        String objectProfit = modelOrderObject.getObjectProfit();
         String orderRoom = modelOrderObject.getOrderRoom();
         String objRoom = modelOrderObject.getObjRoom();
         String orderObjectId = modelOrderObject.getOrderObjectId();
@@ -173,6 +197,24 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             addExtraUstanovkaLL.setVisibility(View.GONE);
         }
 
+        if (objectSum!=null){
+            objectSumTV.setText(objectSum);
+        } else {
+            objectSumTV.setVisibility(View.GONE);
+        }
+
+        if (sharedUserType.equals("superAdmin")){
+            if (objectCost!=null) {
+                objectCostTV.setVisibility(View.VISIBLE);
+                objectCostTV.setText(objectCost);
+            }
+            if (objectProfit!=null) {
+                objectProfitTV.setVisibility(View.VISIBLE);
+                objectProfitTV.setText(objectProfit);
+            }
+        }
+
+
         nameOrderObjectTV.setText(String.format("%s, %s", orderRoom, objRoom));
 
         productObjectArrayList = new ArrayList<>();
@@ -195,8 +237,8 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
         delOrderObjectBtn.setOnClickListener(view13 -> {
             progressDialog.dismiss();
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Delete").setMessage("Rosdan o'chirmoqchimisiz?")
-                    .setPositiveButton("Delete", (dialog, which) -> {
+            builder.setTitle("O'chirish").setMessage("Rostdan o'chirmoqchimisiz?")
+                    .setPositiveButton("O'chirish", (dialog, which) -> {
                         // delete
                         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
                         DocumentReference productRef = firestore.collection("OrderObjects").document(orderObjectId);
@@ -214,9 +256,10 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                                         if (deletedProductId!=null){
                                             deleteProductByObjects(deletedProductId);
                                         }
-                                        Intent intent = new Intent(context, OrderDetail.class);
-                                        intent.putExtra("orderId", orderId);
-                                        context.startActivity(intent);
+                                        objectArrayList.remove(position);
+                                        notifyItemRemoved(position);
+                                        notifyItemRangeChanged(position, objectArrayList.size());
+                                        bottomSheetDialog.dismiss();
                                     } else {
                                         Toast.makeText(context, "Mahsulot o'chirishda xato", Toast.LENGTH_SHORT).show();
                                     }
@@ -314,19 +357,73 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                     if (task.isSuccessful()){
                         DocumentSnapshot documentSnapshot = task.getResult();
                         if (documentSnapshot.exists()){
-                            hashMap.put("productPriceProductOrder", documentSnapshot.getString("prPrice"));
+                            String productPrice = documentSnapshot.getString("prPrice");
+                            String productCost = documentSnapshot.getString("prCost");
+
+                            double len = Double.parseDouble(lenProductOrder);
+                            double price = productPrice != null ? Double.parseDouble(productPrice): 0;
+                            double cost = productCost != null ? Double.parseDouble(productCost): 0;
+                            double objectSumDouble = productPrice != null ? price * len : 0;
+                            double objectCosDouble = productCost != null ? len * cost : 0;
+
+                            DecimalFormat df = new DecimalFormat("#.0");
+                            String formattedObjectSum = df.format(objectSumDouble);
+                            String formattedObjectCost = df.format(objectCosDouble);
+
+                            if (productPrice != null){
+                                hashMap.put("productPriceProductOrder", productPrice);
+                                hashMap.put("objectSum", formattedObjectSum);
+                            }
+                            if (productCost!= null){
+                                hashMap.put("productCostProductOrder", productCost);
+                                hashMap.put("objectCost", formattedObjectCost);
+                            }
 
                             firebaseFirestore.collection("ProductObjectOrder").document(timestamps).set(hashMap).
                                     addOnCompleteListener(task1 -> {
                                         progressDialog.dismiss();
                                         if (task1.isSuccessful()){
-                                            Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
-                                            bottomSheetDialog1.dismiss();
-                                            bottomSheetDialog.dismiss();
-                                            Intent intent = new Intent(context, OrderDetail.class);
-                                            intent.putExtra("orderId", orderId);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                                            context.startActivity(intent);
+                                            double currentObjectSum = modelOrderObject.getObjectSum() != null ?
+                                                    Double.parseDouble(modelOrderObject.getObjectSum()): 0;
+                                            double currentObjectCost = modelOrderObject.getObjectCost() != null ?
+                                                    Double.parseDouble(modelOrderObject.getObjectCost()): 0;
+                                            if (productPrice != null){
+                                                currentObjectSum += objectSumDouble;
+                                                modelOrderObject.setObjectSum(df.format(currentObjectSum));
+                                            }
+                                            if (productCost!=null) {
+                                                currentObjectCost += objectCosDouble;
+//                                                modelOrderObject.setObjectCost(String.valueOf(currentObjectCost));
+                                                modelOrderObject.setObjectCost(df.format(currentObjectCost));
+                                            }
+
+                                            Map<String, Object> updateFields = new HashMap<>();
+                                            if (productPrice != null) {
+                                                updateFields.put("objectSum", modelOrderObject.getObjectSum());
+                                            }
+                                            if (productCost != null) {
+                                                updateFields.put("objectCost", modelOrderObject.getObjectCost());
+                                            }
+
+                                            double finalCurrentObjectSum = currentObjectSum;
+                                            double finalCurrentObjectCost = currentObjectCost;
+                                            firebaseFirestore.collection("OrderObjects").document(modelOrderObject.getOrderObjectId())
+                                                            .update(updateFields)
+                                                                    .addOnCompleteListener(updateTask->{
+                                                                        if (updateTask.isSuccessful()) {
+                                                                            Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
+                                                                            bottomSheetDialog1.dismiss();
+                                                                            loadProductObjects(modelOrderObject.getOrderObjectId(), productOrderObjectsRV, noPartsTxt);
+                                                                            TextView objectSumTVNext = view.findViewById(R.id.objectSumTV);
+                                                                            objectSumTVNext.setText(String.valueOf(finalCurrentObjectSum));
+                                                                            TextView objectCostTVNext = view.findViewById(R.id.objectCostTV);
+                                                                            objectCostTVNext.setText(String.valueOf(finalCurrentObjectCost));
+                                                                            adapterProductObject.notifyDataSetChanged();
+                                                                        } else {
+                                                                            Toast.makeText(context, "Object summasini yangilashda xato " +
+                                                                                    updateTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                                        }
+                                                                    });
                                         } else {
                                             Toast.makeText(context, "Qo'shishda muammo " +
                                                     task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -479,10 +576,9 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                 } else {
                     noPartsTxt.setVisibility(View.GONE);
                 }
-
-                adapterProductObject = new AdapterProductObject(context, productObjectArrayList, sharedPreferences);
-                productOrderObjectsRV.setAdapter(adapterProductObject);
-
+                    adapterProductObject = new AdapterProductObject(context, productObjectArrayList, sharedPreferences);
+                    productOrderObjectsRV.setAdapter(adapterProductObject);
+                    adapterProductObject.notifyDataSetChanged();
             } else {
                 progressDialog.dismiss();
                 Toast.makeText(context, "yuklashda xato", Toast.LENGTH_SHORT).show();
@@ -498,19 +594,14 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                 for (DocumentSnapshot document : task.getResult()){
                     document.getReference().delete();
                 }
-
             } else {
                 Toast.makeText(context, "error", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-
-
     @Override
     public int getItemCount() {
         return objectArrayList.size();
     }
-
-
 }

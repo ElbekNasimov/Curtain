@@ -80,6 +80,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class OrderDetail extends AppCompatActivity {
 
@@ -124,14 +125,6 @@ public class OrderDetail extends AppCompatActivity {
         loadOrderDetail(orderId);
 
         loadOrderObjects(orderId);
-
-        if (!sharedUserType.equals("sklad")) {
-            loadOrderPays(orderId);
-        }
-
-        if (!sharedUserType.equals(Constants.userTypes[4])){
-            orderPayBtn.setVisibility(View.GONE);
-        }
 
         orderNumberTV.setOnClickListener(view -> Toast.makeText(OrderDetail.this,
                 "clicked", Toast.LENGTH_SHORT).show());
@@ -211,6 +204,14 @@ public class OrderDetail extends AppCompatActivity {
             editBtn.setVisibility(View.GONE);
             buttonsLL.setVisibility(View.GONE);
             orderPrintBtn.setVisibility(View.GONE);
+        }
+
+        if (!sharedUserType.equals("sklad")) {
+            loadOrderPays(orderId);
+        }
+
+        if (!sharedUserType.equals(Constants.userTypes[4])){
+            orderPayBtn.setVisibility(View.GONE);
         }
 
         if (!sharedUserType.equals(Constants.userTypes[4])){
@@ -302,8 +303,8 @@ public class OrderDetail extends AppCompatActivity {
 
         delBtn.setOnClickListener(view -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(OrderDetail.this);
-            builder.setTitle("Delete").setMessage(" Are you agree with it?")
-                    .setPositiveButton("Delete", (dialog, which) -> {
+            builder.setTitle("O'chirish").setMessage("O'chirmoqchimisiz?")
+                    .setPositiveButton("O'chirish", (dialog, which) -> {
                         // delete
                         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
                         DocumentReference orderRef = firestore.collection("Orders").document(orderId);
@@ -326,7 +327,11 @@ public class OrderDetail extends AppCompatActivity {
                                             deleteProductObjectByOrder(deletedOrderId); // product objectlari
                                             deleteCutPartProductObjectByOrder(deletedOrderId); // object kesilgan kusoklar
                                             deleteCutPartProductOrderByOrder(deletedOrderId);  // order kesilgan kusoklar
-                                            startActivity(new Intent(OrderDetail.this, MainActivity.class));
+
+                                            Intent intent = new Intent(OrderDetail.this, MainActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                            startActivity(intent);
+                                            finish();
                                         }
                                     } else {
                                         Toast.makeText(OrderDetail.this,
@@ -398,63 +403,20 @@ public class OrderDetail extends AppCompatActivity {
             bottomSheetDialog(orderId);
         });
 
+        // deepseekda tuzatildi
         addObjToOrderBtn.setOnClickListener(view -> {
 
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             LayoutInflater inflater = LayoutInflater.from(this.getApplicationContext());
             View dialogView = inflater.inflate(R.layout.dialog_add_obj_to_order, null);
-            alertDialog.setTitle("Obyekt qo'shish");
+            alertDialog.setTitle("Xona qo'shish");
 
             Spinner orderRoomSpinner = dialogView.findViewById(R.id.orderRoomSpinner);
             Spinner objRoomSpinner = dialogView.findViewById(R.id.objRoomSpinner);
             EditText objDescET = dialogView.findViewById(R.id.objDescET);
 
-            ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this,
-                    android.R.layout.simple_spinner_item, Constants.orderRooms);
-            adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            orderRoomSpinner.setAdapter(adapter1);
-
-            orderRoomSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view12, int i, long l) {
-
-                    if (!orderRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase("Xonani tanlang:")){
-                        orderRoom = orderRoomSpinner.getSelectedItem().toString().trim();
-                    } else {
-                        TextView errTxt = (TextView) orderRoomSpinner.getSelectedView();
-                        errTxt.setError("");
-                        errTxt.setTextColor(Color.RED);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                    Toast.makeText(OrderDetail.this, "Hech narsa tanlanmadi", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_spinner_item, Constants.objRooms);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            objRoomSpinner.setAdapter(adapter);
-
-            objRoomSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view12, int i, long l) {
-                    if (!objRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase("Etajni tanlang:")){
-                        objRoom = objRoomSpinner.getSelectedItem().toString().trim();
-                    } else {
-                        TextView errTxt = (TextView) objRoomSpinner.getSelectedView();
-                        errTxt.setError("");
-                        errTxt.setTextColor(Color.RED);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                    Toast.makeText(OrderDetail.this, "Hech narsa tanlanmadi", Toast.LENGTH_SHORT).show();
-                }
-            });
+            setupSpinner(orderRoomSpinner, Constants.orderRooms, "Xonani tanlang:", selected -> orderRoom = selected);
+            setupSpinner(objRoomSpinner, Constants.objRooms, "Etajni tanlang:", selected -> objRoom = selected);
 
             alertDialog.setView(dialogView)
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
@@ -505,6 +467,31 @@ public class OrderDetail extends AppCompatActivity {
             progressDialog.setMessage("Faylga saqlanmoqda");
             progressDialog.show();
             generatePdf();
+        });
+    }
+
+    private void setupSpinner(Spinner spinner, String[] items, String defaultItem, Consumer<String> onItemSelected) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String selectedItem = spinner.getSelectedItem().toString().trim();
+                if (!selectedItem.equalsIgnoreCase(defaultItem)) {
+                    onItemSelected.accept(selectedItem);
+                } else {
+                    TextView errTxt = (TextView) spinner.getSelectedView();
+                    errTxt.setError("");
+                    errTxt.setTextColor(Color.RED);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Toast.makeText(OrderDetail.this, "Hech narsa tanlanmadi", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -989,6 +976,11 @@ public class OrderDetail extends AppCompatActivity {
             pageNumberPaint.setTextSize(20f);
             int pageNum = (int) Math.ceil(objectsArrayList.size()/2.0);
             canvas.drawText("Sahifa " + pageNum + " dan " + pageNumber, pageInfo.getPageWidth()-220,
+                    pageInfo.getPageHeight()-20, pageNumberPaint);
+            Date today = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyy");
+            String formattedDate = dateFormat.format(today);
+            canvas.drawText(formattedDate, 20,
                     pageInfo.getPageHeight()-20, pageNumberPaint);
 
             // objectlarni joylashtirish
@@ -1548,25 +1540,39 @@ public class OrderDetail extends AppCompatActivity {
 
     private void loadOrderObjects(String orderId) {
         progressDialog.setMessage("Loading");
-        progressDialog.show();
+        progressDialog.show(); // ProgressDialog ni ko'rsatish
+
         CollectionReference objectsRef = firestore.collection("OrderObjects");
         objectsRef.whereEqualTo("orderId", orderId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                progressDialog.dismiss();
-                objectsArrayList.clear();
-                for (DocumentSnapshot snapshot : task.getResult()){
+            progressDialog.dismiss(); // ProgressDialog ni yopish
+
+            if (task.isSuccessful()) {
+                objectsArrayList.clear(); // Ro'yxatni tozalash
+
+                for (DocumentSnapshot snapshot : task.getResult()) {
                     ModelOrderObject modelOrderObject = snapshot.toObject(ModelOrderObject.class);
-                    objectsArrayList.add(modelOrderObject);
+                    if (modelOrderObject != null) {
+                        objectsArrayList.add(modelOrderObject); // Ro'yxatni to'ldirish
+                    }
                 }
-                if (objectsArrayList.isEmpty()){
-                    orderObjectsRV.setVisibility(View.GONE);
+
+                if (objectsArrayList.isEmpty()) {
+                    orderObjectsRV.setVisibility(View.GONE); // Ro'yxat bo'sh bo'lsa, RecyclerView ni yashirish
+                } else {
+                    orderObjectsRV.setVisibility(View.VISIBLE); // Ro'yxat bo'sh bo'lmasa, RecyclerView ni ko'rsatish
                 }
-                adapterOrderObject = new AdapterOrderObject(OrderDetail.this, objectsArrayList, sharedPreferences);
-                orderObjectsRV.setAdapter(adapterOrderObject);
+
+                if (adapterOrderObject == null) {
+                    // Adapter yaratilmagan bo'lsa, yangi yaratish
+                    adapterOrderObject = new AdapterOrderObject(OrderDetail.this, objectsArrayList, sharedPreferences);
+                    orderObjectsRV.setAdapter(adapterOrderObject);
+                } else {
+                    // Adapter allaqachon yaratilgan bo'lsa, yangidan yaratish
+                    adapterOrderObject.setOrderObjects(objectsArrayList);
+                    adapterOrderObject.notifyDataSetChanged(); // Adapterni yangilash
+                }
             } else {
-                progressDialog.dismiss();
-                Toast.makeText(OrderDetail.this, "qismlar yuklashda xato " +
-                        task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(OrderDetail.this, "Qismlar yuklashda xato: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -45,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -490,26 +491,45 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
     }
 
     private void loadParts(String prId, RecyclerView partRV, TextView noPartsTxt) {
-        CollectionReference partsRef = firebaseFirestore.collection("Parts");
-        partsRef.whereEqualTo("prId", prId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                progressDialog.dismiss();
-                partsList.clear();
-                for (DocumentSnapshot snapshot : task.getResult()){
-                    ModelPart modelPart = snapshot.toObject(ModelPart.class);
-                    partsList.add(modelPart);
-                }
-                if (partsList.isEmpty()){
-                    partRV.setVisibility(View.GONE);
-                    noPartsTxt.setVisibility(View.VISIBLE);
-                } else {
-                    noPartsTxt.setVisibility(View.GONE);
-                }
-            } else {
-                progressDialog.dismiss();
-                Toast.makeText(context, "qismlar yuklashada xato " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        progressDialog.setMessage("Yuklanmoqda...");
+        progressDialog.show();
+
+        firebaseFirestore.collection("Parts")
+                .whereEqualTo("prId", prId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    progressDialog.dismiss();
+
+                    if (task.isSuccessful()) {
+                        ArrayList<ModelPart> partsList = new ArrayList<>();
+                        for (DocumentSnapshot snapshot : task.getResult()) {
+                            ModelPart modelPart = snapshot.toObject(ModelPart.class);
+                            if (modelPart != null) {
+                                partsList.add(modelPart);
+                            }
+                        }
+
+                        if (partsList.isEmpty()) {
+                            noPartsTxt.setVisibility(View.VISIBLE);
+                            partRV.setVisibility(View.GONE);
+                        } else {
+                            noPartsTxt.setVisibility(View.GONE);
+                            partRV.setVisibility(View.VISIBLE);
+
+                            if (adapterPart == null) {
+                                // Adapter yaratilmagan bo'lsa, yangi yaratish
+                                adapterPart = new AdapterPart(context, partsList);
+                                partRV.setAdapter(adapterPart);
+                            } else {
+                                // Adapter allaqachon yaratilgan bo'lsa, ma'lumotlarni yangilash
+                                adapterPart.setPartsList(partsList);
+                                adapterPart.notifyDataSetChanged(); // UI ni yangilash
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context, "Xatolik: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void deleteItemsByTitle(String deletedProductId) {
