@@ -18,7 +18,13 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 
-public class AdapterObjectProducts extends RecyclerView.Adapter<AdapterObjectProducts.HolderObjectProducts> implements Filterable {
+public class AdapterObjectProducts extends RecyclerView.Adapter<AdapterObjectProducts.HolderObjectProducts>
+        implements Filterable {
+
+    /**
+     * objectga yoki orderga parda tanlashda chiqadigan ro'yxat
+     *  row object products item
+     */
 
     public ArrayList<ModelProduct> productList, filterList;
     private FilterProduct filterProduct;
@@ -59,7 +65,6 @@ public class AdapterObjectProducts extends RecyclerView.Adapter<AdapterObjectPro
         String productId = modelProduct.getPrId();
 
         holder.objectProductIdTV.setVisibility(View.GONE);
-
         holder.objectProductTitleTV.setText(title);
         holder.objectProductIdTV.setText(productId);
         if (price!=null) {
@@ -67,7 +72,6 @@ public class AdapterObjectProducts extends RecyclerView.Adapter<AdapterObjectPro
         } else {
             holder.objectProductPriceTV.setText(String.format("$ %s", "0"));
         }
-
         holder.itemView.setOnClickListener(view -> {
             searchPrObjET.setText(title);
             searchPrIdObjET.setText(productId);
@@ -83,11 +87,9 @@ public class AdapterObjectProducts extends RecyclerView.Adapter<AdapterObjectPro
         private TextView objectProductTitleTV, objectProductPriceTV, objectProductIdTV;
         public HolderObjectProducts(@NonNull View itemView) {
             super(itemView);
-
             objectProductTitleTV = itemView.findViewById(R.id.objectProductTitleTV);
             objectProductPriceTV = itemView.findViewById(R.id.objectProductPriceTV);
             objectProductIdTV = itemView.findViewById(R.id.objectProductIdTV);
-
         }
     }
 }

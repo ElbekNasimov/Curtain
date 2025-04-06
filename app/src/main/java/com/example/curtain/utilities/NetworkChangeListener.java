@@ -29,12 +29,9 @@ public class NetworkChangeListener extends BroadcastReceiver {
 
             dialog.getWindow().setGravity(Gravity.CENTER);
 
-            btnRetry.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                    onReceive(context, intent);
-                }
+            btnRetry.setOnClickListener(v -> {
+                dialog.dismiss();
+                onReceive(context, intent);
             });
         }
     }
