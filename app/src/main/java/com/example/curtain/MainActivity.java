@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.curtain.activities.LoginActivity;
+import com.example.curtain.activities.Otchot;
 import com.example.curtain.activities.UsersListActivity;
 import com.example.curtain.adapter.AdapterOrder;
 import com.example.curtain.adapter.AdapterProduct;
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private GridView ordersGV;
     private ImageButton addProductBtn, logoutBtn, filterPrBtn, scannerPrBtn, excelPrintBtn;
     private ImageButton addOrderBtn;
-    private TextView usernameTV, userTypeTV, tabProdsTV, tabOrdersTV, filterPrTV, emptyTV, usersListTV;
+    private TextView usernameTV, userTypeTV, tabProdsTV, tabOrdersTV, filterPrTV, emptyTV, usersListTV, otchotTV;
     private EditText searchET, searchOrderET;
     private RecyclerView productRV;
     private ProgressDialog progressDialog;
@@ -125,9 +126,11 @@ public class MainActivity extends AppCompatActivity {
         loadOrders();
 
         usersListTV.setVisibility(View.GONE);
+        otchotTV.setVisibility(View.GONE);
 
         if (sharedUserType.equals(Constants.userTypes[4])){
             usersListTV.setVisibility(View.VISIBLE);
+            otchotTV.setVisibility(View.VISIBLE);
         }
 
         if (sharedUserType.equals("dizayner") || sharedUserType.equals("bichuvchi")){
@@ -156,6 +159,8 @@ public class MainActivity extends AppCompatActivity {
         showProductsUI();
 
         usersListTV.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, UsersListActivity.class)));
+        otchotTV.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, Otchot.class)));
+
         // search
         searchET.addTextChangedListener(new TextWatcher() {
             @Override
@@ -353,6 +358,7 @@ public class MainActivity extends AppCompatActivity {
         searchOrderET = findViewById(R.id.searchOrderET);
         emptyTV = findViewById(R.id.emptyTV);
         usersListTV = findViewById(R.id.usersListTV);
+        otchotTV = findViewById(R.id.otchotTV);
 
         productRV = findViewById(R.id.productRV);
 
