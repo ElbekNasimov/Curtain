@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -79,6 +80,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         String orderId = modelProductObject.getOrderId();
         String partStatusProductObject = modelProductObject.getPartStatusProductObject();
         String productPriceProductOrder = modelProductObject.getProductPriceProductOrder();
+        String productType = modelProductObject.getProductTypeProductOrder();
 
         firestore = FirebaseFirestore.getInstance();
 
@@ -96,7 +98,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                     if (!orderStatus.equals("Yangi")){
                         if (!sharedUserType.equals(Constants.userTypes[4])) {
                             holder.delProductOrderBtn.setVisibility(View.GONE);
-                            holder.editProductOrderBtn.setVisibility(View.GONE);
+//                            holder.editProductOrderBtn.setVisibility(View.GONE);
                         }
                     }
                 } else {
@@ -107,8 +109,32 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
             }
         });
 
-
         DocumentReference prObjRef = firestore.collection("ProductObjectOrder").document(productObjectId);
+
+        prObjRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                DocumentSnapshot doc = task.getResult();
+                if (doc.exists()) {
+                    String qoldiqKusok;
+                    if (doc.contains("qoldiqKusok")){
+                        qoldiqKusok = doc.getString("qoldiqKusok");
+                        if (qoldiqKusok != null && !qoldiqKusok.trim().isEmpty()) {
+                            holder.qoldiqKusokTV.setVisibility(View.VISIBLE);
+                            holder.qoldiqKusokTV.setText(qoldiqKusok);
+                        }
+                    }
+                    if (doc.contains("kesilganKusoklarList")) {
+                        String kesilganlarList = doc.getString("kesilganKusoklarList");
+                        holder.cutPartsPrOrderTV.setVisibility(View.VISIBLE);
+                        holder.cutPartsPrOrderTV.setText(kesilganlarList);
+                    }
+                } else {
+                    Toast.makeText(context, "bunaqa pr yo'q", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(context, "pr topishda xato " + task.getException(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // delete items from objects
         holder.delProductOrderBtn.setOnClickListener(view -> {
@@ -118,8 +144,12 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                     .setPositiveButton("Delete", (dialog, which) ->
                             prObjRef.delete().addOnCompleteListener(task -> {
                                 if (task.isSuccessful()){
+
                                     Toast.makeText(context, "Kusok o'chirildi", Toast.LENGTH_SHORT).show();
                                     updateOrderObjectsSumAndCost(orderId);
+                                    productObjectArrayList.remove(position);
+                                    notifyItemRemoved(position);
+                                    notifyItemRangeChanged(position, productObjectArrayList.size());
                                 } else {
                                     Toast.makeText(context, "kusok o'chirishda xato "
                                             + task.getException(), Toast.LENGTH_SHORT).show();
@@ -136,12 +166,24 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
 
         });
 
-        if (sharedUserType.equals("sklad")){
+        if (sharedUserType.equals("sklad") || sharedUserType.equals("bichuvchi")){
             holder.delProductOrderBtn.setVisibility(View.GONE);
             holder.editProductOrderBtn.setVisibility(View.GONE);
         }
 
-        holder.titleProductOrderTV.setText(productTitle);
+        // check productType with null, if not null, set text
+        if (productType != null) {
+            if (productType.startsWith("T")){
+                holder.titleProductOrderTV.setText(String.format("T:  %s", productTitle));
+            } else if (productType.startsWith("P")){
+                holder.titleProductOrderTV.setText(String.format("P:  %s", productTitle));
+            } else {
+                holder.titleProductOrderTV.setText(productTitle);
+            }
+        } else {
+            holder.titleProductOrderTV.setText(productTitle);
+        }
+
         holder.lenProductOrderTV.setText(String.format("%s m", productLength));
 
         float price = Float.parseFloat(productPriceProductOrder);
@@ -151,6 +193,14 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
 
         holder.qoldiqKusokTV.setVisibility(View.GONE);
         holder.cutPartsPrOrderTV.setVisibility(View.GONE);
+
+        if (holder.productOrderStatusTV.getText().toString().equals("kesildi")){
+            // change text color to cutColor from colors.xml
+            holder.productOrderStatusTV.setTextColor(Color.parseColor("#008000"));
+        } else if (holder.productOrderStatusTV.getText().toString().equals("bichildi")){
+            // change text color to cuttingColor from colors.xml
+            holder.productOrderStatusTV.setTextColor(Color.parseColor("#800000"));
+        }
 
         if (holder.productOrderStatusTV.getText().toString().equals("holat") ||
                 holder.productOrderStatusTV.getText().toString().equals("kesilmoqda")
@@ -163,7 +213,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                 holder.editProductOrderBtn.setVisibility(View.GONE);
             }
         }
-        
+
         holder.productOrderStatusTV.setOnClickListener(view -> {
             if (sharedUserType.equals(Constants.userTypes[4]) || sharedUserType.equals(Constants.userTypes[0]))
             {
@@ -176,7 +226,6 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
             }
             else if (holder.productOrderStatusTV.getText().toString().equals("kesildi")){
                 if (sharedUserType.equals(Constants.userTypes[4]) || sharedUserType.equals(Constants.userTypes[2])){
-
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
                     alertDialog.setTitle("Info").setMessage("Bichildimi?").setPositiveButton("Ha", (dialogInterface, i) -> {
                         String status = "bichildi";
@@ -186,6 +235,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                         statusRef.update(hashMap).addOnSuccessListener(unused -> {
                             Toast.makeText(context, status, Toast.LENGTH_SHORT).show();
                             changeStatusPartPrOrder(orderId, status);
+                            notifyItemChanged(position);
                         }).addOnFailureListener(e -> Toast.makeText(context, "part not updated "
                                 + e.getMessage(), Toast.LENGTH_SHORT).show());
                     }).setNegativeButton("Yo'q", (dialogInterface, i) -> dialogInterface.dismiss()).show();
@@ -213,28 +263,39 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         EditText editPartET = dialogView.findViewById(R.id.editPartET);
         editPartET.setText(modelProductObject.getLenProductObject());
 
-//        alertDialog.setView(dialogView)
-//                .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
-//                    HashMap<String, Object> hashMap = new HashMap<>();
-//                    hashMap.put("lenProductObjectOrder", editPartET.getText().toString().trim());
-//                    if (!TextUtils.isEmpty(editPartET.getText())) {
-//                        prObjRef.update(hashMap).addOnSuccessListener(unused ->
-//                                        Toast.makeText(context, "Updated...", Toast.LENGTH_SHORT).show())
-//                                .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
-//                                        + e.getMessage(), Toast.LENGTH_SHORT).show());
-//                    } else {
-//                        Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss());
-        alertDialog.setPositiveButton("O'zgartirish", (dialogInterface, i) -> {
-            String newLen = editPartET.getText().toString().trim();
-            if (TextUtils.isEmpty(newLen)){
-                Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            updateProductLength(modelProductObject, newLen, position);
-            }).setNegativeButton("Bekor qilish", (dialogInterface, i) -> dialogInterface.dismiss());
+        alertDialog.setView(dialogView)
+                .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("lenProductObject", editPartET.getText().toString().trim());
+
+                    if (!TextUtils.isEmpty(editPartET.getText())) {
+                        prObjRef.update(hashMap).addOnSuccessListener(unused -> {
+
+                            modelProductObject.setLenProductObject(editPartET.getText().toString().trim()); // Modelni yangilash
+                            notifyItemChanged(position); // UI ni yangilash
+                            Toast.makeText(context, "Kusok uzunligi o'zgardi...", Toast.LENGTH_SHORT).show();
+
+                        })
+
+                                .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
+                                        + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    } else {
+                        Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+                    Toast.makeText(context, "cancel", Toast.LENGTH_SHORT).show();
+                        dialogInterface.dismiss();
+                        });
+//        alertDialog.setPositiveButton("O'zgartirish", (dialogInterface, i) -> {
+//            String newLen = editPartET.getText().toString().trim();
+//            if (TextUtils.isEmpty(newLen)){
+//                Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//            Toast.makeText(context, "update", Toast.LENGTH_SHORT).show();
+//            updateProductLength(modelProductObject, newLen, position);
+//            }).setNegativeButton("Bekor qilish", (dialogInterface, i) -> dialogInterface.dismiss());
 
         alertDialog.create().show();
     }
@@ -244,6 +305,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         double newLength = Double.parseDouble(newLen);
         double price = modelProductObject.getProductPriceProductOrder() != null ?
                 Double.parseDouble(modelProductObject.getProductPriceProductOrder()) : 0;
+
 
     }
 
@@ -361,7 +423,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                     hashMap.put("productId", "" + productId);                    // product id
                     hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
 
-                    firestore.collection("CutPartProductObject").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
+                    firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
 
@@ -401,7 +463,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                 hashMap.put("productId", "" + productId);                    // product id
                 hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
 
-                firestore.collection("CutPartProductObject").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
+                firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                     progressDialog.dismiss();
                     if (task.isSuccessful()) {
                         changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
@@ -433,7 +495,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                 hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
                 hashMap.put("partStatusProductObject", "" + kusokHolati);                          // holat - status
 
-                firestore.collection("CutPartProductObject").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
+                firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                     progressDialog.dismiss();
                     if (task.isSuccessful()) {
                         changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
@@ -452,8 +514,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         });
     }
 
-
-
+    // change order status
     private void changeStatusPartPrOrder(String orderId, String changeOrderStatus) {
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("orderStatus", ""+changeOrderStatus);  // kesish holati
