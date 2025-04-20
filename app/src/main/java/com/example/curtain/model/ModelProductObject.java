@@ -2,26 +2,28 @@ package com.example.curtain.model;
 
 public class ModelProductObject {
     String created_by, orderId, productObjectId, objectOrderId, lenProductObject, titleProductObject,
-            partStatusProductObject, productId, qoldiqKusok, kesilganKusoklarList, productPriceProductOrder;
+            partStatusProductObject, productId, qoldiqKusok, kesilganKusoklarList, productPriceProductOrder,
+            productTypeProductOrder;
 
     public ModelProductObject() {
     }
 
     public ModelProductObject(String created_by, String orderId, String productObjectId, String objectOrderId,
                               String lenProductObject, String titleProductObject, String partStatusProductObject,
-                              String productId, String qoldiqKusok, String kesilganKusoklarList, String productPriceProductOrder
-    ) {
+                              String productId, String qoldiqKusok, String kesilganKusoklarList,
+                              String productPriceProductOrder, String productTypeProductOrder) {
         this.created_by = created_by;
-        this.orderId = orderId;
-        this.productObjectId = productObjectId;   // id
-        this.objectOrderId = objectOrderId;   // object id
-        this.lenProductObject = lenProductObject;   // tanlangan parda kiritilgan (kerakli) uzunligi
-        this.titleProductObject = titleProductObject;  // tanlangan parda nomi
-        this.partStatusProductObject = partStatusProductObject;
-        this.productId = productId;      // parda narxi, tannarxi olish uchun productId
-        this.qoldiqKusok = qoldiqKusok;        // keyin qaraymiz, hozir shartmas
-        this.kesilganKusoklarList = kesilganKusoklarList;       // keyin qaraymiz, hozir shartmas
-        this.productPriceProductOrder = productPriceProductOrder;  // keyin qaraymiz, hozir shartmas
+            this.orderId = orderId;
+            this.productObjectId = productObjectId;   // id
+            this.objectOrderId = objectOrderId;   // object id
+            this.lenProductObject = lenProductObject;   // tanlangan parda kiritilgan (kerakli) uzunligi
+            this.titleProductObject = titleProductObject;  // tanlangan parda nomi
+            this.partStatusProductObject = partStatusProductObject;
+            this.productId = productId;      // parda narxi, tannarxi olish uchun productId
+            this.qoldiqKusok = qoldiqKusok;        // keyin qaraymiz, hozir shartmas
+            this.kesilganKusoklarList = kesilganKusoklarList;       // keyin qaraymiz, hozir shartmas
+            this.productPriceProductOrder = productPriceProductOrder;  // keyin qaraymiz, hozir shartmas
+            this.productTypeProductOrder = productTypeProductOrder;  // product turini olish uchun
     }
 
     public String getProductPriceProductOrder() {
@@ -110,5 +112,13 @@ public class ModelProductObject {
 
     public void setKesilganKusoklarList(String kesilganKusoklarList) {
         this.kesilganKusoklarList = kesilganKusoklarList;
+    }
+
+    public String getProductTypeProductOrder() {
+        return productTypeProductOrder;
+    }
+
+    public void setProductTypeProductOrder(String productTypeProductOrder) {
+        this.productTypeProductOrder = productTypeProductOrder;
     }
 }
