@@ -4,6 +4,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
@@ -34,10 +36,13 @@ import com.example.curtain.constants.CaptureAct;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.crud.AddOrder;
 import com.example.curtain.crud.AddProduct;
+import com.example.curtain.entities.Product;
 import com.example.curtain.model.ModelOrder;
 import com.example.curtain.model.ModelProduct;
 import com.example.curtain.utilities.NetworkChangeListener;
-import com.google.android.gms.tasks.OnFailureListener;
+import com.example.curtain.utilities.ProductSyncManager;
+import com.example.curtain.utilities.SyncScheduler;
+import com.example.curtain.viewmodels.ProductViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -79,8 +84,12 @@ public class MainActivity extends AppCompatActivity {
     private AdapterProduct adapterProduct;
     private AdapterOrder adapterOrder;
     private SharedPreferences sharedPreferences;
-
     NetworkChangeListener networkChangeListener = new NetworkChangeListener();
+
+    private Handler handler;
+
+    // for Room database
+    private ProductViewModel productViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +114,14 @@ public class MainActivity extends AppCompatActivity {
         String select="Hammasi";
         loadProducts(select);
 
+        // part for Room database
+        productViewModel.getAllProducts().observe(this, products -> {
+            // mahsulotlarni ko'rsatish uchun UI ni yangilash
+        });
+
+        // qayta ko'rish kerak
+//        SyncScheduler.scheduleSync(this);
+
         loadOrders();
 
         usersListTV.setVisibility(View.GONE);
@@ -125,20 +142,18 @@ public class MainActivity extends AppCompatActivity {
             addOrderBtn.setVisibility(View.GONE);
         }
 
+        if (sharedUserType.equals("viewer")){
+            addOrderBtn.setVisibility(View.GONE);
+            addProductBtn.setVisibility(View.GONE);
+        }
+
         addOrderBtn.setOnClickListener(view -> {
             startActivity(new Intent(MainActivity.this, AddOrder.class));
         });
 
         emptyTV.setVisibility(View.GONE);
 
-//        SharedPreferences sharedFromOrders = getSharedPreferences("FROM_ORDERS", MODE_PRIVATE);
-//        String sharedFrom = sharedFromOrders.getString("from_orders", "");
-//        if (!sharedFrom.isEmpty()){
-//            showOrdersUI();
-//            sharedFromOrders.edit().remove("from_orders").apply();
-//        } else {
-            showProductsUI();
-//        }
+        showProductsUI();
 
         usersListTV.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, UsersListActivity.class)));
         // search
@@ -266,6 +281,7 @@ public class MainActivity extends AppCompatActivity {
         headerRow.createCell(0).setCellValue("Nomi");
         headerRow.createCell(1).setCellValue("Barcode");
         headerRow.createCell(2).setCellValue("Narxi");
+        headerRow.createCell(3).setCellValue("Eni");
 
         // ma'lumotlarni yozish
         int rowNum = 1;
@@ -274,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
             row.createCell(0).setCellValue(document.getString("prTitle"));
             row.createCell(1).setCellValue(document.getString("prBarcode"));
             row.createCell(2).setCellValue(document.getString("prPrice"));
+            row.createCell(3).setCellValue(document.getString("prHeight"));
         }
 
         // Excel faylini saqlash
@@ -310,6 +327,9 @@ public class MainActivity extends AppCompatActivity {
         return sharedPreferences.getString("user_type", "");
     }
     private void init(){
+
+        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
 
@@ -344,6 +364,8 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setCanceledOnTouchOutside(false);
 
         sharedPreferences = getSharedPreferences("USER_TYPE", Context.MODE_PRIVATE);
+
+        handler = new Handler(Looper.getMainLooper());
     }
 
     private void checkUser() {
@@ -387,11 +409,13 @@ public class MainActivity extends AppCompatActivity {
                     productList.add(modelProduct);
                 }
             }
+
             adapterProduct = new AdapterProduct(MainActivity.this, productList, sharedPreferences);
             if (sharedUserType.equals("superAdmin")) {
                 Toast.makeText(this, "products" + productList.size(), Toast.LENGTH_SHORT).show();
             }
             productRV.setAdapter(adapterProduct);
+            adapterProduct.notifyDataSetChanged(); // UI ni yangilash
         });
     }
 
@@ -506,7 +530,27 @@ public class MainActivity extends AppCompatActivity {
         }
         this.doubleBackToExitPressedOnce = true;
         Toast.makeText(this, "Chiqish uchun 2 marta bosing", Toast.LENGTH_SHORT).show();
-        new Handler(Looper.getMainLooper()).postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+        handler.postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // ProgressDialog'ni yopish
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+
+        // BroadcastReceiver'ni tozalash
+        try {
+            unregisterReceiver(networkChangeListener);
+        } catch (IllegalArgumentException e) {
+            // Receiver ro'yxatdan o'tmagan bo'lishi mumkin
+        }
+
+        // Handler'ni tozalash
+        handler.removeCallbacksAndMessages(null);
+
+        super.onDestroy();
     }
 
     @Override
