@@ -144,4 +144,21 @@
     <string name="getSum">Hisoblash</string>
     <string name="isReserve">Bron qilish</string>
     <string name="byUser">User tomonidan</string>
+    <string name="selectColor">Rang tanlang</string>
+    <string name="color">Rang</string>
+    <string name="qoldiqlen">Qoldiq kusok</string>
+    <string name="otchotlar">Otchot</string>
+    <string name="otchotTitle">Hisobot oyi</string>
+    <string name="xarajatlarOpen">Xarajatlar ro\'yxatini ochish</string>
+    <string name="xarajatlarClose">Xarajatlar ro\'yxatini yopish</string>
+    <string name="orderHistoryOpen">Smetalar ro\'yxati ochish</string>
+    <string name="orderHistoryClose">Smetalar ro\'yxati yopish</string>
+    <string name="reason">Sabab</string>
+    <string name="add_xarajat">Xarajat +</string>
+    <string name="otchotDate">Otchot sanasi</string>
+    <string name="countChiqqanOrders">Chiqqan smetalar soni</string>
+    <string name="countNewOrders">Yangi smetalar soni</string>
+    <string name="sumChiqqanOrder">Chiqqan smetalar summasi</string>
+    <string name="costChiqqanOrder">Chiqqan smetalar tannarxi</string>
+    <string name="sumXarajat">Xarajatlar summasi</string>
 </resources>

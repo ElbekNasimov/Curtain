@@ -11,4 +11,5 @@
     <color name="cyan">#25FFFF</color>
     <color name="colorGreen">#43A047</color>
     <color name="red">#FA1403</color>
+    <color name="cutColor">#023020</color>
 </resources>

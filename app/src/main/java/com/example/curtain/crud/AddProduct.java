@@ -10,10 +10,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -44,7 +47,9 @@ import java.util.Objects;
 public class AddProduct extends AppCompatActivity {
     private ImageButton backBtn;
     private Button addPrdBtn;
-    private TextInputEditText titleET, catET, priceET, costET,  descET, productHeightET, productMassET, productCompanyET;
+    private TextInputEditText titleET, catET, priceET, costET,  descET, productHeightET, productColorET,
+            productMassET, productCompanyET;
+    private TextInputLayout labelColor;
     private TextInputLayout labelCost;
     private TextView barcodeET;
     private FirebaseAuth mAuth;
@@ -65,29 +70,33 @@ public class AddProduct extends AppCompatActivity {
         currentUser = sharedPreferences.getString("user_type", "");
         currentUsername = sharedPreferences.getString("username", "");
 
-        if (currentUser.isEmpty()){
+        if (currentUser.isEmpty()) {
             startActivity(new Intent(AddProduct.this, LoginActivity.class));
             finish();
         } else {
-            if (currentUser.equals("superAdmin")){
+            if (currentUser.equals("superAdmin")) {
                 labelCost.setVisibility(View.VISIBLE);
             } else {
                 labelCost.setVisibility(View.GONE);
             }
         }
 
-        backBtn.setOnClickListener(view ->{
+        backBtn.setOnClickListener(view -> {
             startActivity(new Intent(AddProduct.this, MainActivity.class));
             finish();
         });
 
         catET.setOnClickListener(view -> categoryDialog());
 
+        productColorET.setOnClickListener(view -> colorDialog());
+
         addPrdBtn.setOnClickListener(view -> input_data());
 
         barcodeET.setOnClickListener(v -> {
             scanCode();
         });
+
+
     }
 
     public void init(){
@@ -101,8 +110,11 @@ public class AddProduct extends AppCompatActivity {
         barcodeET = findViewById(R.id.barcodeET);
         descET = findViewById(R.id.descET);
         productHeightET = findViewById(R.id.productHeightET);
+        productColorET = findViewById(R.id.productColorET);
         productMassET = findViewById(R.id.productMassET);
         productCompanyET = findViewById(R.id.productCompanyET);
+
+        labelColor = findViewById(R.id.labelColor);
 
         mAuth = FirebaseAuth.getInstance();
         addPrToFireStore = FirebaseFirestore.getInstance();
@@ -122,7 +134,17 @@ public class AddProduct extends AppCompatActivity {
         }).show();
     }
 
-    private String title, prCat, price, cost, prBarcode, desc, productHeight, productMass, productCompany;
+    private void colorDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Mahsulot rangi").setItems(Constants.productColor, (dialog, which) -> {
+            // get picked color
+            String color = Constants.productColor[which];
+            // set picked color
+            productColorET.setText(color);
+        }).show();
+    }
+
+    private String title, prCat, price, cost, prBarcode, desc, productHeight, productColor, productMass, productCompany;
     private void input_data() {
         title = titleET.getText().toString().trim().toLowerCase();
         prCat = catET.getText().toString().trim();
@@ -131,6 +153,7 @@ public class AddProduct extends AppCompatActivity {
         prBarcode = barcodeET.getText().toString().trim();
         desc = descET.getText().toString().trim();
         productHeight = productHeightET.getText().toString().trim();
+        productColor = productColorET.getText().toString().trim();
         productMass = productMassET.getText().toString().trim();
         productCompany = productCompanyET.getText().toString().trim();
 
@@ -192,6 +215,9 @@ public class AddProduct extends AppCompatActivity {
         if (!productHeight.isEmpty()) {
             hashMap.put("prHeight", "" + productHeight);
         }
+        if (!productColor.isEmpty()) {
+            hashMap.put("prColor", productColor);
+        }
         if (!productMass.isEmpty()) {
             hashMap.put("prMass", "" + productMass);
         }
@@ -233,6 +259,7 @@ public class AddProduct extends AppCompatActivity {
         productHeightET.setText("");
         productMassET.setText("");
         productCompanyET.setText("");
+        productColorET.setText("");
     }
 
     private void scanCode(){

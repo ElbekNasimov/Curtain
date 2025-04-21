@@ -123,30 +123,11 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/labelOrderZaklad"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            app:endIconMode="clear_text"
-            android:layout_below="@id/labelOrderSum"
-            android:hint="@string/orderZaklad">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/orderZakladET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_numbers_gray"
-                android:drawablePadding="5dp"
-                android:inputType="number"
-                android:textSize="18sp"
-                android:padding="10dp" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/labelOrderLoc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="5dp"
-            android:layout_below="@id/labelOrderZaklad"
+            android:layout_below="@id/labelOrderSum"
             android:hint="@string/orderLoc">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/orderLocET"

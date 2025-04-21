@@ -194,6 +194,10 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         holder.qoldiqKusokTV.setVisibility(View.GONE);
         holder.cutPartsPrOrderTV.setVisibility(View.GONE);
 
+        if (holder.productOrderStatusTV.getText().toString().equals("bichildi")) {
+            holder.productOrderStatusTV.setVisibility(View.VISIBLE); // Yashirilmasligini ta'minlash
+        }
+
         if (holder.productOrderStatusTV.getText().toString().equals("kesildi")){
             // change text color to cutColor from colors.xml
             holder.productOrderStatusTV.setTextColor(Color.parseColor("#008000"));
@@ -229,13 +233,18 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
                     alertDialog.setTitle("Info").setMessage("Bichildimi?").setPositiveButton("Ha", (dialogInterface, i) -> {
                         String status = "bichildi";
+                        String statusOrder = "bichilmoqda";
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("partStatusProductObject", "" + status);
                         DocumentReference statusRef = firestore.collection("ProductObjectOrder").document(productObjectId);
                         statusRef.update(hashMap).addOnSuccessListener(unused -> {
+
                             Toast.makeText(context, status, Toast.LENGTH_SHORT).show();
-                            changeStatusPartPrOrder(orderId, status);
+                            productObjectArrayList.get(position).setPartStatusProductObject("bichildi");
+                            holder.productOrderStatusTV.setText(status);
+                            changeStatusPartPrOrder(orderId, statusOrder);
                             notifyItemChanged(position);
+
                         }).addOnFailureListener(e -> Toast.makeText(context, "part not updated "
                                 + e.getMessage(), Toast.LENGTH_SHORT).show());
                     }).setNegativeButton("Yo'q", (dialogInterface, i) -> dialogInterface.dismiss()).show();
@@ -519,10 +528,23 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("orderStatus", ""+changeOrderStatus);  // kesish holati
         DocumentReference orderRef = firestore.collection("Orders").document(orderId);
-        orderRef.update(hashMap).addOnSuccessListener(unused ->
-                        Log.d("AdapterProductOrder", "Bajarildi"))
-                .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
-                        + e.getMessage(), Toast.LENGTH_SHORT).show());
+        // check if order status not equals "bichilmoqda" then update order status
+        orderRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                DocumentSnapshot doc = task.getResult();
+                if (doc.exists()){
+                    String orderStatus = doc.getString("orderStatus");
+                    if (!orderStatus.equals("bichilmoqda")){
+                        orderRef.update(hashMap).addOnSuccessListener(unused ->
+                                Log.d("AdapterProductOrder", "Bajarildi"));
+                    }
+                } else {
+                    Toast.makeText(context, "Smeta topilmadi", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(context, "Error fetching Smeta: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void changeStatusProductsObjectOrder(String productObjectId, String kusokHolati,

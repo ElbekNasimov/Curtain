@@ -37,7 +37,7 @@ public class AddOrder extends AppCompatActivity {
     FirebaseFirestore addOrderToFirestore;
     private  ProgressDialog progressDialog;
     private Button saveOrderBtn;
-    private TextInputEditText orderNumberET, orderCatET,  orderNameET, orderPhoneET, orderSumET, orderZakladET,
+    private TextInputEditText orderNumberET, orderCatET,  orderNameET, orderPhoneET, orderSumET,
             orderLocET, orderDescET, orderDeadlineET;
     private String currentUsername;
 
@@ -79,7 +79,7 @@ public class AddOrder extends AppCompatActivity {
         orderNameET = findViewById(R.id.orderNameET);
         orderPhoneET = findViewById(R.id.orderPhoneET);
         orderSumET = findViewById(R.id.orderSumET);
-        orderZakladET = findViewById(R.id.orderZakladET);
+
         orderCatET = findViewById(R.id.orderCatET);
         orderLocET = findViewById(R.id.orderLocET);
         orderDeadlineET = findViewById(R.id.orderDeadlineET);
@@ -96,14 +96,13 @@ public class AddOrder extends AppCompatActivity {
         progressDialog.setCanceledOnTouchOutside(false);
     }
 
-    private String ordNumber, ordName, ordPhone, ordSum, ordZaklad, ordCat, ordLoc, ordDeadline, ordDesc;
+    private String ordNumber, ordName, ordPhone, ordSum, ordCat, ordLoc, ordDeadline, ordDesc;
     private void input_data() {
 
         ordNumber = orderNumberET.getText().toString().trim();
         ordName = orderNameET.getText().toString().trim();
         ordPhone = orderPhoneET.getText().toString().trim();
         ordSum = orderSumET.getText().toString().trim();
-        ordZaklad = orderZakladET.getText().toString().trim();
         ordCat = orderCatET.getText().toString().trim();
         ordLoc = orderLocET.getText().toString().trim();
         ordDeadline = orderDeadlineET.getText().toString().trim();
@@ -157,9 +156,6 @@ public class AddOrder extends AppCompatActivity {
         }
         if (!ordPhone.isEmpty()) {
             hashMap.put("orderPhone", "" + ordPhone);
-        }
-        if (!ordZaklad.isEmpty()) {
-            hashMap.put("orderZaklad", "" + ordZaklad);
         }
         if (!ordDesc.isEmpty()) {
             hashMap.put("orderDesc", "" + ordDesc);

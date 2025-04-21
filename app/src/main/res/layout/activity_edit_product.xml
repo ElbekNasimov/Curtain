@@ -147,17 +147,38 @@
                 android:padding="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/labelHeight"
+            android:id="@+id/labelColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:layout_below="@id/labelCost"
+            android:hint="@string/selectColor">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/productColorET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_brush_grey"
+                android:drawableEnd="@drawable/ic_down_gray"
+                android:textIsSelectable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:drawablePadding="5dp"
+                android:inputType="none"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelHeight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/labelColor"
             android:hint="@string/height">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/productHeightET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_money_gray"
+                android:drawableStart="@drawable/ic_size_grey"
                 android:drawablePadding="5dp"
                 android:inputType="number"
                 android:textSize="18sp"
@@ -174,7 +195,7 @@
                 android:id="@+id/productMassET"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_money_gray"
+                android:drawableStart="@drawable/ic_weight_grey"
                 android:drawablePadding="5dp"
                 android:inputType="numberDecimal"
                 android:textSize="18sp"

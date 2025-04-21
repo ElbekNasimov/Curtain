@@ -31,8 +31,7 @@ public class EditOrder extends AppCompatActivity {
     private ImageButton backBtn;
     private Button editOrderBtn;
     private ProgressDialog progressDialog;
-    private TextInputEditText editOrderNumberET, editOrderCatET, editOrderNameET, editOrderPhoneET, editOrderSumET,
-            editOrderZakladET, editOrderLocET, editOrderDescET;
+    private TextInputEditText editOrderNumberET, editOrderCatET, editOrderNameET, editOrderPhoneET, editOrderSumET, editOrderLocET, editOrderDescET;
     private String orderID;
 
     NetworkChangeListener networkChangeListener = new NetworkChangeListener();
@@ -57,7 +56,7 @@ public class EditOrder extends AppCompatActivity {
         });
     }
 
-    private String editOrderNumber, editOrderCat, editOrderName, editOrderPhone, editOrderSum, editOrderZaklad, editOrderLoc,
+    private String editOrderNumber, editOrderCat, editOrderName, editOrderPhone, editOrderSum, editOrderLoc,
             editOrderDesc;
     private void editOrder() {
 
@@ -66,7 +65,6 @@ public class EditOrder extends AppCompatActivity {
         editOrderName = editOrderNameET.getText().toString().trim();
         editOrderPhone = editOrderPhoneET.getText().toString().trim();
         editOrderSum = editOrderSumET.getText().toString().trim();
-        editOrderZaklad = editOrderZakladET.getText().toString().trim();
         editOrderLoc = editOrderLocET.getText().toString().trim();
         editOrderDesc = editOrderDescET.getText().toString().trim();
 
@@ -100,9 +98,6 @@ public class EditOrder extends AppCompatActivity {
         }
         if (!editOrderPhone.isEmpty()) {
             hashMap.put("orderPhone", "" + editOrderPhone);
-        }
-        if (!editOrderZaklad.isEmpty()) {
-            hashMap.put("orderZaklad", "" + editOrderZaklad);
         }
         if (!editOrderDesc.isEmpty()) {
             hashMap.put("orderDesc", "" + editOrderDesc);
@@ -161,12 +156,7 @@ public class EditOrder extends AppCompatActivity {
                     } else {
                         editOrderSumET.setText("");
                     }
-                    if (doc.contains("orderZaklad")) {  // Check if field exists
-                        String orderZaklad = doc.getString("orderZaklad");
-                        editOrderZakladET.setText(orderZaklad);
-                    } else {
-                        editOrderZakladET.setText("");
-                    }
+
                     if (doc.contains("orderDesc")) {  // Check if field exists
                         String orderDesc = doc.getString("orderDesc");
                         editOrderDescET.setText(orderDesc);
@@ -203,7 +193,6 @@ public class EditOrder extends AppCompatActivity {
         editOrderNameET = findViewById(R.id.editOrderNameET);
         editOrderPhoneET = findViewById(R.id.editOrderPhoneET);
         editOrderSumET = findViewById(R.id.editOrderSumET);
-        editOrderZakladET = findViewById(R.id.editOrderZakladET);
         editOrderLocET = findViewById(R.id.editOrderLocET);
         editOrderDescET = findViewById(R.id.editOrderDescET);
 

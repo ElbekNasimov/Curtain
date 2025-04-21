@@ -3,14 +3,14 @@ package com.example.curtain.model;
 public class ModelProduct {
 
     private String prId, prTitle, prCat, prBarcode, prDesc, prPrice, prCost, created_at, created_by, prHeight, prMass, prComp,
-            prOldPrice, prDiscNote, prEditAt, prEditBy;
+            prOldPrice, prDiscNote, prEditAt, prEditBy, prColor;
 
     public ModelProduct() {
     }
 
     public ModelProduct(String prId, String prTitle, String prCat, String prPrice, String prCost, String prBarcode,
                         String prDesc, String created_at, String created_by, String prOldPrice, String prHeight, String prMass,
-                        String prComp, String prDiscNote, String prEditAt, String prEditBy) {
+                        String prComp, String prDiscNote, String prEditAt, String prEditBy, String prColor) {
         this.prId = prId;
         this.prTitle = prTitle;
         this.prCat = prCat;
@@ -27,6 +27,7 @@ public class ModelProduct {
         this.prHeight = prHeight;
         this.prMass = prMass;
         this.prComp = prComp;
+        this.prColor = prColor;
     }
 
     public String getPrHeight() {
@@ -148,4 +149,12 @@ public class ModelProduct {
     public String getPrEditBy(){ return prEditBy; }
 
     public void setPrEditBy(String prEditBy) { this.prEditBy = prEditBy; }
+
+    public String getPrColor() {
+        return prColor;
+    }
+
+    public void setPrColor(String prColor) {
+        this.prColor = prColor;
+    }
 }

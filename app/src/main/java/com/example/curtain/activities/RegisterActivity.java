@@ -197,7 +197,7 @@ public class RegisterActivity extends AppCompatActivity {
                         startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                         finish();
 
-                        Toast.makeText(RegisterActivity.this, "added successfully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "Ro'yxatdan o'tdingiz", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(RegisterActivity.this, "error to add user " +
                                 task.getException(), Toast.LENGTH_SHORT).show();
@@ -219,10 +219,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     //    for choosing user type
     private void get_user_type_select() {
-        String[] userTypes = {"sklad","dizayner", "bichuvchi","admin","superAdmin"};
         ArrayAdapter<String> arrayAdapter;
 
-        arrayAdapter = new ArrayAdapter<>(this, R.layout.select_item, userTypes);
+        arrayAdapter = new ArrayAdapter<>(this, R.layout.select_item, Constants.userTypes);
         autoCompleteTextView.setAdapter(arrayAdapter);
     }
 

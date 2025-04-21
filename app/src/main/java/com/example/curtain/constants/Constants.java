@@ -7,7 +7,8 @@ public class Constants {
             "dizayner",
             "bichuvchi",
             "admin",
-            "superAdmin"
+            "superAdmin",
+            "viewer",
     };
     public static final String [] userStatus = {
             "DISABLE",
@@ -23,7 +24,6 @@ public class Constants {
             "Topshirildi",
             "Yopildi",
     };
-
     public static final String [] extraOrder = {
             "Tanlang:",
             "Poshiv",
@@ -41,7 +41,6 @@ public class Constants {
             "Derjatel",
             "Karniz",
     };
-
     public static final String [] categories1 = {
             "Hammasi",
             "Portyer",
@@ -55,28 +54,24 @@ public class Constants {
             "Derjatel",
             "Karniz",
     };
-
     // product location
     public static final String [] location = {
             "Sklad",
             "Salon Yunusobod",
             "Salon Nurafshon"
     };
-
     public static final String [] location1 = {
             "Tanlang:",
             "Sklad",
             "Salon Yunusobod",
             "Salon Nurafshon"
     };
-
     public static final String [] measurement = {
             "metr",
             "dona",
             "ro'lon",
             "pochka",
     };
-
     public static final String [] orderCats = {
             "Parda",
             "Dasturxon",
@@ -85,13 +80,11 @@ public class Constants {
             "Ko'cha",
             "Stirka",
     };
-
     public static final String [] orderLocations = {
             "Toshkent sh",
             "Viloyat",
             "Chet el",
     };
-
     public static final String [] orderRooms = {
             "Xonani tanlang:",
             "Zal 1",
@@ -119,7 +112,6 @@ public class Constants {
             "Koridor 1",
             "Koridor 2",
     };
-
     public static final String [] orderRooms1 = {
             "Zal 1",
             "Zal 2",
@@ -160,6 +152,29 @@ public class Constants {
             "Etaj 3",
     };
 
+    public static final String [] productColor = {
+            "Ivory",
+            "Krem",
+            "Kulrang",
+            "Tilla",
+            "Elektr",
+            "Jo'ja tilla",
+            "Krem-tilla",
+            "Krem-oq",
+            "To'q tilla",
+            "Qora",
+            "Roziviy",
+            "Delfin",
+            "Qizil",
+            "Yashil",
+            "Oq",
+            "Moviy",
+            "Sariq",
+            "Jigarrang",
+            "Binafsha",
+            "Siyoh",
+            "Bej",
+    };
     public static String capitalizeFirstLetter(String input) {
         if (input == null || input.isEmpty()) {
             return input; // Agar input null yoki bo'sh bo'lsa, o'zgartirmasdan qaytar

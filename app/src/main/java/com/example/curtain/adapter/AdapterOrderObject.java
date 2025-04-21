@@ -60,7 +60,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
     private FirebaseAuth firebaseAuth;
     private SharedPreferences sharedPreferences;
 
-    BottomSheetDialog bottomSheetDialog, bottomSheetDialog1;
+    private BottomSheetDialog bottomSheetDialog, bottomSheetDialog1;
 
     private String addExtraTxt;
     public AdapterOrderObject(Context context, ArrayList<ModelOrderObject> objectsArrayList, SharedPreferences sharedPreferences) {
@@ -141,6 +141,10 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
         ImageButton backBtn = view.findViewById(R.id.backBtn);
         ImageButton delOrderObjectBtn = view.findViewById(R.id.delOrderObjectBtn);
         ImageButton editOrderObjectBtn = view.findViewById(R.id.editOrderObjectBtn);
+
+        ImageButton editOrderPoshivIB = view.findViewById(R.id.editOrderPoshivIB);
+        ImageButton editOrderUstanovkaIB = view.findViewById(R.id.editOrderUstanovkaIB);
+
         Button addPrToObjectBtn = view.findViewById(R.id.addPrToObjectBtn);
         Button addExtraObjectBtn = view.findViewById(R.id.addExtraObjectBtn);
 
@@ -177,6 +181,8 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             editOrderObjectBtn.setVisibility(View.GONE);
             addPrToObjectBtn.setVisibility(View.GONE);
             addExtraObjectBtn.setVisibility(View.GONE);
+            editOrderPoshivIB.setVisibility(View.GONE);
+            editOrderUstanovkaIB.setVisibility(View.GONE);
         }
 
         if (objectDesc!=null){
@@ -190,7 +196,6 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
         } else {
             addExtraPoshivLL.setVisibility(View.GONE);
         }
-
         if (objectUstanovka!=null){
             orderObjectUstanovkaPriceTV.setText(objectUstanovka);
         } else {
@@ -214,6 +219,70 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             }
         }
 
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        DocumentReference partRef = firestore.collection("OrderObjects").document(orderObjectId);
+
+        editOrderPoshivIB.setOnClickListener(view3 -> {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+            LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
+            View dialogView = inflater.inflate(R.layout.dialog_edit_part, null);
+            alertDialog.setTitle("O'zgartirish");
+
+            EditText editPartET = dialogView.findViewById(R.id.editPartET);
+
+            alertDialog.setView(dialogView)
+                    .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("objectPoshiv", editPartET.getText().toString().trim());
+                        if (!TextUtils.isEmpty(editPartET.getText().toString().trim())) {
+                            partRef.update(hashMap).addOnSuccessListener(unused -> {
+                                        modelOrderObject.setObjectPoshiv(editPartET.getText().toString().trim()); // Modelni yangilash
+                                        notifyItemChanged(position); // UI ni yangilash
+                                        Toast.makeText(context, "Poshiv haqi O'zgardi", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> Toast.makeText(context, "Xatolik: Qism o'zgarmadi: "
+                                            + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        } else {
+                            Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss());
+
+            alertDialog.setView(dialogView);
+            AlertDialog dialog = alertDialog.create();
+            dialog.show();
+        });
+
+        editOrderUstanovkaIB.setOnClickListener(view3 -> {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+            LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
+            View dialogView = inflater.inflate(R.layout.dialog_edit_part, null);
+            alertDialog.setTitle("O'zgartirish");
+
+            EditText editPartET = dialogView.findViewById(R.id.editPartET);
+
+            alertDialog.setView(dialogView)
+                    .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("objectUstanovka", editPartET.getText().toString().trim());
+                        if (!TextUtils.isEmpty(editPartET.getText().toString().trim())) {
+                            partRef.update(hashMap).addOnSuccessListener(unused -> {
+                                        modelOrderObject.setObjectPoshiv(editPartET.getText().toString().trim()); // Modelni yangilash
+                                        notifyItemChanged(position); // UI ni yangilash
+                                        Toast.makeText(context, "Ustanovka haqi O'zgardi", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> Toast.makeText(context, "Xatolik: Qism o'zgarmadi: "
+                                            + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        } else {
+                            Toast.makeText(context, "Miqdor kiritilmagan yoki xato ", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss());
+
+            alertDialog.setView(dialogView);
+            AlertDialog dialog = alertDialog.create();
+            dialog.show();
+        });
 
         nameOrderObjectTV.setText(String.format("%s, %s", orderRoom, objRoom));
 
@@ -240,9 +309,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             builder.setTitle("O'chirish").setMessage("Rostdan o'chirmoqchimisiz?")
                     .setPositiveButton("O'chirish", (dialog, which) -> {
                         // delete
-                        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-                        DocumentReference productRef = firestore.collection("OrderObjects").document(orderObjectId);
-                        productRef.get().addOnCompleteListener(task -> {
+                        partRef.get().addOnCompleteListener(task -> {
                             if (task.isSuccessful() && task.getResult().exists()){
                                 String deletedProductId;
                                 if (task.getResult().contains("orderObjectId")){
@@ -250,7 +317,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                                 } else {
                                     deletedProductId = null;
                                 }
-                                productRef.delete().addOnCompleteListener(task1 -> {
+                                partRef.delete().addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()){
                                         Toast.makeText(context, "Obyekt o'chirildi", Toast.LENGTH_SHORT).show();
                                         if (deletedProductId!=null){
@@ -359,12 +426,13 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                         if (documentSnapshot.exists()){
                             String productPrice = documentSnapshot.getString("prPrice");
                             String productCost = documentSnapshot.getString("prCost");
+                            String productType = documentSnapshot.getString("prCat");
 
                             double len = Double.parseDouble(lenProductOrder);
-                            double price = productPrice != null ? Double.parseDouble(productPrice): 0;
-                            double cost = productCost != null ? Double.parseDouble(productCost): 0;
-                            double objectSumDouble = productPrice != null ? price * len : 0;
-                            double objectCosDouble = productCost != null ? len * cost : 0;
+                            double price = productPrice != null ? Double.parseDouble(productPrice): 0.0;
+                            double cost = productCost != null ? Double.parseDouble(productCost): 0.0;
+                            double objectSumDouble = productPrice != null ? price * len : 0.0;
+                            double objectCosDouble = productCost != null ? len * cost : 0.0;
 
                             DecimalFormat df = new DecimalFormat("#.0");
                             String formattedObjectSum = df.format(objectSumDouble);
@@ -378,52 +446,60 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                                 hashMap.put("productCostProductOrder", productCost);
                                 hashMap.put("objectCost", formattedObjectCost);
                             }
+                            if (productType != null){
+                                hashMap.put("productTypeProductOrder", productType);
+                            }
 
                             firebaseFirestore.collection("ProductObjectOrder").document(timestamps).set(hashMap).
                                     addOnCompleteListener(task1 -> {
                                         progressDialog.dismiss();
                                         if (task1.isSuccessful()){
-                                            double currentObjectSum = modelOrderObject.getObjectSum() != null ?
-                                                    Double.parseDouble(modelOrderObject.getObjectSum()): 0;
-                                            double currentObjectCost = modelOrderObject.getObjectCost() != null ?
-                                                    Double.parseDouble(modelOrderObject.getObjectCost()): 0;
-                                            if (productPrice != null){
-                                                currentObjectSum += objectSumDouble;
-                                                modelOrderObject.setObjectSum(df.format(currentObjectSum));
-                                            }
-                                            if (productCost!=null) {
-                                                currentObjectCost += objectCosDouble;
-//                                                modelOrderObject.setObjectCost(String.valueOf(currentObjectCost));
-                                                modelOrderObject.setObjectCost(df.format(currentObjectCost));
-                                            }
+//                                            double currentObjectSum = modelOrderObject.getObjectSum() != null ?
+//                                                    Double.parseDouble(modelOrderObject.getObjectSum()): 0.0;
+//                                            double currentObjectCost = modelOrderObject.getObjectCost() != null ?
+//                                                    Double.parseDouble(modelOrderObject.getObjectCost()): 0.0;
+//                                            if (productPrice != null){
+//                                                currentObjectSum += objectSumDouble;
+//                                                modelOrderObject.setObjectSum(df.format(currentObjectSum));
+//                                            }
+//                                            if (productCost!=null) {
+//                                                currentObjectCost += objectCosDouble;
+////                                                modelOrderObject.setObjectCost(String.valueOf(currentObjectCost));
+//                                                modelOrderObject.setObjectCost(df.format(currentObjectCost));
+//                                            }
 
-                                            Map<String, Object> updateFields = new HashMap<>();
-                                            if (productPrice != null) {
-                                                updateFields.put("objectSum", modelOrderObject.getObjectSum());
-                                            }
-                                            if (productCost != null) {
-                                                updateFields.put("objectCost", modelOrderObject.getObjectCost());
-                                            }
+//                                            Map<String, Object> updateFields = new HashMap<>();
+//                                            if (productPrice != null) {
+//                                                updateFields.put("objectSum", modelOrderObject.getObjectSum());
+//                                            }
+//                                            if (productCost != null) {
+//                                                updateFields.put("objectCost", modelOrderObject.getObjectCost());
+//                                            }
 
-                                            double finalCurrentObjectSum = currentObjectSum;
-                                            double finalCurrentObjectCost = currentObjectCost;
-                                            firebaseFirestore.collection("OrderObjects").document(modelOrderObject.getOrderObjectId())
-                                                            .update(updateFields)
-                                                                    .addOnCompleteListener(updateTask->{
-                                                                        if (updateTask.isSuccessful()) {
-                                                                            Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
-                                                                            bottomSheetDialog1.dismiss();
-                                                                            loadProductObjects(modelOrderObject.getOrderObjectId(), productOrderObjectsRV, noPartsTxt);
-                                                                            TextView objectSumTVNext = view.findViewById(R.id.objectSumTV);
-                                                                            objectSumTVNext.setText(String.valueOf(finalCurrentObjectSum));
-                                                                            TextView objectCostTVNext = view.findViewById(R.id.objectCostTV);
-                                                                            objectCostTVNext.setText(String.valueOf(finalCurrentObjectCost));
-                                                                            adapterProductObject.notifyDataSetChanged();
-                                                                        } else {
-                                                                            Toast.makeText(context, "Object summasini yangilashda xato " +
-                                                                                    updateTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                                                        }
-                                                                    });
+//                                            double finalCurrentObjectSum = currentObjectSum;
+//                                            double finalCurrentObjectCost = currentObjectCost;
+                                            // o'zgartirish kerak shu joyini
+//                                            firebaseFirestore.collection("OrderObjects").document(modelOrderObject.getOrderObjectId())
+//                                                            .update(updateFields)
+//                                                                    .addOnCompleteListener(updateTask->{
+//                                                                        if (updateTask.isSuccessful()) {
+//                                                                            Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
+//                                                                            bottomSheetDialog1.dismiss();
+//                                                                            loadProductObjects(modelOrderObject.getOrderObjectId(), productOrderObjectsRV, noPartsTxt);
+//                                                                            TextView objectSumTVNext = view.findViewById(R.id.objectSumTV);
+//                                                                            objectSumTVNext.setText(String.valueOf(finalCurrentObjectSum));
+//                                                                            TextView objectCostTVNext = view.findViewById(R.id.objectCostTV);
+//                                                                            objectCostTVNext.setText(String.valueOf(finalCurrentObjectCost));
+//                                                                            adapterProductObject.notifyDataSetChanged();
+//                                                                        } else {
+//                                                                            Toast.makeText(context, "Object summasini yangilashda xato " +
+//                                                                                    updateTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+//                                                                        }
+//                                                                    });
+                                                                                                                        Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
+                                                                                                                        bottomSheetDialog1.dismiss();
+                                            loadProductObjects(modelOrderObject.getOrderObjectId(), productOrderObjectsRV, noPartsTxt);
+                                                                                                                        adapterProductObject.notifyDataSetChanged();
                                         } else {
                                             Toast.makeText(context, "Qo'shishda muammo " +
                                                     task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -491,13 +567,20 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                                             Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
                                             if (addExtraTxt.equals("Poshiv")){
                                                 addExtraToOrder("orderPoshiv", addExtraPrice, orderId);
+                                                orderObjectPoshivPriceTV.setText(addExtraPrice);
+                                                addExtraPoshivLL.setVisibility(View.VISIBLE);
                                             }
                                             if (addExtraTxt.equals("Ustanovka")){
                                                 addExtraToOrder("orderUstanovka", addExtraPrice, orderId);
+                                                orderObjectUstanovkaPriceTV.setText(addExtraPrice);
+                                                addExtraPoshivLL.setVisibility(View.VISIBLE);
                                             }
-                                            Intent intent = new Intent(context, OrderDetail.class);
-                                            intent.putExtra("orderId", orderId);
-                                            context.startActivity(intent);
+
+//                                            Intent intent = new Intent(context, OrderDetail.class);
+//                                            intent.putExtra("orderId", orderId);
+//                                            context.startActivity(intent);
+
+                                            Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
 
                                         } else {
                                             Toast.makeText(context, "Qo'shishda muammo " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();

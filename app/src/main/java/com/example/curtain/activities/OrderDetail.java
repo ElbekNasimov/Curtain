@@ -1,8 +1,8 @@
 package com.example.curtain.activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -56,9 +57,7 @@ import com.example.curtain.model.ModelProduct;
 import com.example.curtain.model.ModelProductObject;
 import com.example.curtain.model.ModelProductOrder;
 import com.example.curtain.utilities.NetworkChangeListener;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
+import com.example.curtain.viewmodels.ProductViewModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -78,7 +77,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -106,21 +104,39 @@ public class OrderDetail extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private SharedPreferences sharedPreferences;
     private String orderId, sharedUserType, sharedUsername, orderRoom, objRoom, addExtraTxt;
-    private LinearLayout priceOrderDetailLL, buttonsLL, priceDesignerLL, addExtraPoshivLL, addExtraUstanovkaLL;
+    private LinearLayout priceOrderDetailLL, buttonsLL, priceDesignerLL, addExtraPoshivLL, addExtraUstanovkaLL,
+            idPoshAndUstLL;
     boolean click = false; //       To hide/open designer pay status
     Bitmap bitmap, scaledBitmap; // pdf rasm uchun
     private static final int OBJECTS_PER_PAGE = 2;     // Har bir sahifada nechta object joylashish
     private Context context;
     HashMap<String, Object> loadFromFirebaseMap;
-
     NetworkChangeListener networkChangeListener = new NetworkChangeListener();
+
+    // room database
+    private ProductViewModel productViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_detail);
 
+//        Button crashButton = new Button(this);
+//        crashButton.setText("Test Crash");
+//        crashButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View view) {
+//                throw new RuntimeException("Test Crash"); // Force a crash
+//            }
+//        });
+//
+//        addContentView(crashButton, new ViewGroup.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.WRAP_CONTENT));
+
+
         init();
+
+
 
         loadOrderDetail(orderId);
 
@@ -143,6 +159,12 @@ public class OrderDetail extends AppCompatActivity {
                 payHistoryTV.setText(open);
             }
         });
+
+        idPoshAndUstLL.setVisibility(View.GONE);
+        if (sharedUserType.equals("superAdmin")){
+            idPoshAndUstLL.setVisibility(View.VISIBLE);
+        }
+
 
         designerPercentTV.setVisibility(View.GONE);
         designerSumTV.setVisibility(View.GONE);
@@ -604,10 +626,15 @@ public class OrderDetail extends AppCompatActivity {
         for (ModelProductOrder productOrder: productOrderArrayList){
             canvas.drawText( productOrder.getProductObjectOrder(), 90, startY, paint);
             canvas.drawText( productOrder.getLenProductObjectOrder(), 465, startY, paint);
-            canvas.drawText( productOrder.getProductPriceProductOrder(), 545, startY, paint);
+            float price;
+            if(productOrder.getProductPriceProductOrder()!=null) {
+                canvas.drawText(productOrder.getProductPriceProductOrder(), 545, startY, paint);
+                price = Float.parseFloat(productOrder.getProductPriceProductOrder());
+            } else {
+                price = 0.0f;
+            }
 
             float len = Float.parseFloat(productOrder.getLenProductObjectOrder());
-            float price = Float.parseFloat(productOrder.getProductPriceProductOrder());
             float sum = len * price;
             DecimalFormat df = new DecimalFormat("#.0");
             canvas.drawText(df.format(sum), 625, startY, paint);
@@ -686,6 +713,23 @@ public class OrderDetail extends AppCompatActivity {
             prObjRV.setAdapter(adapterObjectProduct);
         });
 
+        // from Room database
+//        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
+//            @Override
+//            public void onChanged(List<Product> products) {
+//                if (products.isEmpty()){
+//                    prObjRV.setVisibility(View.GONE);
+//                } else {
+//                    prObjRV.setVisibility(View.VISIBLE);
+//                    adapterObjectProduct = new AdapterObjectProducts(OrderDetail.this, productList, searchPrObjET,searchPrIdObjET);
+//                    prObjRV.setLayoutManager(new LinearLayoutManager(OrderDetail.this));
+//                    prObjRV.setAdapter(adapterObjectProduct);
+//                }
+//            }
+//        });
+
+
+
         searchPrObjET.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -728,7 +772,7 @@ public class OrderDetail extends AppCompatActivity {
 //            Document - ProductOrder, ProductObjectOrder
             hashMap.put("productObjectOrder", productObjectOrder);
             hashMap.put("lenProductObjectOrder", lenProductObjectOrder);
-            hashMap.put("productObjectOrderId", ""+timestamps);
+            hashMap.put("productObjectOrderId", timestamps);
             hashMap.put("orderId", orderId);
             hashMap.put("productId", productId);
             hashMap.put("partStatusProductOrder", "holat");
@@ -762,6 +806,9 @@ public class OrderDetail extends AppCompatActivity {
         });
     }
     private void init(){
+        // room
+        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
+
         context = this;
         firebaseAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
@@ -769,8 +816,9 @@ public class OrderDetail extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("USER_TYPE", Context.MODE_PRIVATE);
         sharedUserType = sharedPreferences.getString("user_type", "");
         sharedUsername = sharedPreferences.getString("username", "");
-        orderId = getIntent().getStringExtra("orderId");
-
+        if (getIntent().hasExtra("orderId")){
+            orderId = getIntent().getStringExtra("orderId");
+        }
         backBtn = findViewById(R.id.backBtn);
         delBtn = findViewById(R.id.delBtn);
         addExtraBtn = findViewById(R.id.addExtraBtn);
@@ -813,6 +861,7 @@ public class OrderDetail extends AppCompatActivity {
         priceDesignerLL = findViewById(R.id.priceDesignerLL);
         addExtraUstanovkaLL = findViewById(R.id.addExtraUstanovkaLL);
         addExtraPoshivLL = findViewById(R.id.addExtraPoshivLL);
+        idPoshAndUstLL = findViewById(R.id.idPoshAndUstLL);
 
         payHistoryRV = findViewById(R.id.payHistoryRV);
         orderObjectsRV = findViewById(R.id.orderObjectsRV);
@@ -1043,10 +1092,31 @@ public class OrderDetail extends AppCompatActivity {
                                 ModelProduct product = productList.stream().filter(p ->
                                         p.getPrId().equals(productObject.getProductId())).findFirst().orElse(null);
                                 if (product!=null){
-                                    canvas.drawText(productObject.getTitleProductObject(), 90, yPosition, paint);
+                                    if (productObject.getProductTypeProductOrder()!=null) {
+                                        if (productObject.getProductTypeProductOrder().startsWith("T")) {
+                                            canvas.drawText("Tyul:  " + productObject.getTitleProductObject(), 90, yPosition, paint);
+                                        } else if (productObject.getProductTypeProductOrder().startsWith("P")) {
+                                            canvas.drawText("Port:  " + productObject.getTitleProductObject(), 90, yPosition, paint);
+                                        } else if (productObject.getProductTypeProductOrder().startsWith("O")) {
+                                            canvas.drawText("Odno:  " + productObject.getTitleProductObject(), 90, yPosition, paint);
+                                        } else {
+                                            canvas.drawText(productObject.getTitleProductObject(), 90, yPosition, paint);
+                                        }
+                                    } else {
+                                        canvas.drawText(productObject.getTitleProductObject(), 90, yPosition, paint);
+                                    }
                                     canvas.drawText(productObject.getLenProductObject(), 465, yPosition, paint);
-                                    canvas.drawText(productObject.getProductPriceProductOrder(), 545, yPosition , paint);
-                                    float pr = Float.parseFloat(productObject.getLenProductObject()) ;
+                                    if (productObject.getProductPriceProductOrder()!=null) {
+                                        canvas.drawText(productObject.getProductPriceProductOrder(), 545, yPosition, paint);
+                                    }
+                                    float pr;
+                                    if (productObject.getProductPriceProductOrder()!=null) {
+                                        pr = Float.parseFloat(productObject.getProductPriceProductOrder());
+                                    } else {
+                                        pr = 0.0f;
+                                    }
+                                    pr = Float.parseFloat(productObject.getLenProductObject()) ;
+
                                     float len = Float.parseFloat(productObject.getProductPriceProductOrder()) ;
                                     canvas.drawText(String.valueOf(pr*len), 625, yPosition, paint);
 
@@ -1099,14 +1169,29 @@ public class OrderDetail extends AppCompatActivity {
                                 ModelProduct product = productList.stream().filter(p ->
                                         p.getPrId().equals(productObject.getProductId())).findFirst().orElse(null);
                                 if (product!=null){
-                                        canvas.drawText(productObject.getTitleProductObject(), 90, yPosition - 10, paint);
-                                        canvas.drawText(productObject.getLenProductObject(), 465, yPosition - 10, paint);
-                                        canvas.drawText(productObject.getProductPriceProductOrder(), 545, yPosition -10, paint);
-                                        float pr = Float.parseFloat(productObject.getLenProductObject()) ;
-                                        float len = Float.parseFloat(productObject.getProductPriceProductOrder()) ;
-                                        canvas.drawText(String.valueOf(pr*len), 625, yPosition - 10, paint);                                        canvas.drawText(String.valueOf(number), 40, yPosition - 10, paint);
-                                        yPosition += 38;
-                                        number++;
+                                    if (productObject.getProductTypeProductOrder().startsWith("T")) {
+                                        canvas.drawText("Tyul:  " + productObject.getTitleProductObject(), 90, yPosition - 10, paint);
+                                    } else if (productObject.getProductTypeProductOrder().startsWith("P")) {
+                                        canvas.drawText("Port:  " + productObject.getTitleProductObject(), 90, yPosition - 10, paint);
+                                    } else if (productObject.getProductTypeProductOrder().startsWith("O")) {
+                                        canvas.drawText("Odno:  " + productObject.getTitleProductObject(), 90, yPosition - 10, paint);
+                                    } else {
+                                        canvas.drawText(productObject.getTitleProductObject(), 90, yPosition, paint);
+                                    }
+
+                                    canvas.drawText(productObject.getLenProductObject(), 465, yPosition - 10, paint);
+                                    canvas.drawText(productObject.getProductPriceProductOrder(), 545, yPosition -10, paint);
+                                    float len = Float.parseFloat(productObject.getLenProductObject()) ;
+                                    float pr;
+                                    if (productObject.getProductPriceProductOrder()!=null) {
+                                        pr = Float.parseFloat(productObject.getProductPriceProductOrder());
+                                    } else {
+                                        pr = 0.0f;
+                                    }
+                                    pr = Float.parseFloat(productObject.getProductPriceProductOrder()) ;
+                                    canvas.drawText(String.valueOf(pr*len), 625, yPosition - 10, paint);                                        canvas.drawText(String.valueOf(number), 40, yPosition - 10, paint);
+                                    yPosition += 38;
+                                    number++;
                                 } else {
                                     Toast.makeText(context, "Berilgan Id product topilmadi", Toast.LENGTH_SHORT).show();
                                 }
@@ -1249,10 +1334,17 @@ public class OrderDetail extends AppCompatActivity {
         for (ModelProductOrder productOrder: productOrderArrayList){
             canvas.drawText( productOrder.getProductObjectOrder(), 90, startY, paint);
             canvas.drawText( productOrder.getLenProductObjectOrder(), 465, startY, paint);
-            canvas.drawText( productOrder.getProductPriceProductOrder(), 545, startY, paint);
-
+            if (productOrder.getProductPriceProductOrder()!=null) {
+                canvas.drawText(productOrder.getProductPriceProductOrder(), 545, startY, paint);
+            }
+            float price;
+            if (productOrder.getProductPriceProductOrder()!=null) {
+                price = Float.parseFloat(productOrder.getProductPriceProductOrder());
+            } else {
+                price = 0.0f;
+            }
             float len = Float.parseFloat(productOrder.getLenProductObjectOrder());
-            float price = Float.parseFloat(productOrder.getProductPriceProductOrder());
+            price = Float.parseFloat(productOrder.getProductPriceProductOrder());
             float sum = len * price;
             DecimalFormat df = new DecimalFormat("#.0");
             canvas.drawText(df.format(sum), 625, startY, paint);
@@ -1398,7 +1490,29 @@ public class OrderDetail extends AppCompatActivity {
                             }
                             orderStatusBtn.setText(status);
                         }
+                        // after "bichildi" change order status to "chiqdi"
                         if (status.equals("bichildi") && sharedUserType.equals(Constants.userTypes[4])){
+                            orderStatusBtn.setClickable(false);
+                            delBtn.setClickable(false);
+
+                            orderStatusBtn.setOnClickListener(view -> {
+                                HashMap<String, Object> hashMap = new HashMap<>();
+                                hashMap.put("orderStatus", "Chiqdi");  // kesish holati
+                                DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
+                                orderReference1.update(hashMap).addOnSuccessListener(unused ->{
+                                    Toast.makeText(this, "Smeta sexdan chiqdi", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(this, OrderDetail.class);
+                                    intent.putExtra("orderId", orderId);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(intent);
+                                    finish();
+
+                                }).addOnFailureListener(e -> Toast.makeText(this, "part not updated "
+                                        + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            });
+                        }
+                        // Topshirilgan dan keyin Yopiladi
+                        if (status.equals("Chiqdi") && sharedUserType.equals(Constants.userTypes[4])){
                             orderStatusBtn.setClickable(false);
                             delBtn.setClickable(false);
 
@@ -1407,9 +1521,10 @@ public class OrderDetail extends AppCompatActivity {
                                 hashMap.put("orderStatus", "Yopildi");  // kesish holati
                                 DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
                                 orderReference1.update(hashMap).addOnSuccessListener(unused ->{
-                                    Toast.makeText(this, "Smeta yopildi", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Smeta sexdan chiqdi", Toast.LENGTH_SHORT).show();
                                     Intent intent = new Intent(this, OrderDetail.class);
                                     intent.putExtra("orderId", orderId);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                     startActivity(intent);
                                     finish();
 
@@ -1472,9 +1587,9 @@ public class OrderDetail extends AppCompatActivity {
                     if (ordSum!=null){
                         if (ordZaklad!=null) {
                             ordLoan = String.valueOf(Float.parseFloat(ordSum) - Float.parseFloat(ordZaklad));
-                            orderLoanTV.setText(String.format("Qarz - %s", ordLoan));
+                            orderLoanTV.setText(String.format("Qarz: %s", ordLoan));
                         } else{
-                            orderLoanTV.setText(String.format("Qarz - %s", ordSum));
+                            orderLoanTV.setText(String.format("Qarz: %s", ordSum));
                         }
                     }
                 } else {
@@ -1582,6 +1697,9 @@ public class OrderDetail extends AppCompatActivity {
         if (adapterOrderObject != null) {
             adapterOrderObject.dismissAllDialogs(); // Adapterdagi barcha dialoglarni dismiss qilish
         }
+        if (adapterProductOrder != null) {
+            adapterProductOrder.dismissAllDialogs(); // Adapterdagi barcha dialoglarni dismiss qilish
+        }
         super.onBackPressed(); // Activityni yakunlash va oldingi activityga qaytish
     }
 
@@ -1655,6 +1773,7 @@ public class OrderDetail extends AppCompatActivity {
             }
         });
     }
+
     private void deleteProductObjectByOrder(String deletedOrderId) {
         CollectionReference orderPaysRef = firestore.collection("ProductObjectOrder");
         orderPaysRef.whereEqualTo("orderId", deletedOrderId).get().addOnCompleteListener(task -> {
@@ -1669,7 +1788,7 @@ public class OrderDetail extends AppCompatActivity {
     }
 
     private void deleteCutPartProductOrderByOrder(String deletedOrderId) {
-        CollectionReference orderPaysRef = firestore.collection("CutPartProductOrder");
+        CollectionReference orderPaysRef = firestore.collection("CutPartProduct");
         orderPaysRef.whereEqualTo("orderId", deletedOrderId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
                 for (DocumentSnapshot document : task.getResult()){
@@ -1682,7 +1801,7 @@ public class OrderDetail extends AppCompatActivity {
     }
 
     private void deleteCutPartProductObjectByOrder(String deletedOrderId) {
-        CollectionReference orderPaysRef = firestore.collection("CutPartProductObject");
+        CollectionReference orderPaysRef = firestore.collection("CutPartProduct");
         orderPaysRef.whereEqualTo("orderId", deletedOrderId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
                 for (DocumentSnapshot document : task.getResult()){
@@ -1715,6 +1834,15 @@ public class OrderDetail extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if(intent.hasExtra("orderId")){
+            orderId = intent.getStringExtra("orderId");
+            loadOrderDetail(orderId);
+        }
     }
 
     @Override

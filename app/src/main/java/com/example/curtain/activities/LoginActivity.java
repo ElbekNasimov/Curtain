@@ -126,6 +126,24 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    // for memory leak
+    @Override
+    protected void onDestroy() {
+        // ProgressDialog'ni tozalash
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+
+    // BroadcastReceiver'ni tozalash
+        try {
+            unregisterReceiver(networkChangeListener);
+        } catch (IllegalArgumentException e) {
+            Log.e("LoginActivity", "Receiver not registered: " + e.getMessage());
+        }
+
+        super.onDestroy();
+    }
+
     @Override
     protected void onStart() {
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);

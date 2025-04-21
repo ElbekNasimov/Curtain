@@ -62,7 +62,7 @@ public class OtchotActivity extends AppCompatActivity {
     }
 
     private void loadOtchotOylar() {
-        // get al items from "Otchot collection
+        // get al items from "Otchotlar" collection
         CollectionReference collectionReference  = firestore.collection("Otchotlar");
         collectionReference.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

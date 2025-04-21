@@ -127,9 +127,11 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
                         // delete
                         partRef.delete().addOnCompleteListener(task -> {
                             if (task.isSuccessful()){
+
                                 partList.remove(position); // Ro'yxatdan o'chirish
                                 notifyItemRemoved(position); // UI ni yangilash
                                 notifyItemRangeChanged(position, partList.size());
+
                                 Toast.makeText(context, "Kusok o'chirildi", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(context, "kusok o'chirishda xato "

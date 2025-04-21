@@ -82,7 +82,7 @@
             android:id="@+id/qoldiqKusokTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="@string/len"
+            android:hint="@string/qoldiqlen"
             android:layout_toEndOf="@id/lenProductOrderTV"
             android:layout_marginStart="5dp"
             android:gravity="end"

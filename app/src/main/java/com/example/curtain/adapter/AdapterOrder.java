@@ -84,11 +84,16 @@ public class AdapterOrder extends ArrayAdapter<ModelOrder> implements Filterable
         orderCategoryTV.setText(modelOrder.getOrderCat());
         orderStatusInCardTV.setText(modelOrder.getOrderStatus());
 
-        listItemView.setOnClickListener(view -> {
-            Intent intent = new Intent(getContext(), OrderDetail.class);
-            intent.putExtra("orderId", orderId);
-            context.startActivity(intent);
-        });
+            listItemView.setOnClickListener(view -> {
+                if (!sharedUserType.equals("viewer")) {
+                    Intent intent = new Intent(getContext(), OrderDetail.class);
+                    intent.putExtra("orderId", orderId);
+                    context.startActivity(intent);
+                } else {
+                    Toast.makeText(context, "Siz smetani ko'ra olmaysiz...", Toast.LENGTH_SHORT).show();
+                }
+            });
+
         return listItemView;
     }
 }

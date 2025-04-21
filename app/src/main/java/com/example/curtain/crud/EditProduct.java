@@ -1,16 +1,13 @@
 package com.example.curtain.crud;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -26,16 +23,13 @@ import com.example.curtain.activities.LoginActivity;
 import com.example.curtain.constants.CaptureAct;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.utilities.NetworkChangeListener;
-import com.example.curtain.utils.Save;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.example.curtain.utilities.Save;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -50,7 +44,8 @@ public class EditProduct extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore firestore;
     private ImageButton backBtn;
-    private TextInputEditText titleET, catET, descET, priceET, costET, productHeightET, productMassET, productCompanyET;
+    private TextInputEditText titleET, catET, descET, priceET, costET, productHeightET, productMassET,
+            productCompanyET, productColorET;
     private TextInputLayout labelCost;
     private TextView barcodeET;
     private Button editPrdBtn;
@@ -84,6 +79,8 @@ public class EditProduct extends AppCompatActivity {
 
         catET.setOnClickListener(view -> categoryDialog());
 
+        productColorET.setOnClickListener(view -> colorDialog());
+
         barcodeET.setOnClickListener(v -> {
             Toast.makeText(EditProduct.this, "ScanCode", Toast.LENGTH_SHORT).show();
             scanCode();
@@ -92,6 +89,17 @@ public class EditProduct extends AppCompatActivity {
         editPrdBtn.setOnClickListener(view -> editData());
 
     }
+
+    private void colorDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Mahsulot rangi").setItems(Constants.productColor, (dialog, which) -> {
+            // get picked color
+            String color = Constants.productColor[which];
+            // set picked color
+            productColorET.setText(color);
+        }).show();
+    }
+
     private void init(){
         prID = getIntent().getStringExtra("prId");
 
@@ -107,6 +115,7 @@ public class EditProduct extends AppCompatActivity {
         productHeightET = findViewById(R.id.productHeightET);
         productMassET = findViewById(R.id.productMassET);
         productCompanyET = findViewById(R.id.productCompanyET);
+        productColorET = findViewById(R.id.productColorET);
 
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
@@ -169,6 +178,12 @@ public class EditProduct extends AppCompatActivity {
                     } else {
                         productHeightET.setText("");
                     }
+                    if (doc.contains("prColor")) {  // Check if field exists
+                        String prColor = doc.getString("prColor");
+                        productColorET.setText(prColor);
+                    } else {
+                        productColorET.setText("");
+                    }
 
                 } else {
                     Toast.makeText(EditProduct.this, "Mahsulot topilmadi", Toast.LENGTH_SHORT).show();
@@ -181,7 +196,7 @@ public class EditProduct extends AppCompatActivity {
         });
     }
 
-    private String title, category, barcode, desc, price, cost, productHeight, productMass, productCompany;
+    private String title, category, barcode, desc, price, cost, productHeight, productMass, productCompany, productColor;
 
     private void editData() {
 
@@ -194,6 +209,7 @@ public class EditProduct extends AppCompatActivity {
         productHeight = productHeightET.getText().toString().trim();
         productMass = productMassET.getText().toString().trim();
         productCompany = productCompanyET.getText().toString().trim();
+        productColor = productColorET.getText().toString().trim();
 
         if (TextUtils.isEmpty(title)){
             Toast.makeText(this, "Enter Product Name...", Toast.LENGTH_SHORT).show();
@@ -223,6 +239,9 @@ public class EditProduct extends AppCompatActivity {
         }
         if (!productHeight.isEmpty()) {
             hashMap.put("prHeight", "" + productHeight);
+        }
+        if (!productColor.isEmpty()) {
+            hashMap.put("prColor", "" + productColor);
         }
         if (!productMass.isEmpty()) {
             hashMap.put("prMass", "" + productMass);

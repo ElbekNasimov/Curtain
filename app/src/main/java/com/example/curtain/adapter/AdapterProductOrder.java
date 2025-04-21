@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +49,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
     private String sharedUserType;
     private ProgressDialog progressDialog;
     private AdapterCutPartPrOrder adapterCutPartPrOrder;
+    private BottomSheetDialog bottomSheetDialog;
     public AdapterProductOrder(Context context, ArrayList<ModelProductOrder> productOrderArrayList,
                                SharedPreferences sharedPreferences) {
         this.context=context;
@@ -135,9 +137,16 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
             }
         }
 
+        if (holder.productOrderStatusTV.getText().toString().equals("kesildi")){
+            // change text color to cutColor from colors.xml
+            holder.productOrderStatusTV.setTextColor(Color.parseColor("#008000"));
+        } else if (holder.productOrderStatusTV.getText().toString().equals("bichildi")){
+            // change text color to cuttingColor from colors.xml
+            holder.productOrderStatusTV.setTextColor(Color.parseColor("#800000"));
+        }
+
         holder.qoldiqKusokTV.setVisibility(View.GONE);
         holder.cutPartsPrOrderTV.setVisibility(View.GONE);
-
 
         reference.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
@@ -230,8 +239,13 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                         hashMap.put("partStatusProductOrder", "" + status);
                         DocumentReference statusRef = firestore.collection("ProductsOrder").document(productObjectOrderId);
                         statusRef.update(hashMap).addOnSuccessListener(unused -> {
+
                             Toast.makeText(context, status, Toast.LENGTH_SHORT).show();
+                            productOrderArrayList.get(position).setPartStatusProductOrder(status);
                             changeStatusPartPrOrder(orderId, status);
+                            holder.productOrderStatusTV.setText(status);
+                            notifyItemChanged(position);
+
                         }).addOnFailureListener(e -> Toast.makeText(context, "part not updated "
                                         + e.getMessage(), Toast.LENGTH_SHORT).show());
                             }).setNegativeButton("Yo'q", (dialogInterface, i) -> dialogInterface.dismiss()).show();
@@ -256,7 +270,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
         String kelganQoldiqKusok = kelganQoldiqKusokTV.getText().toString().trim();
 
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        bottomSheetDialog = new BottomSheetDialog(context);
         View view = LayoutInflater.from(context).inflate(R.layout.bs_parts_pr_to_order, null);
         bottomSheetDialog.setContentView(view);
 
@@ -357,7 +371,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                     hashMap.put("productId", "" + productId);                    // product id
                     hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
 
-                    firestore.collection("CutPartProductOrder").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
+                    firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
                             changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
@@ -397,7 +411,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                 hashMap.put("productId", "" + productId);                    // product id
                 hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
 
-                firestore.collection("CutPartProductOrder").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
+                firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                     progressDialog.dismiss();
                     if (task.isSuccessful()) {
                         changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
@@ -430,7 +444,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                 hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
                 hashMap.put("partStatusProductOrder", "" + kusokHolati);                          // holat - status
 
-                firestore.collection("CutPartProductOrder").document(timestamps).set(hashMap).
+                firestore.collection("CutPartProduct").document(timestamps).set(hashMap).
                         addOnCompleteListener(task -> {
                             progressDialog.dismiss();
                             if (task.isSuccessful()) {
@@ -491,6 +505,12 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                         + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    public void dismissAllDialogs() {
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+            bottomSheetDialog.dismiss();
+        }
+    }
+
     @Override
     public int getItemCount() {
         return productOrderArrayList.size();
@@ -512,7 +532,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
             cutPartsPrOrderTV = itemView.findViewById(R.id.cutPartsPrOrderTV);
             delProductOrderBtn = itemView.findViewById(R.id.delProductOrderBtn);
             editProductOrderBtn = itemView.findViewById(R.id.editProductOrderBtn);
-
         }
     }
 }

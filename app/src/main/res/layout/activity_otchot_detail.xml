@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.OtchotDetailActivity">
+
+    <RelativeLayout
+        android:id="@+id/toolbarRL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_rect01"
+        android:padding="10dp" >
+        <ImageButton
+            android:id="@+id/otchotBackBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@null"
+            android:src="@drawable/ic_home_white"
+            android:contentDescription="@string/todo" />
+
+        <ImageButton
+            android:id="@+id/otchotPrintBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@null"
+            android:src="@drawable/ic_download_white" />
+
+        <TextView
+            android:id="@+id/otchotDateTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:text="@string/otchotDate"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/toolbarLL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbarRL"
+        android:layout_above="@id/buttonsLL"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
+
+        <TextView
+            android:id="@+id/countNewOrdersTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/countNewOrders"
+            android:textColor="@color/grey2"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/countChiqqanOrdersTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/countChiqqanOrders"
+            android:textColor="@color/grey2"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/sumChiqqanOrderTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sumChiqqanOrder"
+            android:textSize="18sp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+        <TextView
+            android:id="@+id/costChiqqanOrderTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/costChiqqanOrder"
+            android:textSize="18sp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+
+        <TextView
+            android:id="@+id/sumXarajatTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sumXarajat"
+            android:textSize="18sp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+
+        <TextView
+            android:id="@+id/xarajatHistoryTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/xarajatlarOpen"
+            android:textSize="18sp"
+            android:layout_marginTop="15dp"
+            android:textStyle="italic"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/monthXarajatRV"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/row_month_xarajat" />
+
+        <TextView
+            android:id="@+id/orderHistoryTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/orderHistoryOpen"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            android:textColor="@color/grey2" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/orderHistoryRV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/row_order_history" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttonsLL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/addXarajatToMonthBtn"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/add_xarajat"
+            android:backgroundTint="@color/colorPrimary"
+            />
+    </LinearLayout>
+
+</RelativeLayout>

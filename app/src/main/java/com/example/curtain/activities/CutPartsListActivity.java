@@ -62,7 +62,7 @@ public class CutPartsListActivity extends AppCompatActivity {
 
     private void loadCutParts() {
         progressDialog.show();
-        CollectionReference partsRef = firestore.collection("CutPartProductOrder");
+        CollectionReference partsRef = firestore.collection("CutPartProduct");
         partsRef.whereEqualTo("productId", prID).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()){
                 progressDialog.dismiss();

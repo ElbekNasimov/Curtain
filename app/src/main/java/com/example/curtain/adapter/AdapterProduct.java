@@ -45,7 +45,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -87,7 +86,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
 
     class HolderProduct extends RecyclerView.ViewHolder{
         // holds views of recView
-        private TextView discNoteTV, titleTV, discPriceTV, priceTV;
+        private TextView discNoteTV, titleTV, discPriceTV, priceTV, colorTV;
 
         public HolderProduct(@NonNull View itemView) {
             super(itemView);
@@ -96,6 +95,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             discPriceTV = itemView.findViewById(R.id.discPriceTV);
             priceTV = itemView.findViewById(R.id.priceTV);
             titleTV = itemView.findViewById(R.id.titleTV);
+            colorTV = itemView.findViewById(R.id.colorTV);
         }
     }
 
@@ -117,14 +117,31 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         String price = modelProduct.getPrPrice();
         String oldPrice = modelProduct.getPrOldPrice();
         String discNote = modelProduct.getPrDiscNote();
+        String color = modelProduct.getPrColor();
+        String prCost = modelProduct.getPrCost();
+
+        // if psCost equals null, set titleTV to red
+        if (prCost!=null){
+            if (prCost.length()==0) {
+                holder.titleTV.setTextColor(Color.RED);
+            } else {
+                holder.titleTV.setTextColor(Color.BLACK);
+            }
+        } else {
+            holder.titleTV.setTextColor(Color.RED);
+        }
 
         // set Data
         holder.titleTV.setText(title);
+
         if (oldPrice == null) {
             if (price!=null) {
                 holder.priceTV.setText(String.format("$ %s", price));
             } else {
                 holder.priceTV.setText(String.format("$ %s", "0"));
+            }
+
+            if (holder.priceTV.getText().toString().startsWith(")")){
                 holder.priceTV.setTextColor(Color.RED);
             }
             holder.discPriceTV.setVisibility(View.GONE);
@@ -141,11 +158,11 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         }
 
         holder.itemView.setOnClickListener(view -> {
-            detailsBottomSheet(modelProduct, sharedPreferences);
+            detailsBottomSheet(modelProduct, sharedPreferences, position);
         });
     }
 
-    private void detailsBottomSheet(ModelProduct modelProduct, SharedPreferences sharedPreferences) {
+    private void detailsBottomSheet(ModelProduct modelProduct, SharedPreferences sharedPreferences, int position) {
 
         String sharedUserType = sharedPreferences.getString("user_type", "");
 
@@ -174,6 +191,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         TextView catTV = view.findViewById(R.id.catTV);
         TextView noPartsTxt = view.findViewById(R.id.NoPartsTxt);
         TextView cutPartsListTV = view.findViewById(R.id.cutPartsListTV);
+        TextView colorTV = view.findViewById(R.id.colorTV);
 
         String price = modelProduct.getPrPrice();
         String cost = modelProduct.getPrCost();
@@ -187,6 +205,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         String prMass = modelProduct.getPrMass();
         String desc = modelProduct.getPrDesc();
         String prId = modelProduct.getPrId();
+        String color = modelProduct.getPrColor();
 
         partsList = new ArrayList<>();
 
@@ -220,6 +239,16 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                 click = false;
             }
         });
+
+        if (color!=null){
+            if (color.length()==0) {
+                colorTV.setVisibility(View.GONE);
+            } else {
+                colorTV.setText(String.format("Rang: %s", color));
+            }
+        } else {
+            colorTV.setVisibility(View.GONE);
+        }
 
         if (cost!=null){
             if (cost.length()==0) {
@@ -267,7 +296,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             descTV.setVisibility(View.GONE);
         }
 
-        if (sharedUserType.equals("bichuvchi") || sharedUserType.equals("dizayner")){
+        if (sharedUserType.equals("bichuvchi") || sharedUserType.equals("dizayner") || sharedUserType.equals("viewer")){
             editBtn.setVisibility(View.GONE);
             delBtn.setVisibility(View.GONE);
             addLenBtn.setVisibility(View.GONE);
@@ -315,25 +344,14 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             Spinner measSpinner = dialogView.findViewById(R.id.measSpinner);
             EditText dialAlenET = dialogView.findViewById(R.id.dialAlenET);
 
-//            measSpinner.setVisibility(View.GONE);
-//            measurement = "metr";
-
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
                     android.R.layout.simple_spinner_item, Constants.measurement);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             measSpinner.setAdapter(adapter);
-
             measSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view12, int i, long l) {
                         measurement = measSpinner.getSelectedItem().toString().trim();
-//                    if (!measSpinner.getSelectedItem().toString().trim().equalsIgnoreCase("Tanlang:")){
-//                        measurement = measSpinner.getSelectedItem().toString().trim();
-//                    } else {
-//                        TextView errTxt = (TextView) measSpinner.getSelectedView();
-//                        errTxt.setError("");
-//                        errTxt.setTextColor(Color.YELLOW);
-//                    }
                 }
 
                 @Override
@@ -346,7 +364,6 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                     android.R.layout.simple_spinner_item, Constants.location1);
             adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter1);
-
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view12, int i, long l) {
@@ -406,8 +423,8 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
 
             // show del confirm dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("Delete").setMessage(" Are you agree with it?")
-                    .setPositiveButton("Delete", (dialog, which) -> {
+            builder.setTitle("O'chirish").setMessage("Rostdan ham o'chirmoqchimisiz??")
+                    .setPositiveButton("O'chirish", (dialog, which) -> {
                         // delete
                         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
                         DocumentReference productRef = firestore.collection("Products").document(prId);
@@ -422,7 +439,10 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                                 }
                                 productRef.delete().addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()){
-                                        loadParts(prId, partRV, noPartsTxt);
+                                        productList.remove(position);
+                                        notifyItemRemoved(position); // UI ni yangilash
+                                        notifyItemRangeChanged(position, productList.size());
+
                                         Toast.makeText(context, "Mahsulot o'chirildi", Toast.LENGTH_SHORT).show();
                                         if (deletedProductId!=null){
                                             deleteItemsByTitle(deletedProductId);

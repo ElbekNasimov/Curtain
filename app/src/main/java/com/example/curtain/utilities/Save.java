@@ -1,4 +1,4 @@
-package com.example.curtain.utils;
+package com.example.curtain.utilities;
 
 import android.content.Context;
 import android.content.SharedPreferences;

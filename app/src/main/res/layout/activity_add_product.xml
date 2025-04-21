@@ -33,7 +33,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp">
+        android:paddingTop="10dp">
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/labelTitle"
             android:layout_width="match_parent"
@@ -165,11 +165,32 @@
                 android:padding="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/labelMass"
+            android:id="@+id/labelColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:layout_below="@id/labelHeight"
+            android:hint="@string/selectColor">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/productColorET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_brush_grey"
+                android:drawableEnd="@drawable/ic_down_gray"
+                android:textIsSelectable="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:drawablePadding="5dp"
+                android:inputType="none"
+                android:textSize="18sp"
+                android:padding="10dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/labelMass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/labelColor"
             android:hint="@string/mass">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/productMassET"

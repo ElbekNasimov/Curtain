@@ -1,10 +1,8 @@
 package com.example.curtain;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,7 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.curtain.activities.LoginActivity;
-import com.example.curtain.activities.Otchot;
+import com.example.curtain.activities.OtchotActivity;
 import com.example.curtain.activities.UsersListActivity;
 import com.example.curtain.adapter.AdapterOrder;
 import com.example.curtain.adapter.AdapterProduct;
@@ -37,12 +35,9 @@ import com.example.curtain.constants.CaptureAct;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.crud.AddOrder;
 import com.example.curtain.crud.AddProduct;
-import com.example.curtain.entities.Product;
 import com.example.curtain.model.ModelOrder;
 import com.example.curtain.model.ModelProduct;
 import com.example.curtain.utilities.NetworkChangeListener;
-import com.example.curtain.utilities.ProductSyncManager;
-import com.example.curtain.utilities.SyncScheduler;
 import com.example.curtain.viewmodels.ProductViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -159,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         showProductsUI();
 
         usersListTV.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, UsersListActivity.class)));
-        otchotTV.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, Otchot.class)));
+        otchotTV.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, OtchotActivity.class)));
 
         // search
         searchET.addTextChangedListener(new TextWatcher() {

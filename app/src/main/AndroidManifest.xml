@@ -24,7 +24,10 @@
         android:theme="@style/Theme.Curtain"
         tools:targetApi="31">
         <activity
-            android:name=".activities.Otchot"
+            android:name=".activities.OtchotDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.OtchotActivity"
             android:exported="false" />
         <activity
             android:name=".activities.CutPartsListActivity"
