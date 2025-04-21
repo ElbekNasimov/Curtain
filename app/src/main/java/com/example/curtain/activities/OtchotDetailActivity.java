@@ -8,11 +8,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.curtain.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class OtchotDetailActivity extends AppCompatActivity {
@@ -41,7 +45,11 @@ public class OtchotDetailActivity extends AppCompatActivity {
         progressDialog.setMessage("Loading order Detail");
         progressDialog.show();
         DocumentReference otchotRef = firestore.collection("Otchotlar").document(otchotId);
+        otchotRef.get().addOnSuccessListener(documentSnapshot -> {
 
+        }).addOnFailureListener(e -> {
+
+        });
     }
 
     private void init() {

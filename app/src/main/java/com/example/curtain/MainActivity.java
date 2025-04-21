@@ -3,7 +3,6 @@ package com.example.curtain;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
@@ -38,7 +37,6 @@ import com.example.curtain.crud.AddProduct;
 import com.example.curtain.model.ModelOrder;
 import com.example.curtain.model.ModelProduct;
 import com.example.curtain.utilities.NetworkChangeListener;
-import com.example.curtain.viewmodels.ProductViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -84,9 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler handler;
 
-    // for Room database
-    private ProductViewModel productViewModel;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,10 +105,6 @@ public class MainActivity extends AppCompatActivity {
         String select="Hammasi";
         loadProducts(select);
 
-        // part for Room database
-        productViewModel.getAllProducts().observe(this, products -> {
-            // mahsulotlarni ko'rsatish uchun UI ni yangilash
-        });
 
         // qayta ko'rish kerak
 //        SyncScheduler.scheduleSync(this);
@@ -327,8 +318,6 @@ public class MainActivity extends AppCompatActivity {
         return sharedPreferences.getString("user_type", "");
     }
     private void init(){
-
-        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
 
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();

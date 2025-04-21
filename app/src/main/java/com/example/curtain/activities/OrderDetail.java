@@ -2,7 +2,6 @@ package com.example.curtain.activities;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,7 +31,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -57,7 +55,6 @@ import com.example.curtain.model.ModelProduct;
 import com.example.curtain.model.ModelProductObject;
 import com.example.curtain.model.ModelProductOrder;
 import com.example.curtain.utilities.NetworkChangeListener;
-import com.example.curtain.viewmodels.ProductViewModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -113,8 +110,6 @@ public class OrderDetail extends AppCompatActivity {
     HashMap<String, Object> loadFromFirebaseMap;
     NetworkChangeListener networkChangeListener = new NetworkChangeListener();
 
-    // room database
-    private ProductViewModel productViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -713,23 +708,6 @@ public class OrderDetail extends AppCompatActivity {
             prObjRV.setAdapter(adapterObjectProduct);
         });
 
-        // from Room database
-//        productViewModel.getAllProducts().observe(this, new Observer<List<Product>>() {
-//            @Override
-//            public void onChanged(List<Product> products) {
-//                if (products.isEmpty()){
-//                    prObjRV.setVisibility(View.GONE);
-//                } else {
-//                    prObjRV.setVisibility(View.VISIBLE);
-//                    adapterObjectProduct = new AdapterObjectProducts(OrderDetail.this, productList, searchPrObjET,searchPrIdObjET);
-//                    prObjRV.setLayoutManager(new LinearLayoutManager(OrderDetail.this));
-//                    prObjRV.setAdapter(adapterObjectProduct);
-//                }
-//            }
-//        });
-
-
-
         searchPrObjET.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -806,9 +784,6 @@ public class OrderDetail extends AppCompatActivity {
         });
     }
     private void init(){
-        // room
-        productViewModel = new ViewModelProvider(this).get(ProductViewModel.class);
-
         context = this;
         firebaseAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
