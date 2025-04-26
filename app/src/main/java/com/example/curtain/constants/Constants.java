@@ -93,6 +93,8 @@ public class Constants {
             "Oshxona 2",
             "Xol 1",
             "Xol 2",
+            "Ofis 1",
+            "Ofis 2",
             "Yotoqxona 1",
             "Yotoqxona 2",
             "Yotoqxona 3",
@@ -137,6 +139,10 @@ public class Constants {
             "Namozxona 2",
             "Koridor 1",
             "Koridor 2",
+    };
+    public static final String [] xarajatStatusSpinner = {
+            "Kassa",
+            "Bonus",
     };
     public static final String [] objRooms = {
             "Etajni tanlang:",

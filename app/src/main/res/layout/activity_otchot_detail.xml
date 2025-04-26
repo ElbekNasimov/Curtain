@@ -64,6 +64,7 @@
             android:layout_marginTop="5dp"
             android:text="@string/countNewOrders"
             android:textColor="@color/grey2"
+            android:textStyle="bold"
             android:textSize="18sp" />
 
         <TextView
@@ -73,6 +74,7 @@
             android:layout_marginTop="5dp"
             android:text="@string/countChiqqanOrders"
             android:textColor="@color/grey2"
+            android:textStyle="bold"
             android:textSize="18sp" />
 
         <TextView
@@ -81,6 +83,7 @@
             android:layout_height="wrap_content"
             android:text="@string/sumChiqqanOrder"
             android:textSize="18sp"
+            android:textStyle="bold"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
             android:textColor="@color/grey2" />
@@ -90,6 +93,39 @@
             android:layout_height="wrap_content"
             android:text="@string/costChiqqanOrder"
             android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+
+        <TextView
+            android:id="@+id/countYopilganOrdersTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/countYopilganOrders"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+
+        <TextView
+            android:id="@+id/sumYopilganOrdersTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sumYopilganOrder"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+        <TextView
+            android:id="@+id/costYopilganOrdersTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/costYopilganOrder"
+            android:textSize="18sp"
+            android:textStyle="bold"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
             android:textColor="@color/grey2" />
@@ -100,6 +136,7 @@
             android:layout_height="wrap_content"
             android:text="@string/sumXarajat"
             android:textSize="18sp"
+            android:textStyle="bold"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
             android:textColor="@color/grey2" />

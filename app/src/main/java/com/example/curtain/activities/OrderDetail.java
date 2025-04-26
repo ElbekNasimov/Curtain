@@ -49,6 +49,7 @@ import com.example.curtain.adapter.AdapterOrderPay;
 import com.example.curtain.adapter.AdapterProductOrder;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.crud.EditOrder;
+import com.example.curtain.databinding.ActivityOrderDetailBinding;
 import com.example.curtain.model.ModelOrderObject;
 import com.example.curtain.model.ModelOrderPays;
 import com.example.curtain.model.ModelProduct;
@@ -79,6 +80,7 @@ import java.util.function.Consumer;
 
 public class OrderDetail extends AppCompatActivity {
 
+    private ActivityOrderDetailBinding orderDetailBinding;
     private FirebaseFirestore firestore;
     private FirebaseAuth firebaseAuth;
     private AdapterOrderPay adapterOrderPay;
@@ -90,12 +92,12 @@ public class OrderDetail extends AppCompatActivity {
     private ArrayList<ModelOrderObject> objectsArrayList;
     private ArrayList<ModelProductObject> productObjectsArrayList;
     private ArrayList<ModelProduct> productList;
-    private ImageButton backBtn, delBtn, editBtn,stockPrintBtn, orderPrintBtn, orderPayBtn, hidePayStatus,
+    private ImageButton backBtn, delBtn, editBtn, orderPrintBtn, orderPayBtn, hidePayStatus,
             editOrderPoshivIB, editOrderUstanovkaIB;
     private TextView orderNumberTV,orderTypeTV ,orderNameTV, orderPhoneTV, orderLocTV, orderDeadlineTV, orderSumTV, orderZakladTV,
             orderLoanTV, designerPercentTV, designerSumTV, designerPayStatusTV, payHistoryTV, orderObjectsTV,
             productOrdersTV, orderDescTV, orderCreateTV, orderPoshivPriceTV, orderUstanovkaPriceTV, orderStatusTV,
-            orderTotalTV;
+            orderTotalTV, orderCostTV;
     private Button addObjToOrderBtn, addPrToOrderBtn, addExtraBtn, orderStatusBtn;
     private RecyclerView payHistoryRV, orderObjectsRV, productOrdersRV;
     private ProgressDialog progressDialog;
@@ -156,10 +158,13 @@ public class OrderDetail extends AppCompatActivity {
         });
 
         idPoshAndUstLL.setVisibility(View.GONE);
+        orderCostTV.setVisibility(View.GONE);
         if (sharedUserType.equals("superAdmin")){
             idPoshAndUstLL.setVisibility(View.VISIBLE);
-        }
 
+            // tannarx qo'shish: "Smeta tannarxi: 2800" kabi, chunki substring(16) qilingan
+            orderCostTV.setVisibility(View.VISIBLE);
+        }
 
         designerPercentTV.setVisibility(View.GONE);
         designerSumTV.setVisibility(View.GONE);
@@ -286,10 +291,10 @@ public class OrderDetail extends AppCompatActivity {
                             HashMap<String, Object> hashMap = new HashMap<>();
 
                             if (addExtraTxt.equals("Poshiv")){
-                                hashMap.put("orderPoshiv", "" + addExtraPrice);
+                                hashMap.put("orderPoshiv", addExtraPrice);
                             }
                             if (addExtraTxt.equals("Ustanovka")){
-                                hashMap.put("orderUstanovka", "" + addExtraPrice);
+                                hashMap.put("orderUstanovka", addExtraPrice);
                             }
                             firestore.collection("Orders").document(orderId).update(hashMap)
                                     .addOnCompleteListener(task -> {
@@ -382,13 +387,13 @@ public class OrderDetail extends AppCompatActivity {
                         String timestamps = "" + System.currentTimeMillis();
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("orderPayId", timestamps);
-                        hashMap.put("orderNumber", "" + orderId);
+                        hashMap.put("orderNumber", orderId);
                         hashMap.put("orderPay", dialPayET.getText().toString().trim());
 
                         Date prDate = new Date(Long.parseLong(timestamps));
                         SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
                         String created_at = sdfFormat.format(prDate);
-                        hashMap.put("created_at", "" + created_at);
+                        hashMap.put("created_at", created_at);
                         hashMap.put("created_by", sharedUsername);
 
                         if (!TextUtils.isEmpty(dialPayET.getText())) {
@@ -416,9 +421,8 @@ public class OrderDetail extends AppCompatActivity {
 
         });
 
-        addPrToOrderBtn.setOnClickListener(view -> {
-            bottomSheetDialog(orderId);
-        });
+        addPrToOrderBtn.setOnClickListener(view ->
+            bottomSheetDialog(orderId));
 
         // deepseekda tuzatildi
         addObjToOrderBtn.setOnClickListener(view -> {
@@ -439,13 +443,13 @@ public class OrderDetail extends AppCompatActivity {
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         String timestamps = "" + System.currentTimeMillis();
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("orderObjectId", "" + timestamps);
-                        hashMap.put("orderId", "" + orderId);
-                        hashMap.put("orderRoom", "" + orderRoom);
-                        hashMap.put("objRoom", "" + objRoom);
+                        hashMap.put("orderObjectId", timestamps);
+                        hashMap.put("orderId", orderId);
+                        hashMap.put("orderRoom", orderRoom);
+                        hashMap.put("objRoom", objRoom);
 
                         if (!objDescET.getText().toString().trim().isEmpty()) {
-                            hashMap.put("objDescET", "" + objDescET.getText().toString().trim());
+                            hashMap.put("objDescET", objDescET.getText().toString().trim());
                         }
                         hashMap.put("created_by", firebaseAuth.getCurrentUser().getDisplayName());
 
@@ -471,13 +475,6 @@ public class OrderDetail extends AppCompatActivity {
             alertDialog.setView(dialogView);
             AlertDialog dialog = alertDialog.create();
             dialog.show();
-        });
-
-        stockPrintBtn.setVisibility(View.GONE);
-        stockPrintBtn.setOnClickListener(view -> {
-            progressDialog.setMessage("Ombor smeta saqlanmoqda");
-            progressDialog.show();
-            generateStockPdf();
         });
 
         orderPrintBtn.setOnClickListener(view -> {
@@ -510,146 +507,6 @@ public class OrderDetail extends AppCompatActivity {
                 Toast.makeText(OrderDetail.this, "Hech narsa tanlanmadi", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void generateStockPdf() {
-        if (orderTypeTV.getText().equals("Parda")) {
-            fetchProductObjects(orderId);
-        } else {
-            goToStockPdf();
-        }
-    }
-
-    private void goToStockPdf() {
-        PdfDocument pdfDocument = new PdfDocument();
-        Paint paint = new Paint();
-        Paint titlePaint = new Paint();
-
-        int pageNumber = 1;
-        PdfDocument.PageInfo pageInfo =new PdfDocument.PageInfo.
-                Builder(1240, 1754,pageNumber).create();
-        PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-        Canvas canvas = page.getCanvas();
-
-        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
-        scaledBitmap = Bitmap.createScaledBitmap(bitmap, 128, 128, false);
-        canvas.drawBitmap(scaledBitmap, 20, 20, paint);
-
-        int startY = 290;
-        int spacing = 40;
-        int pageWidth = 1240;
-        int pageHeight = 1754;
-
-        titlePaint.setTextSize(36f);
-        titlePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-        float textSizeInPoints = 28f;
-
-        paint.setTextSize(textSizeInPoints);
-        paint.setTextAlign(Paint.Align.LEFT);
-        paint.setColor(Color.BLACK);
-
-        canvas.drawText(orderTypeTV.getText().toString()+" ombor buyurtma # " +
-                orderNumberTV.getText().toString(), 450, 50, titlePaint);
-        String orderOwn = orderCreateTV.getText().toString();
-        String[] parts = orderOwn.split(" ");
-        if (parts.length > 1){
-            canvas.drawText("Dizayner: " + parts[3], 170,100, paint);
-        }
-
-        canvas.drawText("Mijoz: " + orderNameTV.getText().toString(), 500,100, paint);
-        if (orderPhoneTV.getText().toString().equals("Tel raqami")) {
-            canvas.drawText("Tel raqami: ", 850, 100, paint);
-            canvas.drawLine(1000, 100, 1200, 100, paint);
-        } else {
-            canvas.drawText("Tel raqami: " + orderPhoneTV.getText(), 850, 100, paint);
-        }
-
-        if (orderSumTV.getText().toString().equals("Smeta summasi")){
-            canvas.drawText("Zakaz: ", 170,140, paint);
-            canvas.drawLine(280, 140, 400, 140, paint);
-        } else {
-            canvas.drawText( orderSumTV.getText().toString(), 170,140, paint);
-        }
-
-        if (orderZakladTV.getText().toString().equals("Zaklad")){
-            canvas.drawText("Zaklad: ", 500, 140, paint);
-            canvas.drawLine(600, 140, 770, 140, paint);
-        } else {
-            canvas.drawText(orderZakladTV.getText().toString(), 500, 140, paint);
-        }
-        if (orderDeadlineTV.getText().toString().equals("Muddat")){
-            canvas.drawText("Topshiriladi: ", 850, 140, paint);
-            canvas.drawLine(1000, 140, 1200, 140, paint);
-        } else {
-            canvas.drawText("Topshiriladi: " +
-                    orderDeadlineTV.getText().toString(), 850, 140, paint);
-        }
-
-        if (orderDescTV.getText().toString().equals("Izoh")){
-            canvas.drawText("Izoh: ", 170, 180, paint);
-            canvas.drawLine(280, 180, 1200, 180, paint);
-        } else {
-            canvas.drawText("Izoh: " + orderDescTV.getText().toString(), 170, 180, paint);
-        }
-        // ramka chizish
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(2);
-        canvas.drawRect(20, 200, pageWidth-20, 820, paint); // first
-        canvas.drawLine(20, 260, pageWidth-20, 260, paint);
-
-        paint.setTextAlign(Paint.Align.LEFT);
-        paint.setStyle(Paint.Style.FILL);
-        canvas.drawText("№", 30, 240, paint);
-        canvas.drawText("Mahsulot", 85, 240, paint);
-        canvas.drawText("Metr", 460, 240, paint);
-        canvas.drawText("Narx", 540, 240, paint);
-        canvas.drawText("Jami", 620, 240, paint);
-
-        canvas.drawLine(75, 200, 75, 820, paint);  // name
-        canvas.drawLine(450, 200, 450, 820, paint);  // len
-        canvas.drawLine(530, 200, 530, 820, paint);  // price
-        canvas.drawLine(610, 200, 610, 820, paint);  // total
-        canvas.drawLine(710, 200, 710, 820, paint);  // end total
-        canvas.drawLine(pageWidth-20, 200, pageWidth-20, 820, paint); // last
-
-        paint.setTextSize(25f);
-
-        for (int i1 = 260; i1 < pageHeight/2-40; i1+=spacing) {
-            canvas.drawLine(20, i1, pageWidth-20, i1, paint);
-        }
-        int number = 1;
-        for (ModelProductOrder productOrder: productOrderArrayList){
-            canvas.drawText( productOrder.getProductObjectOrder(), 90, startY, paint);
-            canvas.drawText( productOrder.getLenProductObjectOrder(), 465, startY, paint);
-            float price;
-            if(productOrder.getProductPriceProductOrder()!=null) {
-                canvas.drawText(productOrder.getProductPriceProductOrder(), 545, startY, paint);
-                price = Float.parseFloat(productOrder.getProductPriceProductOrder());
-            } else {
-                price = 0.0f;
-            }
-
-            float len = Float.parseFloat(productOrder.getLenProductObjectOrder());
-            float sum = len * price;
-            DecimalFormat df = new DecimalFormat("#.0");
-            canvas.drawText(df.format(sum), 625, startY, paint);
-            canvas.drawText(String.valueOf(number), 40, startY, paint);
-            number ++;
-
-            startY += spacing;
-        }
-
-        if (!orderPoshivPriceTV.getText().toString().isEmpty()){
-            int lastValue = (pageHeight/2-40 - spacing) / spacing * spacing+10;
-            canvas.drawText("Poshiv", 90, lastValue, paint);
-            canvas.drawText(orderPoshivPriceTV.getText().toString(), 625, lastValue, paint);
-        }
-
-        pdfDocument.finishPage(page);
-        String fileName = orderNameTV.getText().toString()+"_"+orderTypeTV.getText().toString()+"_"
-                +orderNumberTV.getText().toString()+"_ombor";
-        //        Pdf ga saqlash
-        savePDF(pdfDocument, fileName);
     }
 
     private void addPoshivToOrderTotal(String orderId, String addExtraPrice) {
@@ -761,7 +618,7 @@ public class OrderDetail extends AppCompatActivity {
                 if (task.isSuccessful()){
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot.exists()){
-                        hashMap.put("productPriceProductOrder", "" + documentSnapshot.getString("prPrice"));
+                        hashMap.put("productPriceProductOrder", documentSnapshot.getString("prPrice"));
                         firestore.collection("ProductsOrder").document(timestamps).set(hashMap).
                                 addOnCompleteListener(task1 -> {
                                     progressDialog.dismiss();
@@ -799,7 +656,6 @@ public class OrderDetail extends AppCompatActivity {
         addExtraBtn = findViewById(R.id.addExtraBtn);
         orderStatusBtn = findViewById(R.id.orderStatusBtn);
         editBtn = findViewById(R.id.editBtn);
-        stockPrintBtn = findViewById(R.id.stockPrintBtn);
         orderPrintBtn = findViewById(R.id.orderPrintBtn);
         orderPayBtn = findViewById(R.id.orderPayBtn);
         editOrderUstanovkaIB = findViewById(R.id.editOrderUstanovkaIB);
@@ -830,6 +686,7 @@ public class OrderDetail extends AppCompatActivity {
         orderCreateTV = findViewById(R.id.orderCreateTV);
         orderStatusTV = findViewById(R.id.orderStatusTV);
         orderTotalTV = findViewById(R.id.orderTotalTV);
+        orderCostTV = findViewById(R.id.orderCostTV);
 
         priceOrderDetailLL = findViewById(R.id.priceOrderDetailLL);
         buttonsLL = findViewById(R.id.buttonsLL);
@@ -865,7 +722,6 @@ public class OrderDetail extends AppCompatActivity {
             goToPdf();
         }
     }
-
     private void fetchProductObjects(String orderId) {
         firestore.collection("ProductObjectOrder")
                 .whereEqualTo("orderId", orderId)
@@ -876,7 +732,6 @@ public class OrderDetail extends AppCompatActivity {
                             ModelProductObject productObject = document.toObject(ModelProductObject.class);
                             productObjectsArrayList.add(productObject);
                         }
-
                         fetchProducts();
                     }
                 });
@@ -1085,11 +940,6 @@ public class OrderDetail extends AppCompatActivity {
                                         canvas.drawText(productObject.getProductPriceProductOrder(), 545, yPosition, paint);
                                     }
                                     float pr;
-                                    if (productObject.getProductPriceProductOrder()!=null) {
-                                        pr = Float.parseFloat(productObject.getProductPriceProductOrder());
-                                    } else {
-                                        pr = 0.0f;
-                                    }
                                     pr = Float.parseFloat(productObject.getLenProductObject()) ;
 
                                     float len = Float.parseFloat(productObject.getProductPriceProductOrder()) ;
@@ -1164,7 +1014,8 @@ public class OrderDetail extends AppCompatActivity {
                                         pr = 0.0f;
                                     }
                                     pr = Float.parseFloat(productObject.getProductPriceProductOrder()) ;
-                                    canvas.drawText(String.valueOf(pr*len), 625, yPosition - 10, paint);                                        canvas.drawText(String.valueOf(number), 40, yPosition - 10, paint);
+                                    canvas.drawText(String.valueOf(pr*len), 625, yPosition - 10, paint);
+                                    canvas.drawText(String.valueOf(number), 40, yPosition - 10, paint);
                                     yPosition += 38;
                                     number++;
                                 } else {
@@ -1179,7 +1030,6 @@ public class OrderDetail extends AppCompatActivity {
                             canvas.drawText("Ustanovka", 90, lastValue, paint);
                             canvas.drawText(orderObject.getObjectUstanovka(), 625, lastValue, paint);
                         }
-
                         if (orderObject.getObjectPoshiv()!=null){
                             int spacing = 38;
                             int lastValue = (pageInfo.getPageHeight()-80 - spacing) / spacing * spacing-4;
@@ -1187,12 +1037,10 @@ public class OrderDetail extends AppCompatActivity {
                             canvas.drawText(orderObject.getObjectPoshiv(), 625, lastValue, paint);
                         }
                     }
-
                     canvas.drawLine(20, pageInfo.getPageHeight()-40,
                             pageInfo.getPageWidth()-20, pageInfo.getPageHeight()-40, paint); // bottom line
                 }
             }
-
             pdfDocument.finishPage(page);
             pageNumber++;
         }
@@ -1201,7 +1049,6 @@ public class OrderDetail extends AppCompatActivity {
         //        Pdf ga saqlash
         savePDF(pdfDocument, fileName);
     }
-
     private void goToPdf() {
         PdfDocument pdfDocument = new PdfDocument();
         Paint paint = new Paint();
@@ -1390,6 +1237,8 @@ public class OrderDetail extends AppCompatActivity {
                         addPrToOrderBtn.setVisibility(View.GONE);
                         productOrdersTV.setVisibility(View.GONE);
                         addExtraBtn.setVisibility(View.GONE);
+                        editOrderUstanovkaIB.setVisibility(View.GONE);
+                        editOrderPoshivIB.setVisibility(View.GONE);
                     }
                     if (orderCat != null && !orderCat.equals("Parda")) {
                         orderObjectsTV.setVisibility(View.GONE);
@@ -1466,48 +1315,66 @@ public class OrderDetail extends AppCompatActivity {
                             orderStatusBtn.setText(status);
                         }
                         // after "bichildi" change order status to "chiqdi"
-                        if (status.equals("bichildi") && sharedUserType.equals(Constants.userTypes[4])){
+                        if (status.equals("bichilmoqda") && sharedUserType.equals(Constants.userTypes[4])){
                             orderStatusBtn.setClickable(false);
-                            delBtn.setClickable(false);
 
                             orderStatusBtn.setOnClickListener(view -> {
-                                HashMap<String, Object> hashMap = new HashMap<>();
-                                hashMap.put("orderStatus", "Chiqdi");  // kesish holati
-                                DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
-                                orderReference1.update(hashMap).addOnSuccessListener(unused ->{
-                                    Toast.makeText(this, "Smeta sexdan chiqdi", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(this, OrderDetail.class);
-                                    intent.putExtra("orderId", orderId);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
-                                    finish();
 
-                                }).addOnFailureListener(e -> Toast.makeText(this, "part not updated "
-                                        + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                AlertDialog.Builder builder = new AlertDialog.Builder(OrderDetail.this);
+                                builder.setTitle("Sexdan chiqish").setMessage("Bichib bo'lindimi? Sexdan chiqdimi?")
+                                        .setPositiveButton("Chiqarish", (dialog, which) -> {
+
+                                            HashMap<String, Object> hashMap = new HashMap<>();
+                                            hashMap.put("orderStatus", "Chiqdi");  // kesish holati
+
+                                             DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
+                                             orderReference1.update(hashMap).addOnSuccessListener(unused -> {
+
+                                                 Toast.makeText(this, "Smeta sexdan chiqdi", Toast.LENGTH_SHORT).show();
+
+                                                 addChiqqanOrderToOtchotlar();
+                                                 collectSumChiqqanOrderToOtchotlar(orderSumTV.getText().toString(),
+                                                         orderCostTV.getText().toString());
+
+                                                 Intent intent = new Intent(this, OrderDetail.class);
+                                                 intent.putExtra("orderId", orderId);
+                                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                 startActivity(intent);
+                                                 finish();
+
+                                             }).addOnFailureListener(e -> Toast.makeText(this, "part not updated "
+                                                     + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+                                        }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
                             });
                         }
                         // Topshirilgan dan keyin Yopiladi
                         if (status.equals("Chiqdi") && sharedUserType.equals(Constants.userTypes[4])){
                             orderStatusBtn.setClickable(false);
-                            delBtn.setClickable(false);
 
                             orderStatusBtn.setOnClickListener(view -> {
-                                HashMap<String, Object> hashMap = new HashMap<>();
-                                hashMap.put("orderStatus", "Yopildi");  // kesish holati
-                                DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
-                                orderReference1.update(hashMap).addOnSuccessListener(unused ->{
-                                    Toast.makeText(this, "Smeta sexdan chiqdi", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(this, OrderDetail.class);
-                                    intent.putExtra("orderId", orderId);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
-                                    finish();
+                                AlertDialog.Builder builder = new AlertDialog.Builder(OrderDetail.this);
+                                builder.setTitle("Smetani yopish").setMessage("Smeta yopildimi?")
+                                        .setPositiveButton("Yopish", (dialog, which) -> {
+                                            HashMap<String, Object> hashMap = new HashMap<>();
+                                            hashMap.put("orderStatus", "Yopildi");  // kesish holati
+                                            DocumentReference orderReference1 = firestore.collection("Orders").document(orderId);
+                                            orderReference1.update(hashMap).addOnSuccessListener(unused ->{
+                                                Toast.makeText(this, "Smeta yopildi", Toast.LENGTH_SHORT).show();
 
-                                }).addOnFailureListener(e -> Toast.makeText(this, "part not updated "
-                                        + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                                addYopilganOrderToOtchotlar();
+                                                collectSumYopilganOrderToOtchotlar(orderSumTV.getText().toString(),
+                                                        orderCostTV.getText().toString());
+
+                                                Intent intent = new Intent(this, OrderDetail.class);
+                                                intent.putExtra("orderId", orderId);
+                                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                startActivity(intent);
+                                            }).addOnFailureListener(e -> Toast.makeText(this, "part not updated "
+                                                    + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                        }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
                             });
                         }
-
                     } else {
                         orderStatusBtn.setText("Skladga");
                     }
@@ -1575,6 +1442,184 @@ public class OrderDetail extends AppCompatActivity {
                         task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void collectSumYopilganOrderToOtchotlar(String ordSum, String orderCost) {
+        // get today date
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String todayDate = dateFormat.format(date);
+
+        firestore.collection("Otchotlar").whereEqualTo("title", todayDate).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()){
+                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        String otchotId = documentSnapshot.getId();
+                        String sumYopilganOrder = documentSnapshot.getString("sumYopilganOrder") != null ?
+                                documentSnapshot.getString("sumYopilganOrder") : "0";
+                        String costYopilganOrder = documentSnapshot.getString("costYopilganOrder") != null ?
+                                documentSnapshot.getString("costYopilganOrder") : "0";
+
+                        HashMap<String, Object> changeOtchot = new HashMap<>();
+                        changeOtchot.put("title", todayDate);
+                        changeOtchot.put("sumYopilganOrder", String.valueOf(Integer.parseInt(sumYopilganOrder)
+                                + Integer.parseInt(ordSum.substring(7))));
+                        if (orderCost.length()>14) {
+                            changeOtchot.put("costYopilganOrder", String.valueOf(Integer.parseInt(costYopilganOrder)
+                                    + Integer.parseInt(orderCost.substring(16))));
+                        }
+                        firestore.collection("Otchotlar")
+                                .document(otchotId)
+                                .update(changeOtchot)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("sumYopilganOrder", "Sum And Cost Yopilgan" +
+                                            " updated successfully");
+                                }).addOnFailureListener(e ->
+                                        Log.d("sumYopilganOrder", "Sum And Cost Yopilgan" +
+                                                " updated unsuccessfully" + e.getMessage()));
+                    } else {
+                        HashMap<String, Object> newOtchot = new HashMap<>();
+                        newOtchot.put("title", todayDate);
+                        newOtchot.put("sumYopilganOrder", Integer.parseInt(ordSum.substring(7)));
+                        if (orderCost.length()>14) {
+                            newOtchot.put("costYopilganOrder", Integer.parseInt(orderCost.substring(16)));
+                        }
+
+                        firestore.collection("Otchotlar")
+                                .add(newOtchot)
+                                .addOnSuccessListener(documentReference -> Log.d("sumYopilganOrder",
+                                        "Sum And Cost Yopilgan Order successfully"))
+                                .addOnFailureListener(e -> Log.e("sumYopilganOrder",
+                                        "Sum And Cost Yopilgan Unsuccessfully" + e.getMessage()));
+                    }
+                }).addOnFailureListener(e ->
+                        Toast.makeText(OrderDetail.this, "error to get otchotlar " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
+    }
+
+    private void addYopilganOrderToOtchotlar() {
+        // get today date
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String todayDate = dateFormat.format(date);
+
+        firestore.collection("Otchotlar").whereEqualTo("title", todayDate).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()){
+                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        String otchotId = documentSnapshot.getId();
+                        String currentCount = documentSnapshot.getString("countYopilganOrders") != null ?
+                                documentSnapshot.getString("countYopilganOrders") : "0";
+
+                        firestore.collection("Otchotlar")
+                                .document(otchotId)
+                                .update("countYopilganOrders", String.valueOf(Integer.parseInt(currentCount) + 1))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Count Yopilgan Otchotlar", "countYopilganOrders updated successfully");
+                                }).addOnFailureListener(e ->
+                                        Log.d("Count Yopilgan Otchotlar", "countYopilganOrders updated unsuccessfully"));
+                    } else {
+                        HashMap<String, Object> newOtchot = new HashMap<>();
+                        newOtchot.put("title", todayDate);
+                        newOtchot.put("countYopilganOrders", 1);
+
+                        firestore.collection("Otchotlar")
+                                .add(newOtchot)
+                                .addOnSuccessListener(documentReference -> Log.d("Count Yopilgan Order", "Count Yopilgan otchot successfully"))
+                                .addOnFailureListener(e -> Log.e("Count Yopilgan Order", "Error count closing otchot", e));
+                    }
+                }).addOnFailureListener(e ->
+                        Toast.makeText(OrderDetail.this, "error to get otchotlar " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
+    }
+
+    private void collectSumChiqqanOrderToOtchotlar(String ordSum, String orderCost) {
+        // get today date
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String todayDate = dateFormat.format(date);
+
+        firestore.collection("Otchotlar").whereEqualTo("title", todayDate).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()){
+                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        String otchotId = documentSnapshot.getId();
+                        String sumChiqqanOrder = documentSnapshot.getString("sumChiqqanOrder") != null ?
+                                documentSnapshot.getString("sumChiqqanOrder") : "0";
+                        String costChiqqanOrder = documentSnapshot.getString("costChiqqanOrder") != null ?
+                                documentSnapshot.getString("costChiqqanOrder") : "0";
+
+                        HashMap<String, Object> changeOtchot = new HashMap<>();
+                        changeOtchot.put("title", todayDate);
+                        changeOtchot.put("sumChiqqanOrder", String.valueOf(Integer.parseInt(sumChiqqanOrder)
+                                + Integer.parseInt(ordSum.substring(7))));
+                        if (orderCost.length()>14) {
+                            changeOtchot.put("costChiqqanOrder", String.valueOf(Integer.parseInt(costChiqqanOrder)
+                                    + Integer.parseInt(orderCost.substring(16))));
+                        }
+                        firestore.collection("Otchotlar")
+                                .document(otchotId)
+                                .update(changeOtchot)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("sumAndCostChiqqanOrders", "Sum And Cost Chiqqan" +
+                                            " updated successfully");
+                                }).addOnFailureListener(e ->
+                                        Log.d("sumAndCostChiqqanOrders", "Sum And Cost Chiqqan" +
+                                                " updated unsuccessfully" + e.getMessage()));
+                    } else {
+                        HashMap<String, Object> newOtchot = new HashMap<>();
+                        newOtchot.put("title", todayDate);
+                        newOtchot.put("sumChiqqanOrder", Integer.parseInt(ordSum.substring(7)));
+                        if (orderCost.length()>14) {
+                            newOtchot.put("costChiqqanOrder", Integer.parseInt(orderCost.substring(16)));
+                        }
+
+                        firestore.collection("Otchotlar")
+                                .add(newOtchot)
+                                .addOnSuccessListener(documentReference -> Log.d("sumAndCostChiqqanOrders",
+                                        "Sum And Cost Chiqqan Order successfully"))
+                                .addOnFailureListener(e -> Log.e("sumAndCostChiqqanOrders",
+                                        "Sum And Cost Chiqqan Unsuccessfully" + e.getMessage()));
+                    }
+                }).addOnFailureListener(e ->
+                        Toast.makeText(OrderDetail.this, "error to get otchotlar " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
+    }
+
+    private void addChiqqanOrderToOtchotlar() {
+        // get today date
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String todayDate = dateFormat.format(date);
+
+        firestore.collection("Otchotlar").whereEqualTo("title", todayDate).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()){
+                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        String otchotId = documentSnapshot.getId();
+                        String currentCount = documentSnapshot.getString("countChiqqanOrders") != null ?
+                                documentSnapshot.getString("countChiqqanOrders") : "0";
+
+                        firestore.collection("Otchotlar")
+                                .document(otchotId)
+                                .update("countChiqqanOrders", String.valueOf(Integer.parseInt(currentCount) + 1))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("Count Chiqqan Orders", "countNewOrders updated successfully");
+                                }).addOnFailureListener(e ->
+                                        Log.d("Count Chiqqan Orders", "countNewOrders updated successfully"));
+                    } else {
+                        HashMap<String, Object> newOtchot = new HashMap<>();
+                        newOtchot.put("title", todayDate);
+                        newOtchot.put("countChiqqanOrders", 1);
+
+                        firestore.collection("Otchotlar")
+                                .add(newOtchot)
+                                .addOnSuccessListener(documentReference -> Log.d("Count Chiqqan Orders", "Count Chiqqan order successfully"))
+                                .addOnFailureListener(e -> Log.e("Count Chiqqan Orders", "Error counting chiqqan orders", e));
+                    }
+                }).addOnFailureListener(e ->
+                        Toast.makeText(OrderDetail.this, "error to get otchotlar " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
     }
 
     private void loadOrderPays(String orderId) {
@@ -1686,8 +1731,6 @@ public class OrderDetail extends AppCompatActivity {
                 if (doc.exists()) {
                     String ordZaklad = doc.getString("orderZaklad");
 
-                    Toast.makeText(this, "ordZaklad " + ordZaklad, Toast.LENGTH_SHORT).show();
-
                     HashMap<String, Object> hashMap = new HashMap<>();
                     float newZaklad;
                     if (ordZaklad != null) {
@@ -1748,7 +1791,6 @@ public class OrderDetail extends AppCompatActivity {
             }
         });
     }
-
     private void deleteProductObjectByOrder(String deletedOrderId) {
         CollectionReference orderPaysRef = firestore.collection("ProductObjectOrder");
         orderPaysRef.whereEqualTo("orderId", deletedOrderId).get().addOnCompleteListener(task -> {
@@ -1761,7 +1803,6 @@ public class OrderDetail extends AppCompatActivity {
             }
         });
     }
-
     private void deleteCutPartProductOrderByOrder(String deletedOrderId) {
         CollectionReference orderPaysRef = firestore.collection("CutPartProduct");
         orderPaysRef.whereEqualTo("orderId", deletedOrderId).get().addOnCompleteListener(task -> {
@@ -1774,7 +1815,6 @@ public class OrderDetail extends AppCompatActivity {
             }
         });
     }
-
     private void deleteCutPartProductObjectByOrder(String deletedOrderId) {
         CollectionReference orderPaysRef = firestore.collection("CutPartProduct");
         orderPaysRef.whereEqualTo("orderId", deletedOrderId).get().addOnCompleteListener(task -> {

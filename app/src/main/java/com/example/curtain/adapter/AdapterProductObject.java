@@ -159,6 +159,11 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
 
         });
 
+        // if sharedUser type equals bichuvchi, then hide holder.editProductOrderBtn
+        if (sharedUserType.equals("bichuvchi")){
+            holder.editProductOrderBtn.setVisibility(View.GONE);
+        }
+
         // update len items from objects
         holder.editProductOrderBtn.setOnClickListener(view -> {
 

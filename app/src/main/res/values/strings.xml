@@ -161,4 +161,9 @@
     <string name="sumChiqqanOrder">Chiqqan smetalar summasi</string>
     <string name="costChiqqanOrder">Chiqqan smetalar tannarxi</string>
     <string name="sumXarajat">Xarajatlar summasi</string>
+    <string name="sum">Summa</string>
+    <string name="countYopilganOrders">Yopilgan smetalar soni</string>
+    <string name="sumYopilganOrder">Yopilgan smetalar summasi</string>
+    <string name="costYopilganOrder">Yopilgan smetalar tannarxi</string>
+    <string name="orderCost">Smeta tannarxi</string>
 </resources>

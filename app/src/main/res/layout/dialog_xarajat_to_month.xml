@@ -1,0 +1,40 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/xarajatSumET"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/sum"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/ic_money_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="4dp"
+        android:inputType="numberDecimal"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
+
+    <EditText
+        android:id="@+id/xarajatDescET"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/description"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/icon_dns_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="4dp"
+        android:inputType="text|textCapSentences"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
+
+</LinearLayout>

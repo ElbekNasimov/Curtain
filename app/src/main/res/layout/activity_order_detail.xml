@@ -52,17 +52,7 @@
             android:layout_toStartOf="@id/delBtn"
             android:background="@null"
             android:src="@drawable/ic_edit_white" />
-        <ImageButton
-            android:id="@+id/stockPrintBtn"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_toStartOf="@id/orderPrintBtn"
-            android:background="@null"
-            android:src="@drawable/ic_stock_pdf_white" />
+
         <ImageButton
             android:id="@+id/orderPrintBtn"
             android:layout_width="30dp"
@@ -257,6 +247,11 @@
             android:textSize="18sp"
             android:layout_marginEnd="10dp"
             android:textColor="@color/grey2" />
+    <LinearLayout
+        android:id="@+id/orderMoneyLL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <TextView
             android:id="@+id/orderTotalTV"
             android:layout_width="wrap_content"
@@ -265,6 +260,16 @@
             android:textSize="18sp"
             android:layout_marginEnd="10dp"
             android:textColor="@color/grey2" />
+        <TextView
+            android:id="@+id/orderCostTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/orderCost"
+            android:textSize="18sp"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/grey2" />
+
+    </LinearLayout>
 
         <LinearLayout
             android:id="@+id/idPoshAndUstLL"

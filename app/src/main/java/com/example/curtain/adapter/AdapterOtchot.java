@@ -8,25 +8,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.curtain.R;
 import com.example.curtain.activities.OtchotDetailActivity;
-import com.example.curtain.model.ModelOtchot;
+import com.example.curtain.model.ModelOtchotlar;
 
 import java.util.ArrayList;
 
 public class AdapterOtchot extends RecyclerView.Adapter {
 
     private SharedPreferences sharedPreferences;
-    private ArrayList<ModelOtchot> otchotList;
+    private ArrayList<ModelOtchotlar> otchotList;
     private String sharedUserType;
     private Context context;
     private ProgressDialog progressDialog;
-    public AdapterOtchot(Context context, ArrayList<ModelOtchot> otchotList, SharedPreferences sharedPreferences) {
+    public AdapterOtchot(Context context, ArrayList<ModelOtchotlar> otchotList, SharedPreferences sharedPreferences) {
         this.context = context;
         this.otchotList = otchotList;
         this.sharedPreferences = sharedPreferences;
@@ -42,15 +41,16 @@ public class AdapterOtchot extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         HolderOtchot holderOtchot = (HolderOtchot) holder;
-        ModelOtchot modelOtchot = otchotList.get(position);
+        ModelOtchotlar modelOtchot = otchotList.get(position);
 
         holderOtchot.orderTitleTV.setText(modelOtchot.getTitle());
 
         holderOtchot.itemView.setOnClickListener(view -> {
             String otchotId = modelOtchot.getOtchotId();
-            Toast.makeText(context, "otchotId " + otchotId, Toast.LENGTH_SHORT).show();
+            String otchotTitle = modelOtchot.getTitle();
             Intent intent = new Intent(context, OtchotDetailActivity.class);
             intent.putExtra("otchotId", otchotId);
+            intent.putExtra("otchotTitle", otchotTitle);
             context.startActivity(intent);
         });
 

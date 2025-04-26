@@ -6,10 +6,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -18,9 +16,7 @@ import androidx.work.WorkManager;
 
 import com.example.curtain.R;
 import com.example.curtain.adapter.AdapterOtchot;
-import com.example.curtain.adapter.AdapterUser;
-import com.example.curtain.model.ModelOtchot;
-import com.example.curtain.model.ModelUser;
+import com.example.curtain.model.ModelOtchotlar;
 import com.example.curtain.utilities.NetworkChangeListener;
 import com.example.curtain.worker.CreateDailyReportWorker;
 import com.google.firebase.firestore.CollectionReference;
@@ -35,7 +31,7 @@ public class OtchotActivity extends AppCompatActivity {
 
     private FirebaseFirestore firestore;
     private SharedPreferences sharedPreferences;
-    private ArrayList<ModelOtchot> otchotList;
+    private ArrayList<ModelOtchotlar> otchotList;
     private String sharedUserType;
     private RecyclerView otchotListRV;
     private ProgressDialog progressDialog;
@@ -72,7 +68,7 @@ public class OtchotActivity extends AppCompatActivity {
                 }
                 otchotList.clear();
                 for (DocumentSnapshot document : task.getResult()) {
-                    ModelOtchot modelOtchot = document.toObject(ModelOtchot.class);
+                    ModelOtchotlar modelOtchot = document.toObject(ModelOtchotlar.class);
                     otchotList.add(modelOtchot);
                 }
 
@@ -144,6 +140,4 @@ public class OtchotActivity extends AppCompatActivity {
         unregisterReceiver(networkChangeListener);
         super.onStop();
     }
-
-
 }

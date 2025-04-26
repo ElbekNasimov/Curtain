@@ -1,5 +1,6 @@
 package com.example.curtain.crud;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,6 +12,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -18,12 +20,21 @@ import android.widget.Toast;
 
 import com.example.curtain.MainActivity;
 import com.example.curtain.R;
+import com.example.curtain.activities.OtchotDetailActivity;
 import com.example.curtain.activities.UsersListActivity;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.utilities.NetworkChangeListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -191,6 +202,9 @@ public class AddOrder extends AppCompatActivity {
         addOrderToFirestore.collection("Orders").document(orderID).set(hashMap).addOnCompleteListener(task -> {
             progressDialog.dismiss();
             if (task.isSuccessful()){
+
+                addNewOrderToOtchotlar();
+
                 Toast.makeText(AddOrder.this, "Yangi smeta qo'shildi", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(AddOrder.this, MainActivity.class));
             } else {
@@ -200,6 +214,41 @@ public class AddOrder extends AppCompatActivity {
         });
     }
 
+    private void addNewOrderToOtchotlar() {
+        // get today date
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String todayDate = dateFormat.format(date);
+
+        addOrderToFirestore.collection("Otchotlar").whereEqualTo("title", todayDate).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()){
+                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        String otchotId = documentSnapshot.getId();
+                        String currentCount = documentSnapshot.getString("countNewOrders") != null ?
+                                documentSnapshot.getString("countNewOrders") : "0";
+
+                        addOrderToFirestore.collection("Otchotlar")
+                                .document(otchotId)
+                                .update("countNewOrders", String.valueOf(Integer.parseInt(currentCount) + 1))
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("OtchotlarUpdate", "countNewOrders updated successfully");
+                                }).addOnFailureListener(e ->
+                                        Log.d("OtchotlarUpdate", "countNewOrders updated successfully"));
+                    } else {
+                        HashMap<String, Object> newOtchot = new HashMap<>();
+                        newOtchot.put("title", todayDate);
+                        newOtchot.put("countNewOrders", 1);
+
+                        addOrderToFirestore.collection("Otchotlar")
+                                .add(newOtchot)
+                                .addOnSuccessListener(documentReference -> Log.d("OtchotlarCreate", "New otchot created successfully"))
+                                .addOnFailureListener(e -> Log.e("OtchotlarCreate", "Error creating new otchot", e));
+                    }
+                }).addOnFailureListener(e ->
+                        Toast.makeText(AddOrder.this, "error to get otchotlar " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
+    }
     private void categoryDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Smeta turi").setItems(Constants.orderCats, (dialog, which) -> {
