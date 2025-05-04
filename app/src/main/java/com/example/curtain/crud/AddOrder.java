@@ -1,6 +1,5 @@
 package com.example.curtain.crud;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,28 +12,17 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.curtain.MainActivity;
 import com.example.curtain.R;
-import com.example.curtain.activities.OtchotDetailActivity;
-import com.example.curtain.activities.UsersListActivity;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.utilities.NetworkChangeListener;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -158,24 +146,24 @@ public class AddOrder extends AppCompatActivity {
         String orderID = "" + System.currentTimeMillis();
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("orderId", "" + orderID);
-        hashMap.put("orderNumber", "" + ordNumber);
-        hashMap.put("orderName", "" + ordName);
-        hashMap.put("orderCat", "" + ordCat);
+        hashMap.put("orderId", orderID);
+        hashMap.put("orderNumber", ordNumber);
+        hashMap.put("orderName", ordName);
+        hashMap.put("orderCat", ordCat);
         if (!ordSum.isEmpty()) {
-            hashMap.put("orderSum", "" + ordSum);
+            hashMap.put("orderSum", ordSum);
         }
         if (!ordPhone.isEmpty()) {
-            hashMap.put("orderPhone", "" + ordPhone);
+            hashMap.put("orderPhone", ordPhone);
         }
         if (!ordDesc.isEmpty()) {
-            hashMap.put("orderDesc", "" + ordDesc);
+            hashMap.put("orderDesc", ordDesc);
         }
         if (!ordLoc.isEmpty()) {
-            hashMap.put("orderLoc", "" + ordLoc);
+            hashMap.put("orderLoc", ordLoc);
         }
         if (!ordDeadline.isEmpty()) {
-            hashMap.put("orderDeadline", "" + ordDeadline);
+            hashMap.put("orderDeadline", ordDeadline);
         }
         if (ordLoc.equals("Viloyat")){
             hashMap.put("orderPercent", "3.5");
@@ -191,12 +179,12 @@ public class AddOrder extends AppCompatActivity {
         Date prDate = new Date(Long.parseLong(orderID));
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String created_at = dateFormat.format(prDate);
-        hashMap.put("created_at", "" + created_at);
+        hashMap.put("created_at", created_at);
 
         if (Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName()!=null) {
-            hashMap.put("created_by", "" + mAuth.getCurrentUser().getDisplayName());
+            hashMap.put("created_by", mAuth.getCurrentUser().getDisplayName());
         } else {
-            hashMap.put("created_by", "" + currentUsername);
+            hashMap.put("created_by", currentUsername);
         }
 
         addOrderToFirestore.collection("Orders").document(orderID).set(hashMap).addOnCompleteListener(task -> {

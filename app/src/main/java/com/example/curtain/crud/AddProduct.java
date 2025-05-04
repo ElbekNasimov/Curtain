@@ -6,17 +6,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -35,7 +31,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -195,43 +190,43 @@ public class AddProduct extends AppCompatActivity {
     private void productAdd(String productID) {
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("prId", "" + productID);
-        hashMap.put("prTitle", "" + title);
-        hashMap.put("prCat", "" + prCat);
+        hashMap.put("prId", productID);
+        hashMap.put("prTitle", title);
+        hashMap.put("prCat", prCat);
         if (!price.isEmpty()) {
-            hashMap.put("prPrice", "" + price);
+            hashMap.put("prPrice", price);
         }
         if (!cost.isEmpty()) {
-            hashMap.put("prCost", "" + cost);
+            hashMap.put("prCost", cost);
         }
         if (!prBarcode.isEmpty()) {
-            hashMap.put("prBarcode", "" + prBarcode);
+            hashMap.put("prBarcode", prBarcode);
         } else {
-            hashMap.put("prBarcode", "" + productID);
+            hashMap.put("prBarcode", productID);
         }
         if (!desc.isEmpty()) {
-            hashMap.put("prDesc", "" + desc);
+            hashMap.put("prDesc", desc);
         }
         if (!productHeight.isEmpty()) {
-            hashMap.put("prHeight", "" + productHeight);
+            hashMap.put("prHeight", productHeight);
         }
         if (!productColor.isEmpty()) {
             hashMap.put("prColor", productColor);
         }
         if (!productMass.isEmpty()) {
-            hashMap.put("prMass", "" + productMass);
+            hashMap.put("prMass", productMass);
         }
         if (!productCompany.isEmpty()) {
-            hashMap.put("prComp", "" + productCompany);
+            hashMap.put("prComp", productCompany);
         }
         Date prDate = new Date(Long.parseLong(productID));
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String created_at = dateFormat.format(prDate);
-        hashMap.put("created_at", "" + created_at);
+        hashMap.put("created_at", created_at);
         if (Objects.requireNonNull(mAuth.getCurrentUser()).getDisplayName()!=null) {
-            hashMap.put("created_by", "" + mAuth.getCurrentUser().getDisplayName());
+            hashMap.put("created_by", mAuth.getCurrentUser().getDisplayName());
         } else {
-            hashMap.put("created_by", "" + currentUsername);
+            hashMap.put("created_by", currentUsername);
         }
 
         addPrToFireStore.collection("Products").document(productID).set(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {

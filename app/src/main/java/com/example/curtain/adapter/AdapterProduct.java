@@ -386,12 +386,12 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         String timestamps = "" + System.currentTimeMillis();
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("partId", "" + timestamps);
-                        hashMap.put("prTitle", "" + title);
-                        hashMap.put("prId", "" + prId);
-                        hashMap.put("partLen", "" +dialAlenET.getText().toString().trim());
-                        hashMap.put("partMeas", "" + measurement);
-                        hashMap.put("partLoc", "" +location);
+                        hashMap.put("partId", timestamps);
+                        hashMap.put("prTitle", title);
+                        hashMap.put("prId", prId);
+                        hashMap.put("partLen", dialAlenET.getText().toString().trim());
+                        hashMap.put("partMeas", measurement);
+                        hashMap.put("partLoc", location);
 
                         bottomSheetDialog.show();
 
@@ -478,7 +478,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                         String editAT = "" + System.currentTimeMillis();
                         if (dialDiscPrice.length()>0) {
                             HashMap<String, Object> hashMap = new HashMap<>();
-                            hashMap.put("prPrice", "" + dialDiscPrice);
+                            hashMap.put("prPrice", dialDiscPrice);
                             hashMap.put("prOldPrice", prOldPrice);
                             if (!dialDiscNote.isEmpty()) {
                                 hashMap.put("prDiscNote", dialDiscNote);
@@ -487,7 +487,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                             Date prDate = new Date(Long.parseLong(editAT));
                             SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
                             String edit_at = sdfFormat.format(prDate);
-                            hashMap.put("prEditAt", "" + edit_at);
+                            hashMap.put("prEditAt", edit_at);
                             if (Objects.requireNonNull(auth.getCurrentUser()).getDisplayName() != null) {
                                 hashMap.put("prEditBy", auth.getCurrentUser().getDisplayName());
                             } else {

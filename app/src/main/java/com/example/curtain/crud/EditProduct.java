@@ -223,43 +223,43 @@ public class EditProduct extends AppCompatActivity {
 
         String editTimestamps = "" + System.currentTimeMillis();
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("prTitle", "" + title);
-        hashMap.put("prCat", "" + category);
+        hashMap.put("prTitle", title);
+        hashMap.put("prCat", category);
         if (!price.isEmpty()){
-            hashMap.put("prPrice", "" + price);
+            hashMap.put("prPrice", price);
         }
         if (!cost.isEmpty()) {
-            hashMap.put("prCost", "" + cost);
+            hashMap.put("prCost", cost);
         }
         if (!barcode.isEmpty()) {
-            hashMap.put("prBarcode", "" + barcode);
+            hashMap.put("prBarcode", barcode);
         }
         if (!desc.isEmpty()) {
-            hashMap.put("prDesc","" + desc);
+            hashMap.put("prDesc", desc);
         }
         if (!productHeight.isEmpty()) {
-            hashMap.put("prHeight", "" + productHeight);
+            hashMap.put("prHeight", productHeight);
         }
         if (!productColor.isEmpty()) {
-            hashMap.put("prColor", "" + productColor);
+            hashMap.put("prColor", productColor);
         }
         if (!productMass.isEmpty()) {
-            hashMap.put("prMass", "" + productMass);
+            hashMap.put("prMass", productMass);
         }
         if (!productCompany.isEmpty()) {
-            hashMap.put("prComp", "" + productCompany);
+            hashMap.put("prComp", productCompany);
         }
 
         Date prDate = new Date(Long.parseLong(editTimestamps));
         SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         String edit_at = sdfFormat.format(prDate);
-        hashMap.put("prEditAt", "" + edit_at);
+        hashMap.put("prEditAt", edit_at);
 
         String sharedUsername = Save.read(getApplicationContext(), "USER_TYPE", "username", "");
         if (Objects.requireNonNull(auth.getCurrentUser()).getDisplayName()!=null) {
-            hashMap.put("prEditBy", "" + auth.getCurrentUser().getDisplayName());
+            hashMap.put("prEditBy", auth.getCurrentUser().getDisplayName());
         } else {
-            hashMap.put("prEditBy", "" + sharedUsername);
+            hashMap.put("prEditBy", sharedUsername);
         }
 
         progressDialog.setMessage("Updating Product");

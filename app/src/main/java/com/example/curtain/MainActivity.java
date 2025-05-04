@@ -544,6 +544,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Har safar MainActivity qayta faol holatga kelganda loadOrders()ni qayta chaqiramiz
+        loadOrders();
+    }
+
+    @Override
     protected void onStart() {
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChangeListener, filter);

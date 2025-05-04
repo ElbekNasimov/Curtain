@@ -87,7 +87,7 @@ public class EditOrderObject extends AppCompatActivity {
 
 
         if (!editObjOrderDesc.isEmpty()) {
-            hashMap.put("objDescET", "" + editObjOrderDesc);
+            hashMap.put("objDescET", editObjOrderDesc);
         }
 
         DocumentReference productRef = firestore.collection("OrderObjects").document(orderObjectId);

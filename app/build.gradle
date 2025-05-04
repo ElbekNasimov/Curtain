@@ -71,7 +71,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // Worker
-    implementation "androidx.work:work-runtime:2.8.0" // Yangi versiya bo'lishi mumkin
+    implementation "androidx.work:work-runtime:2.10.1" // Yangi versiya bo'lishi mumkin
 
     // for memory leak
 //    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'

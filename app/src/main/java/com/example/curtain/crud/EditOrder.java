@@ -94,16 +94,16 @@ public class EditOrder extends AppCompatActivity {
         hashMap.put("orderName", editOrderName);
         hashMap.put("orderCat", editOrderCat);
         if (!editOrderSum.isEmpty()) {
-            hashMap.put("orderSum", "" + editOrderSum);
+            hashMap.put("orderSum", editOrderSum);
         }
         if (!editOrderPhone.isEmpty()) {
-            hashMap.put("orderPhone", "" + editOrderPhone);
+            hashMap.put("orderPhone", editOrderPhone);
         }
         if (!editOrderDesc.isEmpty()) {
-            hashMap.put("orderDesc", "" + editOrderDesc);
+            hashMap.put("orderDesc", editOrderDesc);
         }
         if (!editOrderLoc.isEmpty()) {
-            hashMap.put("orderLoc", "" + editOrderLoc);
+            hashMap.put("orderLoc", editOrderLoc);
         }
         if (editOrderLoc.equals("Viloyat")){
             hashMap.put("orderPercent", "3.5");

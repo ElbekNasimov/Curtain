@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.curtain.R;
-import com.example.curtain.activities.OrderDetail;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.crud.EditOrderObject;
 import com.example.curtain.model.ModelOrderObject;
@@ -45,7 +44,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.HolderOrderObject> {
 
@@ -496,8 +494,8 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
 //                                                                                    updateTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
 //                                                                        }
 //                                                                    });
-                                                                                                                        Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
-                                                                                                                        bottomSheetDialog1.dismiss();
+                                            Toast.makeText(context, "Qo'shildi", Toast.LENGTH_SHORT).show();
+                                            bottomSheetDialog1.dismiss();
                                             loadProductObjects(modelOrderObject.getOrderObjectId(), productOrderObjectsRV, noPartsTxt);
                                                                                                                         adapterProductObject.notifyDataSetChanged();
                                         } else {
@@ -510,7 +508,6 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                         Toast.makeText(context, "Mahsulot topilmadi", Toast.LENGTH_SHORT).show();
                     }
                 });
-
             });
         });
 
@@ -555,10 +552,10 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                             HashMap<String, Object> hashMap = new HashMap<>();
 
                             if (addExtraTxt.equals("Poshiv")){
-                                hashMap.put("objectPoshiv", "" + addExtraPrice);
+                                hashMap.put("objectPoshiv", addExtraPrice);
                             }
                             if (addExtraTxt.equals("Ustanovka")){
-                                hashMap.put("objectUstanovka", "" + addExtraPrice);
+                                hashMap.put("objectUstanovka", addExtraPrice);
                             }
                             firebaseFirestore.collection("OrderObjects").document(orderObjectId).update(hashMap)
                                     .addOnCompleteListener(task -> {

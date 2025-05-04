@@ -11,14 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.curtain.MainActivity;
 import com.example.curtain.R;
 import com.example.curtain.activities.OrderDetail;
 import com.example.curtain.filter.FilterOrder;

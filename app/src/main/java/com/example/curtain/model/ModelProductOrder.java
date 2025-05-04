@@ -2,8 +2,8 @@ package com.example.curtain.model;
 
 public class ModelProductOrder {
     private String created_by, orderId, productOrderId, productObjectOrderId, productId, partStatusProductOrder,
-             lenProductObjectOrder, productObjectOrder, qoldiqKusok, kesilganKusoklarList, productPriceProductOrder
-            ;
+             lenProductObjectOrder, productObjectOrder, qoldiqKusok, kesilganKusoklarList, productPriceProductOrder,
+            totalProductOrder, costProductOrder;
 
     public ModelProductOrder() {
     }
@@ -11,7 +11,7 @@ public class ModelProductOrder {
     public ModelProductOrder(String created_by, String orderId, String productObjectOrderId, String productOrderId,
                              String partStatusProductOrder, String productId, String lenProductObjectOrder,
                              String productObjectOrder,  String qoldiqKusok, String kesilganKusoklarList,
-                             String productPriceProductOrder) {
+                             String productPriceProductOrder, String totalProductOrder, String costProductOrder) {
         this.created_by = created_by; // kiritgan odam
         this.orderId = orderId; // smeta raqami
         this.productObjectOrderId = productObjectOrderId; // parda nomi
@@ -23,6 +23,8 @@ public class ModelProductOrder {
         this.qoldiqKusok = qoldiqKusok;
         this.kesilganKusoklarList = kesilganKusoklarList;
         this.productPriceProductOrder = productPriceProductOrder;  // price product order
+        this.totalProductOrder = totalProductOrder; // umumiy narx
+        this.costProductOrder = costProductOrder; // tannarx
     }
 
     public String getKesilganKusoklarList() {
@@ -111,5 +113,21 @@ public class ModelProductOrder {
 
     public void setProductPriceProductOrder(String productPriceProductOrder) {
         this.productPriceProductOrder = productPriceProductOrder;
+    }
+
+    public String getTotalProductOrder() {
+        return totalProductOrder;
+    }
+
+    public void setTotalProductOrder(String totalProductOrder) {
+        this.totalProductOrder = totalProductOrder;
+    }
+
+    public String getCostProductOrder() {
+        return costProductOrder;
+    }
+
+    public void setCostProductOrder(String costProductOrder) {
+        this.costProductOrder = costProductOrder;
     }
 }

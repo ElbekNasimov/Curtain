@@ -1,9 +1,8 @@
 package com.example.curtain.model;
 public class ModelOrder {
     private String created_at, created_by, orderId, orderNumber, orderCat, orderName, orderPhone, orderSum, orderLoc,
-            orderDesc,
-            orderStatus, orderPercent, edited_at, edit_by, orderCloseDate, orderZaklad, orderDeadline, orderUstanovka,
-            orderPoshiv, orderDesignerSalary, orderTotal;
+            orderDesc, orderStatus, orderPercent, edited_at, edit_by, orderCloseDate, orderZaklad,
+            orderDeadline, orderUstanovka, orderPoshiv, orderDesignerSalary, orderTotal, orderCost;
     /*
     orderNumber - smeta raqami,
     orderStatus - smeta holati,
@@ -13,6 +12,7 @@ public class ModelOrder {
     orderCloseDate - smeta yopilgan sana
     orderSum - dizayner yozgan summasi,
     orderTotal - avtomatik hisoblangan summa
+    orderCost - avtomatik hisoblangan tannarx
      */
 
     public ModelOrder() {
@@ -22,7 +22,7 @@ public class ModelOrder {
                       String orderName, String orderPhone, String orderZaklad, String orderDeadline,
                       String orderSum, String orderLoc, String orderDesc, String orderStatus, String orderPercent,
                       String edited_at, String edit_by, String orderCloseDate, String orderUstanovka, String orderPoshiv,
-                      String orderDesignerSalary, String orderTotal) {
+                      String orderDesignerSalary, String orderTotal, String orderCost) {
         this.created_at = created_at;
         this.created_by = created_by;
         this.orderId = orderId;
@@ -44,6 +44,7 @@ public class ModelOrder {
         this.orderPoshiv = orderPoshiv;
         this.orderDesignerSalary = orderDesignerSalary;
         this.orderTotal = orderTotal;
+        this.orderCost = orderCost;
     }
 
     public String getOrderUstanovka() {
@@ -204,4 +205,8 @@ public class ModelOrder {
     public String getOrderTotal() {return orderTotal;}
 
     public void setOrderTotal(String orderTotal) {this.orderTotal = orderTotal;}
+
+    public String getOrderCost() {return orderCost;}
+
+    public void setOrderCost(String orderCost) {this.orderCost = orderCost;}
 }

@@ -24,7 +24,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
 

@@ -29,14 +29,14 @@ public class CreateDailyReportWorker extends Worker {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         String todayDate = dateFormat.format(calendar.getTime());
-        long timestamp = calendar.getTimeInMillis();
+        String otchotId = "" + System.currentTimeMillis();
 
         HashMap<String , Object> reportData = new HashMap<>();
         reportData.put("title", todayDate);
-        reportData.put("otchotId", String.valueOf(timestamp));
+        reportData.put("otchotId", otchotId);
 
         firestore.collection("Otchotlar")
-                .document(String.valueOf(timestamp))
+                .document(otchotId)
                 .set(reportData)
                 .addOnSuccessListener(aVoid -> {
                     // Successfully written to Firestore

@@ -171,16 +171,16 @@ public class RegisterActivity extends AppCompatActivity {
         String uid = UUID.randomUUID().toString();
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("uid", ""+uid);
-        hashMap.put("username", ""+username);
-        hashMap.put("email", ""+email);
-        hashMap.put("password", ""+password);
+        hashMap.put("uid", uid);
+        hashMap.put("username", username);
+        hashMap.put("email", email);
+        hashMap.put("password", password);
         if (!phone.isEmpty()) {
-            hashMap.put("phone", "" + phone);
+            hashMap.put("phone", phone);
         }
-        hashMap.put("created_at", "" + created_at);
-        hashMap.put("user_type", "" + user_type);
-        hashMap.put("user_status", "" + Constants.userStatus[0]);
+        hashMap.put("created_at", created_at);
+        hashMap.put("user_type", user_type);
+        hashMap.put("user_status", Constants.userStatus[0]);
 
         usersDatabase.collection("Users").document(username).set(hashMap).
                 addOnCompleteListener(task -> {

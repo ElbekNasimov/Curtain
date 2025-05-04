@@ -13,7 +13,7 @@
         android:background="@drawable/shape_rect01"
         android:padding="10dp" >
         <ImageButton
-            android:id="@+id/otchotBackBtn"
+            android:id="@+id/goHomeBtn"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:background="@null"
