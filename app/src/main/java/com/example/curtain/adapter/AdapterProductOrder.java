@@ -2,7 +2,6 @@ package com.example.curtain.adapter;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.text.TextUtils;
@@ -22,13 +21,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.curtain.R;
-import com.example.curtain.activities.OrderDetail;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.model.ModelPart;
 import com.example.curtain.model.ModelProductOrder;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -41,7 +38,6 @@ import java.util.List;
 
 public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrder.HolderProductOrder>{
     private FirebaseFirestore firestore;
-    private FirebaseAuth mAuth;
     private Context context;
     private ArrayList<ModelProductOrder> productOrderArrayList;
     private ArrayList<ModelPart> partsList;
@@ -115,7 +111,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
         float sum = price * len;
         holder.sumProductOrderTV.setText(String.format("%s $", sum));
 
-        String sharedUserName = sharedPreferences.getString("username", "");
         if (holder.productOrderStatusTV.getText().toString().equals("kesildi")){
             if (!sharedUserType.equals(Constants.userTypes[4])) {
                 holder.delProductOrderBtn.setVisibility(View.GONE);
@@ -173,7 +168,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
             }
         });
 
-
         holder.delProductOrderBtn.setOnClickListener(view -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle("Delete").setMessage("O'chirmoqchimisiz?")
@@ -201,7 +195,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
             alertDialog.setView(dialogView)
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("lenProductObjectOrder", editPartET.getText().toString().trim());
+                        hashMap.put("lenProductObjectOrder", ""+editPartET.getText().toString().trim());
                         if (!TextUtils.isEmpty(editPartET.getText())) {
                             reference.update(hashMap).addOnSuccessListener(unused ->
                                             Toast.makeText(context, "Updated...", Toast.LENGTH_SHORT).show())
@@ -236,7 +230,8 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
                         String status = "bichildi";
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("partStatusProductOrder", "" + status);
+                        hashMap.put("partStatusProductOrder", ""+status);
+
                         DocumentReference statusRef = firestore.collection("ProductsOrder").document(productObjectOrderId);
                         statusRef.update(hashMap).addOnSuccessListener(unused -> {
 
@@ -298,10 +293,12 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
             if (task.isSuccessful()){
                 progressDialog.dismiss();
                 partsList.clear();
+
                 for (DocumentSnapshot snapshot : task.getResult()){
                     ModelPart modelPart = snapshot.toObject(ModelPart.class);
                     partsList.add(modelPart);
                 }
+
                 adapterCutPartPrOrder = new AdapterCutPartPrOrder(context, partsList,
                         chosenPartPrOrderET, chosenPartIdPrOrderTV);
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
@@ -325,7 +322,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
             } else {
                 partCutPrObjLen = partCutPrObjLenET.getText().toString().trim();
             }
-
 
             if (TextUtils.isEmpty(chosenPartPrOrderET.getText())){
                 Toast.makeText(context, "Kusokni tanlang...", Toast.LENGTH_SHORT).show();
@@ -362,18 +358,19 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                     String kusokHolati = "kesilmoqda";
                     String timestamps = "" + System.currentTimeMillis();
                     HashMap<String, Object> hashMap = new HashMap<>();
-                    hashMap.put("cutIdPartProductOrder", "" + timestamps);      // vaqti va kesilgan smeta kusogi id
-                    hashMap.put("chosenPartIdPrOrder", chosenPartIdPrOrder);   // tanlangan smeta kusok id
-                    hashMap.put("chosenPartPrOrder", chosenPartPrOrder);       // tanlangan smeta kusok uzunligi
-                    hashMap.put("partCutPrObjLen", partCutPrObjLen);           // kesilgan smeta kusok uzunligi
-                    hashMap.put("orderId", "" + orderId);                           // Smeta id
-                    hashMap.put("productObjectOrderId", "" + productObjectOrderId); // productOrderId
-                    hashMap.put("productId", "" + productId);                    // product id
-                    hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
+                    hashMap.put("cutIdPartProductOrder", ""+timestamps);      // vaqti va kesilgan smeta kusogi id
+                    hashMap.put("chosenPartIdPrOrder", ""+chosenPartIdPrOrder);   // tanlangan smeta kusok id
+                    hashMap.put("chosenPartPrOrder", ""+chosenPartPrOrder);       // tanlangan smeta kusok uzunligi
+                    hashMap.put("partCutPrObjLen", ""+partCutPrObjLen);           // kesilgan smeta kusok uzunligi
+                    hashMap.put("orderId", ""+orderId);                           // Smeta id
+                    hashMap.put("productObjectOrderId", ""+productObjectOrderId); // productOrderId
+                    hashMap.put("productId", ""+productId);                    // product id
+                    hashMap.put("tanlanganKusokUzunligiOrder", ""+productLength);
 
                     firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                         progressDialog.dismiss();
                         if (task.isSuccessful()) {
+
                             changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
                             changeStatusPartPrOrder(orderId, "kesilmoqda");
                             changeStatusProductsOrder(productObjectOrderId, kusokHolati, keyingiQoldiq, finalMyList);
@@ -385,7 +382,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                                     + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
-
                 }
             }
 
@@ -402,18 +398,19 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                 String kusokHolati = "kesilmoqda";
                 String timestamps = "" + System.currentTimeMillis();
                 HashMap<String, Object> hashMap = new HashMap<>();
-                hashMap.put("cutIdPartProductOrder", "" + timestamps);      // vaqti va kesilgan smeta kusogi id
-                hashMap.put("chosenPartIdPrOrder", chosenPartIdPrOrder);   // tanlangan smeta kusok id
-                hashMap.put("chosenPartPrOrder", chosenPartPrOrder);       // tanlangan smeta kusok uzunligi
-                hashMap.put("partCutPrObjLen", partCutPrObjLen);           // kesilgan smeta kusok uzunligi
-                hashMap.put("orderId", "" + orderId);                           // Smeta id
-                hashMap.put("productObjectOrderId", "" + productObjectOrderId); // productOrderId
-                hashMap.put("productId", "" + productId);                    // product id
-                hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
+                hashMap.put("cutIdPartProductOrder", ""+timestamps);      // vaqti va kesilgan smeta kusogi id
+                hashMap.put("chosenPartIdPrOrder", ""+chosenPartIdPrOrder);   // tanlangan smeta kusok id
+                hashMap.put("chosenPartPrOrder", ""+chosenPartPrOrder);       // tanlangan smeta kusok uzunligi
+                hashMap.put("partCutPrObjLen", ""+partCutPrObjLen);           // kesilgan smeta kusok uzunligi
+                hashMap.put("orderId", ""+orderId);                           // Smeta id
+                hashMap.put("productObjectOrderId", ""+productObjectOrderId); // productOrderId
+                hashMap.put("productId", ""+productId);                    // product id
+                hashMap.put("tanlanganKusokUzunligiOrder", ""+productLength);
 
                 firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                     progressDialog.dismiss();
                     if (task.isSuccessful()) {
+
                         changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
                         changeStatusPartPrOrder(orderId, "Kesilmoqda");
                         changeStatusProductsOrder(productObjectOrderId, kusokHolati, keyingiQoldiq, finalMyList);
@@ -425,7 +422,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                                 + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
             }
 
 // Bu tayyor, deylik 12 metr zakas berildi. shundan katta kusokdan 12 metr kesilsa, ishlaydi
@@ -434,20 +430,21 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                 String kusokHolati = "kesildi";
                 String timestamps = "" + System.currentTimeMillis();
                 HashMap<String, Object> hashMap = new HashMap<>();
-                hashMap.put("cutIdPartProductOrder", "" + timestamps);      // vaqti va kesilgan smeta kusogi id
-                hashMap.put("chosenPartIdPrOrder", chosenPartIdPrOrder);   // tanlangan smeta kusok id
-                hashMap.put("chosenPartPrOrder", chosenPartPrOrder);       // tanlangan smeta kusok uzunligi
-                hashMap.put("partCutPrObjLen", partCutPrObjLen);           // kesilgan smeta kusok uzunligi
-                hashMap.put("orderId", "" + orderId);                           // Smeta id
-                hashMap.put("productObjectOrderId", "" + productObjectOrderId); // productOrderId
-                hashMap.put("productId", "" + productId);                    // product id
-                hashMap.put("tanlanganKusokUzunligiOrder", "" + productLength);
-                hashMap.put("partStatusProductOrder", "" + kusokHolati);                          // holat - status
+                hashMap.put("cutIdPartProductOrder", ""+timestamps);      // vaqti va kesilgan smeta kusogi id
+                hashMap.put("chosenPartIdPrOrder", ""+chosenPartIdPrOrder);   // tanlangan smeta kusok id
+                hashMap.put("chosenPartPrOrder", ""+chosenPartPrOrder);       // tanlangan smeta kusok uzunligi
+                hashMap.put("partCutPrObjLen", ""+partCutPrObjLen);           // kesilgan smeta kusok uzunligi
+                hashMap.put("orderId", ""+orderId);                           // Smeta id
+                hashMap.put("productObjectOrderId", ""+productObjectOrderId); // productOrderId
+                hashMap.put("productId", ""+productId);                    // product id
+                hashMap.put("tanlanganKusokUzunligiOrder", ""+productLength);
+                hashMap.put("partStatusProductOrder", ""+kusokHolati);                          // holat - status
 
                 firestore.collection("CutPartProduct").document(timestamps).set(hashMap).
                         addOnCompleteListener(task -> {
                             progressDialog.dismiss();
                             if (task.isSuccessful()) {
+
                                 changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
                                 changeStatusPartPrOrder(orderId, "Kesilmoqda");
                                 changeStatusProductsOrder(productObjectOrderId, kusokHolati, farq, finalMyList);
@@ -466,6 +463,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
     private void changeStatusPartPrOrder(String  orderId, String changeOrderStatus){
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("orderStatus", ""+changeOrderStatus);  // kesish holati
+
         DocumentReference orderRef = firestore.collection("Orders").document(orderId);
         orderRef.update(hashMap).addOnSuccessListener(unused ->
                         Log.d("AdapterProductOrder", "Bajarildi"))
@@ -476,16 +474,17 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
     private void changeStatusProductsOrder(String productObjectOrderId, String kusokHolati,
                                            Float qoldiqKusok, List<String> kesilganKusoklarList){
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("partStatusProductOrder", "" + kusokHolati);
+        hashMap.put("partStatusProductOrder", ""+kusokHolati);
         if (!kesilganKusoklarList.isEmpty()) {
             hashMap.put("kesilganKusoklarList", "" + kesilganKusoklarList);
         }
         if (qoldiqKusok>0){
             hashMap.put("qoldiqKusok", "" + qoldiqKusok);
         } else if (qoldiqKusok == 0){
-            hashMap.put("partStatusProductOrder", "" + "kesildi");
+            hashMap.put("partStatusProductOrder", "kesildi");
             hashMap.put("qoldiqKusok", "");
         }
+
         DocumentReference statusRef = firestore.collection("ProductsOrder").document(productObjectOrderId);
         statusRef.update(hashMap).addOnSuccessListener(unused ->
                 Toast.makeText(context, kusokHolati, Toast.LENGTH_SHORT).show())
@@ -497,7 +496,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
         HashMap<String, Object> hashMap = new HashMap<>();
         float cutPartLen = Float.parseFloat(chosenPartPrOrder) - Float.parseFloat(partCutPrObjLen);
-        hashMap.put("partLen", "" + cutPartLen);
+        hashMap.put("partLen", ""+cutPartLen);
         DocumentReference partRef = firestore.collection("Parts").document(chosenPartIdPrOrder);
         partRef.update(hashMap).addOnSuccessListener(unused ->
                         Log.d("AdapterProductOrder", "Bajarildi"))

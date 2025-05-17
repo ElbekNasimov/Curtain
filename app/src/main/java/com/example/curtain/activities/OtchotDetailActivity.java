@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.curtain.MainActivity;
 import com.example.curtain.R;
 import com.example.curtain.adapter.AdapterOylikXarajat;
 import com.example.curtain.databinding.ActivityOtchotDetailBinding;

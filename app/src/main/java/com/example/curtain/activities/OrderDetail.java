@@ -291,10 +291,10 @@ public class OrderDetail extends AppCompatActivity {
                             HashMap<String, Object> hashMap = new HashMap<>();
 
                             if (addExtraTxt.equals("Poshiv")){
-                                hashMap.put("orderPoshiv", addExtraPrice);
+                                hashMap.put("orderPoshiv", ""+addExtraPrice);
                             }
                             if (addExtraTxt.equals("Ustanovka")){
-                                hashMap.put("orderUstanovka", addExtraPrice);
+                                hashMap.put("orderUstanovka", ""+addExtraPrice);
                             }
                             firestore.collection("Orders").document(orderId).update(hashMap)
                                     .addOnCompleteListener(task -> {
@@ -386,15 +386,15 @@ public class OrderDetail extends AppCompatActivity {
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         String timestamps = "" + System.currentTimeMillis();
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("orderPayId", timestamps);
-                        hashMap.put("orderNumber", orderId);
-                        hashMap.put("orderPay", dialPayET.getText().toString().trim());
+                        hashMap.put("orderPayId", ""+timestamps);
+                        hashMap.put("orderNumber", ""+orderId);
+                        hashMap.put("orderPay", ""+dialPayET.getText().toString().trim());
 
                         Date prDate = new Date(Long.parseLong(timestamps));
                         SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
                         String created_at = sdfFormat.format(prDate);
-                        hashMap.put("created_at", created_at);
-                        hashMap.put("created_by", sharedUsername);
+                        hashMap.put("created_at", ""+created_at);
+                        hashMap.put("created_by", ""+sharedUsername);
 
                         if (!TextUtils.isEmpty(dialPayET.getText())) {
                             firestore.collection("OrderPays").document(timestamps).set(hashMap)
@@ -418,13 +418,12 @@ public class OrderDetail extends AppCompatActivity {
             alertDialog.setView(dialogView);
             AlertDialog dialog = alertDialog.create();
             dialog.show();
-
         });
 
         addPrToOrderBtn.setOnClickListener(view ->
-            bottomSheetDialog(orderId));
+                bottomSheetDialog(orderId)
+        );
 
-        // deepseekda tuzatildi
         addObjToOrderBtn.setOnClickListener(view -> {
 
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
@@ -443,15 +442,15 @@ public class OrderDetail extends AppCompatActivity {
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         String timestamps = "" + System.currentTimeMillis();
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("orderObjectId", timestamps);
-                        hashMap.put("orderId", orderId);
-                        hashMap.put("orderRoom", orderRoom);
-                        hashMap.put("objRoom", objRoom);
+                        hashMap.put("orderObjectId", ""+timestamps);
+                        hashMap.put("orderId", ""+orderId);
+                        hashMap.put("orderRoom", ""+orderRoom);
+                        hashMap.put("objRoom", ""+objRoom);
 
                         if (!objDescET.getText().toString().trim().isEmpty()) {
-                            hashMap.put("objDescET", objDescET.getText().toString().trim());
+                            hashMap.put("objDescET", ""+objDescET.getText().toString().trim());
                         }
-                        hashMap.put("created_by", firebaseAuth.getCurrentUser().getDisplayName());
+                        hashMap.put("created_by", ""+firebaseAuth.getCurrentUser().getDisplayName());
 
                         if (!orderRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase(Constants.orderRooms[0]) &&
                                 !objRoomSpinner.getSelectedItem().toString().trim().equalsIgnoreCase(Constants.objRooms[0])) {
@@ -531,7 +530,6 @@ public class OrderDetail extends AppCompatActivity {
                 Toast.makeText(this, "Poshivni Orderga qo'shishda Xatolik", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
     private void bottomSheetDialog(String orderId){
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
@@ -605,13 +603,13 @@ public class OrderDetail extends AppCompatActivity {
             String timestamps = "" + System.currentTimeMillis();
             HashMap<String, Object> hashMap = new HashMap<>();
 //            Document - ProductOrder, ProductObjectOrder
-            hashMap.put("productObjectOrder", productObjectOrder);
-            hashMap.put("lenProductObjectOrder", lenProductObjectOrder);
-            hashMap.put("productObjectOrderId", timestamps);
-            hashMap.put("orderId", orderId);
-            hashMap.put("productId", productId);
+            hashMap.put("productObjectOrder", ""+productObjectOrder);
+            hashMap.put("lenProductObjectOrder", ""+lenProductObjectOrder);
+            hashMap.put("productObjectOrderId", ""+timestamps);
+            hashMap.put("orderId", ""+orderId);
+            hashMap.put("productId", ""+productId);
             hashMap.put("partStatusProductOrder", "holat");
-            hashMap.put("created_by", firebaseAuth.getCurrentUser().getDisplayName());
+            hashMap.put("created_by", ""+firebaseAuth.getCurrentUser().getDisplayName());
 
             DocumentReference productRef = firestore.collection("Products").document(productId);
             productRef.get().addOnCompleteListener(task -> {
@@ -623,6 +621,7 @@ public class OrderDetail extends AppCompatActivity {
                                 addOnCompleteListener(task1 -> {
                                     progressDialog.dismiss();
                                     if (task1.isSuccessful()){
+
                                         Toast.makeText(this, "Qo'shildi", Toast.LENGTH_SHORT).show();
                                         Intent intent = new Intent(this, OrderDetail.class);
                                         intent.putExtra("orderId", orderId);
@@ -1455,6 +1454,9 @@ public class OrderDetail extends AppCompatActivity {
                     if (!queryDocumentSnapshots.isEmpty()){
                         DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
                         String otchotId = documentSnapshot.getId();
+
+
+
                         String sumYopilganOrder = documentSnapshot.getString("sumYopilganOrder") != null ?
                                 documentSnapshot.getString("sumYopilganOrder") : "0";
                         String costYopilganOrder = documentSnapshot.getString("costYopilganOrder") != null ?
@@ -1652,13 +1654,14 @@ public class OrderDetail extends AppCompatActivity {
         progressDialog.show();
         CollectionReference productsOrderRef = firestore.collection("ProductsOrder");
         productsOrderRef.whereEqualTo("orderId", orderId).get().addOnCompleteListener(task -> {
+            progressDialog.dismiss();
             if (task.isSuccessful()){
-                progressDialog.dismiss();
                 productOrderArrayList.clear();
                 for (DocumentSnapshot snapshot : task.getResult()){
                     ModelProductOrder modelProductOrder = snapshot.toObject(ModelProductOrder.class);
                     productOrderArrayList.add(modelProductOrder);
                 }
+
                 if (productOrderArrayList.isEmpty()){
                     productOrdersRV.setVisibility(View.GONE);
                 }

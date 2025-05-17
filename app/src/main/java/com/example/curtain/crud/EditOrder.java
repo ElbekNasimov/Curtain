@@ -199,7 +199,6 @@ public class EditOrder extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(this.getResources().getString(R.string.wait));
         progressDialog.setCanceledOnTouchOutside(false);
-
     }
 
     private void categoryDialog(){

@@ -231,7 +231,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             alertDialog.setView(dialogView)
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("objectPoshiv", editPartET.getText().toString().trim());
+                        hashMap.put("objectPoshiv", ""+editPartET.getText().toString().trim());
                         if (!TextUtils.isEmpty(editPartET.getText().toString().trim())) {
                             partRef.update(hashMap).addOnSuccessListener(unused -> {
                                         modelOrderObject.setObjectPoshiv(editPartET.getText().toString().trim()); // Modelni yangilash
@@ -262,7 +262,7 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
             alertDialog.setView(dialogView)
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("objectUstanovka", editPartET.getText().toString().trim());
+                        hashMap.put("objectUstanovka", ""+editPartET.getText().toString().trim());
                         if (!TextUtils.isEmpty(editPartET.getText().toString().trim())) {
                             partRef.update(hashMap).addOnSuccessListener(unused -> {
                                         modelOrderObject.setObjectPoshiv(editPartET.getText().toString().trim()); // Modelni yangilash
@@ -408,14 +408,14 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                 String timestamps = "" + System.currentTimeMillis();
                 HashMap<String, Object> hashMap = new HashMap<>();
 
-                hashMap.put("titleProductObject", productObject);
-                hashMap.put("lenProductObject", lenProductOrder);
-                hashMap.put("objectOrderId", orderObjectId);
-                hashMap.put("productObjectId", timestamps);
-                hashMap.put("orderId", orderId);
-                hashMap.put("productId", productId);
+                hashMap.put("titleProductObject", ""+productObject);
+                hashMap.put("lenProductObject", ""+lenProductOrder);
+                hashMap.put("objectOrderId", ""+orderObjectId);
+                hashMap.put("productObjectId", ""+timestamps);
+                hashMap.put("orderId", ""+orderId);
+                hashMap.put("productId", ""+productId);
                 hashMap.put("partStatusProductObject", "holat");
-                hashMap.put("created_by", firebaseAuth.getCurrentUser().getDisplayName());
+                hashMap.put("created_by", ""+firebaseAuth.getCurrentUser().getDisplayName());
 
                 DocumentReference productRef = firebaseFirestore.collection("Products").document(productId);
                 productRef.get().addOnCompleteListener(task -> {
@@ -437,15 +437,15 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                             String formattedObjectCost = df.format(objectCosDouble);
 
                             if (productPrice != null){
-                                hashMap.put("productPriceProductOrder", productPrice);
-                                hashMap.put("objectSum", formattedObjectSum);
+                                hashMap.put("productPriceProductOrder", ""+productPrice);
+                                hashMap.put("objectSum", ""+formattedObjectSum);
                             }
                             if (productCost!= null){
-                                hashMap.put("productCostProductOrder", productCost);
-                                hashMap.put("objectCost", formattedObjectCost);
+                                hashMap.put("productCostProductOrder", ""+productCost);
+                                hashMap.put("objectCost", ""+formattedObjectCost);
                             }
                             if (productType != null){
-                                hashMap.put("productTypeProductOrder", productType);
+                                hashMap.put("productTypeProductOrder", ""+productType);
                             }
 
                             firebaseFirestore.collection("ProductObjectOrder").document(timestamps).set(hashMap).
@@ -552,10 +552,10 @@ public class AdapterOrderObject extends RecyclerView.Adapter<AdapterOrderObject.
                             HashMap<String, Object> hashMap = new HashMap<>();
 
                             if (addExtraTxt.equals("Poshiv")){
-                                hashMap.put("objectPoshiv", addExtraPrice);
+                                hashMap.put("objectPoshiv", ""+addExtraPrice);
                             }
                             if (addExtraTxt.equals("Ustanovka")){
-                                hashMap.put("objectUstanovka", addExtraPrice);
+                                hashMap.put("objectUstanovka", ""+addExtraPrice);
                             }
                             firebaseFirestore.collection("OrderObjects").document(orderObjectId).update(hashMap)
                                     .addOnCompleteListener(task -> {

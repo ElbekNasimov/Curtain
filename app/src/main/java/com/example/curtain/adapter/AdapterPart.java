@@ -153,7 +153,7 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
             alertDialog.setView(dialogView)
                     .setPositiveButton(R.string.save_me, (dialogInterface, i) -> {
                         HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("partLen", editPartET.getText().toString().trim());
+                        hashMap.put("partLen", ""+editPartET.getText().toString().trim());
                         if (!TextUtils.isEmpty(editPartET.getText().toString().trim())) {
                             partRef.update(hashMap).addOnSuccessListener(unused -> {
                                         modelPart.setPartLen(editPartET.getText().toString().trim()); // Modelni yangilash

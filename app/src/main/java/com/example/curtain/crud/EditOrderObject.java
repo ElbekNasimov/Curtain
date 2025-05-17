@@ -82,12 +82,12 @@ public class EditOrderObject extends AppCompatActivity {
         progressDialog.show();
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("objRoom", editObjOrderRoom);
-        hashMap.put("orderRoom", editOrderRoom);
+        hashMap.put("objRoom", ""+editObjOrderRoom);
+        hashMap.put("orderRoom", ""+editOrderRoom);
 
 
         if (!editObjOrderDesc.isEmpty()) {
-            hashMap.put("objDescET", editObjOrderDesc);
+            hashMap.put("objDescET", ""+editObjOrderDesc);
         }
 
         DocumentReference productRef = firestore.collection("OrderObjects").document(orderObjectId);

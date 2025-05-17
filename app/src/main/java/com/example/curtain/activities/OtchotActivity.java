@@ -6,6 +6,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +35,7 @@ public class OtchotActivity extends AppCompatActivity {
     private ArrayList<ModelOtchotlar> otchotList;
     private String sharedUserType;
     private RecyclerView otchotListRV;
+    private ImageButton backBtn;
     private ProgressDialog progressDialog;
     private AdapterOtchot adapterOtchot;
     NetworkChangeListener networkChangeListener = new NetworkChangeListener();
