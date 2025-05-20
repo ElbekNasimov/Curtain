@@ -524,6 +524,9 @@ public class OrderDetail extends AppCompatActivity {
                     }
                     float orderExtraPriceFloat = Float.parseFloat(addExtraPrice);
                     float orderTotal = orderPoshivFloat + orderExtraPriceFloat;
+                    if (String.valueOf(orderTotal).contains(",")){
+                        String.valueOf(orderTotal).replace(",", ".");
+                    }
                     orderRef.update("orderTotal", ""+orderTotal);
                 }
             } else {
@@ -616,17 +619,47 @@ public class OrderDetail extends AppCompatActivity {
                 if (task.isSuccessful()){
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot.exists()){
-                        hashMap.put("productPriceProductOrder", documentSnapshot.getString("prPrice"));
+
+                        float lenProductObjectOrderFloat = Float.parseFloat(lenProductObjectOrder);
+                        float totalProductOrder;
+                        float costProductOrder;
+                        if (documentSnapshot.contains("prPrice")){
+                            hashMap.put("productPriceProductOrder", documentSnapshot.getString("prPrice"));
+                            float productPrice = Float.parseFloat(documentSnapshot.getString("prPrice"));
+                            totalProductOrder = productPrice * lenProductObjectOrderFloat;
+                            if (String.valueOf(totalProductOrder).contains(",")){
+                                String.valueOf(totalProductOrder).replace(",", ".");
+                            }
+                            hashMap.put("totalProductOrder", ""+totalProductOrder);
+                        } else {
+                            totalProductOrder = 0;
+                        }
+
+                        if (documentSnapshot.contains("prCost")){
+                            hashMap.put("productCostProductOrder", documentSnapshot.getString("prCost"));
+                            float productCost = Float.parseFloat(documentSnapshot.getString("prCost"));
+                            costProductOrder = productCost * lenProductObjectOrderFloat;
+                            if (String.valueOf(costProductOrder).contains(",")){
+                                String.valueOf(costProductOrder).replace(",", ".");
+                            }
+                            hashMap.put("costProductOrder", ""+costProductOrder);
+                        } else {
+                            costProductOrder = 0;
+                        }
+
                         firestore.collection("ProductsOrder").document(timestamps).set(hashMap).
                                 addOnCompleteListener(task1 -> {
                                     progressDialog.dismiss();
                                     if (task1.isSuccessful()){
 
                                         Toast.makeText(this, "Qo'shildi", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(this, OrderDetail.class);
-                                        intent.putExtra("orderId", orderId);
-                                        startActivity(intent);
-                                        finish();
+
+                                        // add totalProductOrder and costProductOrder to Order by orderId
+                                        addTotalAndCostToOrder(orderId, totalProductOrder, costProductOrder);
+
+                                        bottomSheetDialog.dismiss();
+                                        loadProductOrders(orderId);
+
                                     } else {
                                         Toast.makeText(this, "Qo'shishda muammo " +
                                                 task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -639,6 +672,61 @@ public class OrderDetail extends AppCompatActivity {
             });
         });
     }
+
+    private void addTotalAndCostToOrder(String orderId, float totalProductOrder, float costProductOrder) {
+        DocumentReference orderRef = firestore.collection("Orders").document(orderId);
+        orderRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (documentSnapshot.exists()){
+                    float orderTotalFromModel;   // from model
+                    float orderCostFromModel;    // from model
+
+                    if (documentSnapshot.contains("orderTotal")){
+                        orderTotalFromModel = Float.parseFloat(documentSnapshot.getString("orderTotal"));
+                        if (String.valueOf(orderTotalFromModel).contains(",")){
+                            String.valueOf(orderTotalFromModel).replace(",", ".");
+                        }
+                    } else {
+                        orderTotalFromModel = 0;
+                    }
+
+                    if (documentSnapshot.contains("orderCost")){
+                        orderCostFromModel = Float.parseFloat(documentSnapshot.getString("orderCost"));
+                        if (String.valueOf(orderCostFromModel).contains(",")){
+                            String.valueOf(orderCostFromModel).replace(",", ".");
+                        }
+                    } else {
+                        orderCostFromModel = 0;
+                    }
+
+                    float newOrderTotal = orderTotalFromModel + totalProductOrder;
+                    float newOrderCost = orderCostFromModel + costProductOrder;
+
+                    HashMap<String, Object> hashMap1 = new HashMap<>();
+                    hashMap1.put("orderTotal", ""+newOrderTotal);
+                    hashMap1.put("orderCost", ""+newOrderCost);
+
+                    orderRef.update(hashMap1).addOnCompleteListener(task12 -> {
+                        if (task12.isSuccessful()){
+                            progressDialog.dismiss();
+
+                            loadOrderDetail(orderId);
+                        } else {
+                            progressDialog.dismiss();
+                            Toast.makeText(this, "Qo'shishda muammo " +
+                                    task12.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            } else {
+                progressDialog.dismiss();
+                Toast.makeText(this, "orderTotal va orderCostni qo'shishda xatolik",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void init(){
         context = this;
         firebaseAuth = FirebaseAuth.getInstance();
@@ -1269,11 +1357,11 @@ public class OrderDetail extends AppCompatActivity {
                         designerPayStatusTV.setTextColor(Color.BLUE);
                     }
                     if (doc.contains("orderTotal")) {
-                        orderTotalTV.setText(String.format("Total: %s",doc.getString("orderTotal")));
+                        orderTotalTV.setText(doc.getString("orderTotal"));
                     }
-                    else {
-                        orderTotalTV.setText("0");
-                        orderTotalTV.setVisibility(View.GONE);
+
+                    if (doc.contains("orderCost")) {
+                        orderCostTV.setText(String.format("Tannarx: %s",doc.getString("orderCost")));
                     }
 
                     if (doc.contains("orderStatus")) {
@@ -1362,8 +1450,8 @@ public class OrderDetail extends AppCompatActivity {
                                                 Toast.makeText(this, "Smeta yopildi", Toast.LENGTH_SHORT).show();
 
                                                 addYopilganOrderToOtchotlar();
-                                                collectSumYopilganOrderToOtchotlar(orderSumTV.getText().toString(),
-                                                        orderCostTV.getText().toString());
+//                                                collectSumYopilganOrderToOtchotlar(orderSumTV.getText().toString(),
+//                                                        orderCostTV.getText().toString());
 
                                                 Intent intent = new Intent(this, OrderDetail.class);
                                                 intent.putExtra("orderId", orderId);
@@ -1464,11 +1552,14 @@ public class OrderDetail extends AppCompatActivity {
 
                         HashMap<String, Object> changeOtchot = new HashMap<>();
                         changeOtchot.put("title", todayDate);
-                        changeOtchot.put("sumYopilganOrder", String.valueOf(Integer.parseInt(sumYopilganOrder)
+                        Toast.makeText(context, "sumYopilganOrder " + sumYopilganOrder, Toast.LENGTH_SHORT).show();
+                        if (!sumYopilganOrder.equals("0")) {
+                            changeOtchot.put("sumYopilganOrder", String.valueOf(Integer.parseInt(sumYopilganOrder)
                                 + Integer.parseInt(ordSum.substring(7))));
-                        if (orderCost.length()>14) {
+                        }
+                        if (orderCost.substring(9).length()>0) {
                             changeOtchot.put("costYopilganOrder", String.valueOf(Integer.parseInt(costYopilganOrder)
-                                    + Integer.parseInt(orderCost.substring(16))));
+                                    + Integer.parseInt(orderCost.substring(9))));
                         }
                         firestore.collection("Otchotlar")
                                 .document(otchotId)
@@ -1483,9 +1574,9 @@ public class OrderDetail extends AppCompatActivity {
                         HashMap<String, Object> newOtchot = new HashMap<>();
                         newOtchot.put("title", todayDate);
                         newOtchot.put("sumYopilganOrder", Integer.parseInt(ordSum.substring(7)));
-                        if (orderCost.length()>14) {
-                            newOtchot.put("costYopilganOrder", Integer.parseInt(orderCost.substring(16)));
-                        }
+//                        if (orderCost.length()>14) {
+//                            newOtchot.put("costYopilganOrder", Integer.parseInt(orderCost.substring(16)));
+//                        }
 
                         firestore.collection("Otchotlar")
                                 .add(newOtchot)
@@ -1546,18 +1637,30 @@ public class OrderDetail extends AppCompatActivity {
                     if (!queryDocumentSnapshots.isEmpty()){
                         DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
                         String otchotId = documentSnapshot.getId();
+
+                        HashMap<String, Object> changeOtchot = new HashMap<>();
+                        changeOtchot.put("title", todayDate);
+
+                        if (documentSnapshot.getString("sumChiqqanOrder") != null) {
+                            String sumChiqqanOrder = documentSnapshot.getString("sumChiqqanOrder");
+                            Toast.makeText(context, "sumchiqqanOrder " + sumChiqqanOrder, Toast.LENGTH_SHORT).show();
+//                            changeOtchot.put("sumChiqqanOrder", String.valueOf(Integer.parseInt(sumChiqqanOrder)
+//                                + Integer.parseInt(ordSum.substring(7))));
+                        }
+
                         String sumChiqqanOrder = documentSnapshot.getString("sumChiqqanOrder") != null ?
                                 documentSnapshot.getString("sumChiqqanOrder") : "0";
                         String costChiqqanOrder = documentSnapshot.getString("costChiqqanOrder") != null ?
                                 documentSnapshot.getString("costChiqqanOrder") : "0";
 
-                        HashMap<String, Object> changeOtchot = new HashMap<>();
-                        changeOtchot.put("title", todayDate);
-                        changeOtchot.put("sumChiqqanOrder", String.valueOf(Integer.parseInt(sumChiqqanOrder)
-                                + Integer.parseInt(ordSum.substring(7))));
-                        if (orderCost.length()>14) {
-                            changeOtchot.put("costChiqqanOrder", String.valueOf(Integer.parseInt(costChiqqanOrder)
-                                    + Integer.parseInt(orderCost.substring(16))));
+                        Toast.makeText(context, "ordSum " + ordSum, Toast.LENGTH_SHORT).show();
+
+                        if (orderCost.length()>0) {
+//                            changeOtchot.put("costChiqqanOrder", String.valueOf(Integer.parseInt(costChiqqanOrder)
+//                                    + Integer.parseInt(orderCost.substring(8))));
+                            Toast.makeText(context, "ordSum " + ordSum.length(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            changeOtchot.put("costChiqqanOrder", String.valueOf(Integer.parseInt(costChiqqanOrder)));
                         }
                         firestore.collection("Otchotlar")
                                 .document(otchotId)
@@ -1572,8 +1675,11 @@ public class OrderDetail extends AppCompatActivity {
                         HashMap<String, Object> newOtchot = new HashMap<>();
                         newOtchot.put("title", todayDate);
                         newOtchot.put("sumChiqqanOrder", Integer.parseInt(ordSum.substring(7)));
-                        if (orderCost.length()>14) {
-                            newOtchot.put("costChiqqanOrder", Integer.parseInt(orderCost.substring(16)));
+                        Toast.makeText(context, "orderCost " + orderCost, Toast.LENGTH_SHORT).show();
+                        if (Integer.parseInt(orderCost.substring(9))>0) {
+                            newOtchot.put("costChiqqanOrder", Integer.parseInt(orderCost.substring(9)));
+                        } else {
+                            Toast.makeText(context, "ha kirmadi " + orderCost, Toast.LENGTH_SHORT).show();
                         }
 
                         firestore.collection("Otchotlar")
@@ -1664,12 +1770,17 @@ public class OrderDetail extends AppCompatActivity {
 
                 if (productOrderArrayList.isEmpty()){
                     productOrdersRV.setVisibility(View.GONE);
+                } else {
+                    productOrdersRV.setVisibility(View.VISIBLE);
                 }
-                adapterProductOrder = new AdapterProductOrder(OrderDetail.this, productOrderArrayList,
-                        sharedPreferences);
-                productOrdersRV.setAdapter(adapterProductOrder);
+                if (adapterProductOrder == null) {
+                    adapterProductOrder = new AdapterProductOrder(OrderDetail.this, productOrderArrayList,
+                            sharedPreferences);
+                    productOrdersRV.setAdapter(adapterProductOrder);
+                } else {
+                    adapterProductOrder.notifyDataSetChanged();
+                }
             } else {
-                progressDialog.dismiss();
                 Toast.makeText(OrderDetail.this, "mahsulotlar yuklashada xato " +
                         task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }

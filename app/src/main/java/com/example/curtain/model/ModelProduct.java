@@ -3,14 +3,15 @@ package com.example.curtain.model;
 public class ModelProduct {
 
     private String prId, prTitle, prCat, prBarcode, prDesc, prPrice, prCost, created_at, created_by, prHeight, prMass, prComp,
-            prOldPrice, prDiscNote, prEditAt, prEditBy, prColor;
+            prOldPrice, prDiscNote, prEditAt, prEditBy, prColor, isAbbos, isPodzakaz;
 
     public ModelProduct() {
     }
 
     public ModelProduct(String prId, String prTitle, String prCat, String prPrice, String prCost, String prBarcode,
                         String prDesc, String created_at, String created_by, String prOldPrice, String prHeight, String prMass,
-                        String prComp, String prDiscNote, String prEditAt, String prEditBy, String prColor) {
+                        String prComp, String prDiscNote, String prEditAt, String prEditBy, String prColor,
+                        String isAbbos, String isPodzakaz) {
         this.prId = prId;
         this.prTitle = prTitle;
         this.prCat = prCat;
@@ -28,6 +29,8 @@ public class ModelProduct {
         this.prMass = prMass;
         this.prComp = prComp;
         this.prColor = prColor;
+        this.isAbbos = isAbbos;
+        this.isPodzakaz = isPodzakaz;
     }
 
     public String getPrHeight() {
@@ -156,5 +159,21 @@ public class ModelProduct {
 
     public void setPrColor(String prColor) {
         this.prColor = prColor;
+    }
+
+    public String getIsAbbos() {
+        return isAbbos;
+    }
+
+    public void setIsAbbos(String isAbbos) {
+        this.isAbbos = isAbbos;
+    }
+
+    public String getIsPodzakaz() {
+        return isPodzakaz;
+    }
+
+    public void setIsPodzakaz(String isPodzakaz) {
+        this.isPodzakaz = isPodzakaz;
     }
 }

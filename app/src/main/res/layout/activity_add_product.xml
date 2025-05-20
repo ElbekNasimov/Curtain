@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="15dp"
+
     tools:context=".crud.AddProduct">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:padding="10dp"
         android:background="@drawable/shape_rect01">
         <ImageButton
@@ -33,12 +33,13 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp">
+        android:paddingTop="5dp">
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/labelTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             app:endIconMode="clear_text"
             android:hint="@string/title">
             <com.google.android.material.textfield.TextInputEditText
@@ -56,7 +57,8 @@
             android:id="@+id/labelSelect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelTitle"
             android:hint="@string/category">
             <com.google.android.material.textfield.TextInputEditText
@@ -78,7 +80,9 @@
             android:id="@+id/labelBC"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="5dp"
             android:layout_below="@id/labelSelect">
             <TextView
                 android:id="@+id/barcodeET"
@@ -96,7 +100,8 @@
             android:id="@+id/labelDesc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelBC"
             android:hint="@string/description">
             <com.google.android.material.textfield.TextInputEditText
@@ -115,7 +120,8 @@
             android:id="@+id/labelPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelDesc"
             android:hint="@string/price">
             <com.google.android.material.textfield.TextInputEditText
@@ -123,7 +129,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_money_gray"
-                android:drawablePadding="5dp"
                 android:inputType="numberDecimal"
                 android:textSize="18sp"
                 android:padding="10dp" />
@@ -133,7 +138,8 @@
             android:id="@+id/labelCost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelPrice"
             android:hint="@string/cost">
             <com.google.android.material.textfield.TextInputEditText
@@ -151,7 +157,8 @@
             android:id="@+id/labelHeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelCost"
             android:hint="@string/height">
             <com.google.android.material.textfield.TextInputEditText
@@ -168,7 +175,8 @@
             android:id="@+id/labelColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelHeight"
             android:hint="@string/selectColor">
             <com.google.android.material.textfield.TextInputEditText
@@ -189,7 +197,8 @@
             android:id="@+id/labelMass"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelColor"
             android:hint="@string/mass">
             <com.google.android.material.textfield.TextInputEditText
@@ -206,7 +215,8 @@
             android:id="@+id/labelCompany"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
             android:layout_below="@id/labelMass"
             android:hint="@string/company">
             <com.google.android.material.textfield.TextInputEditText
@@ -219,6 +229,36 @@
                 android:textSize="18sp"
                 android:padding="10dp" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/abbosSC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/labelCompany"
+            android:textSize="18sp"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/black"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/shape_rect02"
+            android:drawableStart="@drawable/is_abbos_grey"
+            android:drawablePadding="0dp"
+            android:text="@string/abbos_akanikimi" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/podzakazSC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/abbosSC"
+            android:textSize="18sp"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/black"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/shape_rect02"
+            android:drawableStart="@drawable/ic_airplane_grey"
+            android:drawablePadding="0dp"
+            android:text="@string/turkiya" />
 
         <Button
             android:id="@+id/addPrdBtn"

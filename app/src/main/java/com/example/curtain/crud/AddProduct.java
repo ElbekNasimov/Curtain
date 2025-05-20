@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -40,11 +41,30 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class AddProduct extends AppCompatActivity {
+
+//    Add switch compat for get products
+
+//    <androidx.appcompat.widget.SwitchCompat
+//    android:id="@+id/discountSC"
+//    android:layout_width="match_parent"
+//    android:layout_height="wrap_content"
+//    android:layout_below="@id/qrcodeTV"
+//    android:textSize="17sp"
+//    android:textColor="@color/grey2"
+//    android:layout_marginStart="5dp"
+//    android:layout_marginEnd="5dp"
+//    android:background="@drawable/shape_rect02"
+//    android:drawableStart="@drawable/ic_disc_grey"
+//    android:drawablePadding="10dp"
+//    android:text="@string/discount" />
+
+
     private ImageButton backBtn;
     private Button addPrdBtn;
     private TextInputEditText titleET, catET, priceET, costET,  descET, productHeightET, productColorET,
             productMassET, productCompanyET;
     private TextInputLayout labelColor;
+    private SwitchCompat abbosSC, podzakazSC;
     private TextInputLayout labelCost;
     private TextView barcodeET;
     private FirebaseAuth mAuth;
@@ -109,6 +129,9 @@ public class AddProduct extends AppCompatActivity {
         productMassET = findViewById(R.id.productMassET);
         productCompanyET = findViewById(R.id.productCompanyET);
 
+        abbosSC = findViewById(R.id.abbosSC);
+        podzakazSC = findViewById(R.id.podzakazSC);
+
         labelColor = findViewById(R.id.labelColor);
 
         mAuth = FirebaseAuth.getInstance();
@@ -140,6 +163,7 @@ public class AddProduct extends AppCompatActivity {
     }
 
     private String title, prCat, price, cost, prBarcode, desc, productHeight, productColor, productMass, productCompany;
+    private boolean isAbbos = false, isPodzakaz = false;
     private void input_data() {
         title = titleET.getText().toString().trim().toLowerCase();
         prCat = catET.getText().toString().trim();
@@ -151,6 +175,8 @@ public class AddProduct extends AppCompatActivity {
         productColor = productColorET.getText().toString().trim();
         productMass = productMassET.getText().toString().trim();
         productCompany = productCompanyET.getText().toString().trim();
+        isAbbos = abbosSC.isChecked();
+        isPodzakaz = podzakazSC.isChecked();
 
         String productID = "" + System.currentTimeMillis();
 
@@ -163,9 +189,11 @@ public class AddProduct extends AppCompatActivity {
             return;
         }
 
-        if (!cost.isEmpty() && (Float.parseFloat(cost) > Float.parseFloat(price))) {
-            Toast.makeText(this, "Narxlarni tekshiring", Toast.LENGTH_SHORT).show();
-            return;
+        if (!cost.isEmpty()) {
+            if (!price.isEmpty() && (Float.parseFloat(cost) > Float.parseFloat(price))) {
+                Toast.makeText(this, "Narxlarni tekshiring", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         progressDialog.setMessage("Adding Product...");
@@ -229,6 +257,14 @@ public class AddProduct extends AppCompatActivity {
             hashMap.put("created_by", currentUsername);
         }
 
+        if (isAbbos) {
+            hashMap.put("isAbbos", "true");
+        }
+
+        if (isPodzakaz) {
+            hashMap.put("isPodzakaz", "true");
+        }
+
         addPrToFireStore.collection("Products").document(productID).set(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -255,6 +291,8 @@ public class AddProduct extends AppCompatActivity {
         productMassET.setText("");
         productCompanyET.setText("");
         productColorET.setText("");
+        abbosSC.setChecked(false);
+        podzakazSC.setChecked(false);
     }
 
     private void scanCode(){

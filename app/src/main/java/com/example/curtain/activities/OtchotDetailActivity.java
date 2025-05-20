@@ -45,6 +45,12 @@ public class OtchotDetailActivity extends AppCompatActivity {
 
         init();
 
+        binding.goHomeBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(OtchotDetailActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
         binding.addXarajatToMonthBtn.setOnClickListener(view -> {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(OtchotDetailActivity.this);
             LayoutInflater inflater = LayoutInflater.from(OtchotDetailActivity.this.getApplicationContext());

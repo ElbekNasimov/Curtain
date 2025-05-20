@@ -118,8 +118,6 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
             }
         }
 
-        mAuth = FirebaseAuth.getInstance();
-
         if (holder.productOrderStatusTV.getText().toString().equals("holat") ||
         holder.productOrderStatusTV.getText().toString().equals("kesilmoqda")
         ) {
@@ -220,7 +218,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                 ) {
                     cuttingBottomSheetDialog(productTitle,
                             productId, productLength, productObjectOrderId, orderId, holder.qoldiqKusokTV,
-                            holder.cutPartsPrOrderTV);
+                            holder.cutPartsPrOrderTV, position);
                 }
             } else if (holder.productOrderStatusTV.getText().toString().equals("kesildi")){
                 if (sharedUserType.equals(Constants.userTypes[4]) || sharedUserType.equals(Constants.userTypes[2])){
@@ -229,6 +227,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                     alertDialog.setTitle("Info").setMessage("Bichildimi?").setPositiveButton("Ha", (dialogInterface, i) -> {
 
                         String status = "bichildi";
+                        String statusOrder = "bichilmoqda";
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("partStatusProductOrder", ""+status);
 
@@ -237,7 +236,7 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
                             Toast.makeText(context, status, Toast.LENGTH_SHORT).show();
                             productOrderArrayList.get(position).setPartStatusProductOrder(status);
-                            changeStatusPartPrOrder(orderId, status);
+                            changeStatusPartPrOrder(orderId, statusOrder);
                             holder.productOrderStatusTV.setText(status);
                             notifyItemChanged(position);
 
@@ -253,9 +252,9 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
     // shungachasi ko'chirildi AdapterProductObjectga, pasi qoldi
     private void cuttingBottomSheetDialog(String productTitle, String productId, String productLength,
                                           String productObjectOrderId, String orderId, TextView kelganQoldiqKusokTV,
-                                          TextView cutPartsPrOrderTV) {
+                                          TextView cutPartsPrOrderTV, int position) {
 
-        ArrayList<String> kesilganKusoklarList = new ArrayList<>(); // Create an ArrayList object
+        ArrayList<String> kesilganKusoklarList = new ArrayList<>();
 
         String str = cutPartsPrOrderTV.getText().toString().trim();
         if (!str.equals("kesilgan kusoklar:")){
@@ -369,14 +368,16 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
                     firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                         progressDialog.dismiss();
+                        bottomSheetDialog.dismiss();
                         if (task.isSuccessful()) {
 
                             changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
                             changeStatusPartPrOrder(orderId, "kesilmoqda");
                             changeStatusProductsOrder(productObjectOrderId, kusokHolati, keyingiQoldiq, finalMyList);
-                            Intent intent = new Intent(context, OrderDetail.class);
-                            intent.putExtra("orderId", orderId);
-                            context.startActivity(intent);
+
+                            productOrderArrayList.get(position).setPartStatusProductOrder("kesildi");
+                            notifyItemChanged(position);
+
                         } else {
                             Toast.makeText(context, "error to kesish"
                                     + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -409,14 +410,16 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
 
                 firestore.collection("CutPartProduct").document(timestamps).set(hashMap).addOnCompleteListener(task -> {
                     progressDialog.dismiss();
+                    bottomSheetDialog.dismiss();
                     if (task.isSuccessful()) {
 
                         changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
                         changeStatusPartPrOrder(orderId, "Kesilmoqda");
                         changeStatusProductsOrder(productObjectOrderId, kusokHolati, keyingiQoldiq, finalMyList);
-                        Intent intent = new Intent(context, OrderDetail.class);
-                        intent.putExtra("orderId", orderId);
-                        context.startActivity(intent);
+
+                        productOrderArrayList.get(position).setPartStatusProductOrder("kesildi");
+                        notifyItemChanged(position);
+
                     } else {
                         Toast.makeText(context, "error to kesish"
                                 + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -443,14 +446,16 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
                 firestore.collection("CutPartProduct").document(timestamps).set(hashMap).
                         addOnCompleteListener(task -> {
                             progressDialog.dismiss();
+                            bottomSheetDialog.dismiss();
                             if (task.isSuccessful()) {
 
                                 changeLenPrOrder(chosenPartIdPrOrder, chosenPartPrOrder, partCutPrObjLen);
                                 changeStatusPartPrOrder(orderId, "Kesilmoqda");
                                 changeStatusProductsOrder(productObjectOrderId, kusokHolati, farq, finalMyList);
-                                Intent intent = new Intent(context, OrderDetail.class);
-                                intent.putExtra("orderId", orderId);
-                                context.startActivity(intent);
+
+                                productOrderArrayList.get(position).setPartStatusProductOrder("kesildi");
+                                notifyItemChanged(position);
+
                             } else {
                                 Toast.makeText(context, "error to kesish"
                                         + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -465,9 +470,9 @@ public class AdapterProductOrder extends RecyclerView.Adapter<AdapterProductOrde
         hashMap.put("orderStatus", ""+changeOrderStatus);  // kesish holati
 
         DocumentReference orderRef = firestore.collection("Orders").document(orderId);
-        orderRef.update(hashMap).addOnSuccessListener(unused ->
-                        Log.d("AdapterProductOrder", "Bajarildi"))
-                .addOnFailureListener(e -> Toast.makeText(context, "part not updated "
+        orderRef.update(hashMap).addOnSuccessListener(unused ->{
+            Log.d("AdapterProductOrder", "Bajarildi");
+        }).addOnFailureListener(e -> Toast.makeText(context, "part not updated "
                         + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 

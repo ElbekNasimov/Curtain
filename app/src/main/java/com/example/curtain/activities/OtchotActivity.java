@@ -54,6 +54,9 @@ public class OtchotActivity extends AppCompatActivity {
             setupDailyReportWork();
         }
 
+        backBtn.setOnClickListener(v -> {
+            onBackPressed();
+        });
 
         loadOtchotOylar();
 
@@ -123,6 +126,7 @@ public class OtchotActivity extends AppCompatActivity {
         otchotList = new ArrayList<>();
 
         otchotListRV = findViewById(R.id.otchotListRV);
+        backBtn = findViewById(R.id.backBtn);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.wait);

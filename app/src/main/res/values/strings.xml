@@ -115,7 +115,7 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
+    <style name="abbos">Abbos akaniki?</style>
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
@@ -166,4 +166,7 @@
     <string name="sumYopilganOrder">Yopilgan smetalar summasi</string>
     <string name="costYopilganOrder">Yopilgan smetalar tannarxi</string>
     <string name="orderCost">Tannarxi</string>
+    <string name="turkiya">Turkiya ?</string>
+    <string name="abbos_akanikimi">Abbos akanikimi ?</string>
+    <string name="topilishi">Topilishi</string>
 </resources>

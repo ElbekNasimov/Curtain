@@ -3,6 +3,7 @@ package com.example.curtain.crud;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -46,6 +47,7 @@ public class EditProduct extends AppCompatActivity {
     private ImageButton backBtn;
     private TextInputEditText titleET, catET, descET, priceET, costET, productHeightET, productMassET,
             productCompanyET, productColorET;
+    private SwitchCompat abbosSC, podzakazSC;
     private TextInputLayout labelCost;
     private TextView barcodeET;
     private Button editPrdBtn;
@@ -117,6 +119,9 @@ public class EditProduct extends AppCompatActivity {
         productCompanyET = findViewById(R.id.productCompanyET);
         productColorET = findViewById(R.id.productColorET);
 
+        abbosSC = findViewById(R.id.abbosSC);
+        podzakazSC = findViewById(R.id.podzakazSC);
+
         auth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
@@ -184,6 +189,19 @@ public class EditProduct extends AppCompatActivity {
                     } else {
                         productColorET.setText("");
                     }
+                    if (doc.contains("isAbbos")) {  // Check if field exists
+                        String isAbbos = doc.getString("isAbbos");
+                        abbosSC.setChecked(isAbbos.equals("true"));
+                    } else {
+                        abbosSC.setChecked(false);
+                    }
+
+                    if (doc.contains("isPodzakaz")) {  // Check if field exists
+                        String isPodzakaz = doc.getString("isPodzakaz");
+                        podzakazSC.setChecked(isPodzakaz.equals("true"));
+                    } else {
+                        podzakazSC.setChecked(false);
+                    }
 
                 } else {
                     Toast.makeText(EditProduct.this, "Mahsulot topilmadi", Toast.LENGTH_SHORT).show();
@@ -198,6 +216,8 @@ public class EditProduct extends AppCompatActivity {
 
     private String title, category, barcode, desc, price, cost, productHeight, productMass, productCompany, productColor;
 
+    private boolean isAbbos = false, isPodzakaz = false;
+
     private void editData() {
 
         title = titleET.getText().toString().trim();
@@ -210,6 +230,8 @@ public class EditProduct extends AppCompatActivity {
         productMass = productMassET.getText().toString().trim();
         productCompany = productCompanyET.getText().toString().trim();
         productColor = productColorET.getText().toString().trim();
+        isAbbos = abbosSC.isChecked();
+        isPodzakaz = podzakazSC.isChecked();
 
         if (TextUtils.isEmpty(title)){
             Toast.makeText(this, "Enter Product Name...", Toast.LENGTH_SHORT).show();
@@ -248,6 +270,17 @@ public class EditProduct extends AppCompatActivity {
         }
         if (!productCompany.isEmpty()) {
             hashMap.put("prComp", productCompany);
+        }
+        if (isAbbos) {
+            hashMap.put("isAbbos", "true");
+        } else {
+            hashMap.put("isAbbos", "false");
+        }
+
+        if (isPodzakaz) {
+            hashMap.put("isPodzakaz", "true");
+        } else {
+            hashMap.put("isPodzakaz", "false");
         }
 
         Date prDate = new Date(Long.parseLong(editTimestamps));

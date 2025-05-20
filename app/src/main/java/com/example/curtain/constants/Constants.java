@@ -111,6 +111,8 @@ public class Constants {
             "Dush 2",
             "Namozxona 1",
             "Namozxona 2",
+            "Garderob 1",
+            "Garderob 2",
             "Koridor 1",
             "Koridor 2",
     };
@@ -124,6 +126,8 @@ public class Constants {
             "Yotoqxona 1",
             "Yotoqxona 2",
             "Yotoqxona 3",
+            "Ofis 1",
+            "Ofis 2",
             "O'gil xona 1",
             "O'gil xona 2",
             "Qiz xona 1",
@@ -137,6 +141,8 @@ public class Constants {
             "Dush 2",
             "Namozxona 1",
             "Namozxona 2",
+            "Garderob 1",
+            "Garderob 2",
             "Koridor 1",
             "Koridor 2",
     };

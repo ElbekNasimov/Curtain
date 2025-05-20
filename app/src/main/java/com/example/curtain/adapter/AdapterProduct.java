@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Environment;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -41,10 +42,19 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -86,7 +96,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
 
     class HolderProduct extends RecyclerView.ViewHolder{
         // holds views of recView
-        private TextView discNoteTV, titleTV, discPriceTV, priceTV, colorTV;
+        private TextView discNoteTV, titleTV, discPriceTV, priceTV, topishlishiTV, colorTV;
 
         public HolderProduct(@NonNull View itemView) {
             super(itemView);
@@ -96,6 +106,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             priceTV = itemView.findViewById(R.id.priceTV);
             titleTV = itemView.findViewById(R.id.titleTV);
             colorTV = itemView.findViewById(R.id.colorTV);
+            topishlishiTV = itemView.findViewById(R.id.topishlishiTV);
         }
     }
 
@@ -117,8 +128,9 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         String price = modelProduct.getPrPrice();
         String oldPrice = modelProduct.getPrOldPrice();
         String discNote = modelProduct.getPrDiscNote();
-        String color = modelProduct.getPrColor();
         String prCost = modelProduct.getPrCost();
+        String isAbbos = modelProduct.getIsAbbos();
+        String isPodzakaz = modelProduct.getIsPodzakaz();
 
         // if psCost equals null, set titleTV to red
         if (prCost!=null){
@@ -131,6 +143,24 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             holder.titleTV.setTextColor(Color.RED);
         }
 
+        holder.topishlishiTV.setVisibility(View.GONE);
+
+        if (isAbbos != null){
+        if (isAbbos.equals("true")){
+            holder.topishlishiTV.setText("A");
+            holder.topishlishiTV.setTextColor(Color.RED);
+            holder.topishlishiTV.setVisibility(View.VISIBLE);
+        }
+        }
+        if (isPodzakaz != null) {
+            if (isPodzakaz.equals("true")) {
+                holder.topishlishiTV.setText("Podzakaz");
+                Toast.makeText(context, "podzakaz " + isPodzakaz, Toast.LENGTH_SHORT).show();
+                holder.topishlishiTV.setTextColor(Color.RED);
+                holder.topishlishiTV.setVisibility(View.VISIBLE);
+            }
+        }
+        
         // set Data
         holder.titleTV.setText(title);
 
@@ -179,6 +209,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         ImageButton discountBtn = view.findViewById(R.id.discountBtn);
         RecyclerView partRV = view.findViewById(R.id.partRV);
         ImageButton hideCostStatus = view.findViewById(R.id.hideCostStatus);
+        ImageButton excelPrintBtn = view.findViewById(R.id.excelPrintBtn);
 
         TextView nameTV = view.findViewById(R.id.nameTV);
         TextView priceTV = view.findViewById(R.id.priceTV);
@@ -192,6 +223,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         TextView noPartsTxt = view.findViewById(R.id.NoPartsTxt);
         TextView cutPartsListTV = view.findViewById(R.id.cutPartsListTV);
         TextView colorTV = view.findViewById(R.id.colorTV);
+        TextView companyTV = view.findViewById(R.id.companyTV);
 
         String price = modelProduct.getPrPrice();
         String cost = modelProduct.getPrCost();
@@ -206,6 +238,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         String desc = modelProduct.getPrDesc();
         String prId = modelProduct.getPrId();
         String color = modelProduct.getPrColor();
+        String company = modelProduct.getPrComp();
 
         partsList = new ArrayList<>();
 
@@ -230,12 +263,20 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         }
 
         costTV.setVisibility(View.GONE);
+        companyTV.setVisibility(View.GONE);
+        hideCostStatus.setVisibility(View.GONE);
+        if (sharedUserType.equals("superAdmin")) {
+            hideCostStatus.setVisibility(View.VISIBLE);
+        }
+
         hideCostStatus.setOnClickListener(view3 -> {
             if (!click){
                 costTV.setVisibility(View.VISIBLE);
+                companyTV.setVisibility(View.VISIBLE);
                 click = true;
             } else {
                 costTV.setVisibility(View.GONE);
+                companyTV.setVisibility(View.GONE);
                 click = false;
             }
         });
@@ -265,6 +306,16 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         }
 
         catTV.setText(cat);
+
+        if (company!=null){
+//            if (company.length()==0) {
+//                companyTV.setVisibility(View.GONE);
+//            } else {
+                companyTV.setText(String.format("Firma: %s", company));
+//            }
+//        } else {
+//            companyTV.setVisibility(View.GONE);
+        }
 
         if (prHeight!=null){
             if (prHeight.length()==0) {
@@ -324,6 +375,16 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         });
 
         backBtn.setOnClickListener(view2 -> bottomSheetDialog.dismiss());
+
+        if (!sharedUserType.equals("superAdmin")){
+            excelPrintBtn.setVisibility(View.GONE);
+        }
+
+        excelPrintBtn.setOnClickListener(view4 -> {
+            progressDialog.setMessage("Faylga saqlanmoqda");
+            progressDialog.show();
+            downloadExcel(prId);
+        });
 
         editBtn.setOnClickListener(view1 -> {
             bottomSheetDialog.dismiss();
@@ -389,7 +450,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                         hashMap.put("partId", timestamps);
                         hashMap.put("prTitle", title);
                         hashMap.put("prId", prId);
-                        hashMap.put("partLen", dialAlenET.getText().toString().trim());
+                        hashMap.put("partLen", ""+dialAlenET.getText().toString().trim());
                         hashMap.put("partMeas", measurement);
                         hashMap.put("partLoc", location);
 
@@ -508,6 +569,88 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                     })
                     .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss()).show();
         });
+    }
+
+    private void downloadExcel(String prId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Products")
+                .whereEqualTo("prId", prId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<DocumentSnapshot> document = task.getResult().getDocuments();
+                        if (document != null && !document.isEmpty()){
+                            createExcelFile(document);
+                        } else {
+                            progressDialog.dismiss();
+                            Toast.makeText(context, " excel saqlashda Ma'lumot topilmadi", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        progressDialog.dismiss();
+                        Exception exception = task.getException();
+                        if (exception != null) {
+                            Toast.makeText(context, "excel saqlashda xatolik " + exception.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(context, "No'malum xatolik excel saqlashda",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(context, "Excel saqlashda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void createExcelFile(List<DocumentSnapshot> documents) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Product");
+
+        // sarlavha qatorini yozish
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Nomi");
+        headerRow.createCell(1).setCellValue("Barcode");
+        headerRow.createCell(2).setCellValue("Narxi");
+        headerRow.createCell(3).setCellValue("Eni");
+
+        // ma'lumotlarni yozish
+        int rowNum = 1;
+        for (DocumentSnapshot document: documents){
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(document.getString("prTitle"));
+            row.createCell(1).setCellValue(document.getString("prBarcode"));
+            row.createCell(2).setCellValue(document.getString("prPrice"));
+            row.createCell(3).setCellValue(document.getString("prHeight"));
+        }
+
+        // Excel faylini saqlash
+        try {
+            File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                    "Smetalar");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            File file = new File(directory, "product.xlsx");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream fileOut = new FileOutputStream(file);
+            workbook.write(fileOut);
+            fileOut.close();
+            workbook.close();
+            progressDialog.dismiss();
+            Toast.makeText(context, "Excel fayl saqlandi", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            progressDialog.dismiss();
+            Toast.makeText(context, "Excel faylni saqlashda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        } finally {
+            progressDialog.dismiss();
+            try {
+                workbook.close();
+            } catch (IOException e){
+                Toast.makeText(context, "Workbookni yopishda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void loadParts(String prId, RecyclerView partRV, TextView noPartsTxt) {

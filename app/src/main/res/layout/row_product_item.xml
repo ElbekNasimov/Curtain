@@ -60,6 +60,16 @@
                     android:textColor="@color/colorGreen"
                     android:layout_toEndOf="@id/discPriceTV"
                     android:layout_marginEnd="10dp" />
+
+                <TextView
+                    android:id="@+id/topishlishiTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/topilishi"
+                    android:textSize="18sp"
+                    android:layout_toEndOf="@id/discNoteTV"
+                    android:layout_marginEnd="10dp"
+                    android:textColor="@color/black" />
             </RelativeLayout>
 
             <TextView

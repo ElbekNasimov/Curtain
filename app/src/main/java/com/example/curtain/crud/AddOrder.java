@@ -213,16 +213,16 @@ public class AddOrder extends AppCompatActivity {
                     if (!queryDocumentSnapshots.isEmpty()){
                         DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
                         String otchotId = documentSnapshot.getId();
-                        String currentCount = documentSnapshot.getString("countNewOrders") != null ?
-                                documentSnapshot.getString("countNewOrders") : "0";
+//                        String currentCount = documentSnapshot.getString("countNewOrders") != null ?
+//                                documentSnapshot.getString("countNewOrders") : "0";
 
-                        addOrderToFirestore.collection("Otchotlar")
-                                .document(otchotId)
-                                .update("countNewOrders", String.valueOf(Integer.parseInt(currentCount) + 1))
-                                .addOnSuccessListener(aVoid -> {
-                                    Log.d("OtchotlarUpdate", "countNewOrders updated successfully");
-                                }).addOnFailureListener(e ->
-                                        Log.d("OtchotlarUpdate", "countNewOrders updated successfully"));
+//                        addOrderToFirestore.collection("Otchotlar")
+//                                .document(otchotId)
+//                                .update("countNewOrders", String.valueOf(Integer.parseInt(currentCount) + 1))
+//                                .addOnSuccessListener(aVoid -> {
+//                                    Log.d("OtchotlarUpdate", "countNewOrders updated successfully");
+//                                }).addOnFailureListener(e ->
+//                                        Log.d("OtchotlarUpdate", "countNewOrders updated successfully"));
                     } else {
                         HashMap<String, Object> newOtchot = new HashMap<>();
                         newOtchot.put("title", todayDate);
