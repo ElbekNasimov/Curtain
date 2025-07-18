@@ -875,13 +875,15 @@ public class OrderDetail extends AppCompatActivity {
         Paint pageNumberPaint = new Paint();
         int pageNumber = 1;
         int yPosition;
-
-        for (int i = 0; i < objectsArrayList.size(); i+=OBJECTS_PER_PAGE) {
+//shu joyidan o'zgartirish kerak
+//        for (int i = 0; i < objectsArrayList.size(); i+=OBJECTS_PER_PAGE) {
+        for (int i = 0; i < objectsArrayList.size(); i++) {
             PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.
                     Builder(1240, 1754, pageNumber).create();
             PdfDocument.Page page = pdfDocument.startPage(pageInfo);
             Canvas canvas = page.getCanvas();
 
+            //-- Header va umumiy ma'lumotlar --//
             bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
             scaledBitmap = Bitmap.createScaledBitmap(bitmap, 128, 128, false);
             canvas.drawBitmap(scaledBitmap, 20, 20, paint);
@@ -948,45 +950,36 @@ public class OrderDetail extends AppCompatActivity {
             String formattedDate = dateFormat.format(today);
             canvas.drawText(formattedDate, 20,
                     pageInfo.getPageHeight()-20, pageNumberPaint);
+            // objectni joylashtirish - har bir sahifada 1 ta obyekt
 
-            // objectlarni joylashtirish
-            for (int j = 0; j < OBJECTS_PER_PAGE; j++){
+            ModelOrderObject orderObject = objectsArrayList.get(i);
+            yPosition = 290; // har doim yuqorida
+            paint.setTextAlign(Paint.Align.LEFT);
+            paint.setStyle(Paint.Style.FILL);
+            canvas.drawText("№", 30, yPosition-50, paint);
+            canvas.drawText("Mahsulot", 85, yPosition-50, paint);
+            canvas.drawText("Metr", 460, yPosition-50, paint);
+            canvas.drawText("Narx", 540, yPosition-50, paint);
+            canvas.drawText("Jami", 620, yPosition-50, paint);
 
-                int index = i + j;
-
-                if (index < objectsArrayList.size()){
-                    ModelOrderObject orderObject = objectsArrayList.get(index);
-
-                    yPosition = (j % 2 == 0) ? 290 : pageInfo.getPageHeight()/2+80;
-
-                    paint.setTextAlign(Paint.Align.LEFT);
-                    paint.setStyle(Paint.Style.FILL);
-                    canvas.drawText("№", 30, yPosition-50, paint);
-                    canvas.drawText("Mahsulot", 85, yPosition-50, paint);
-                    canvas.drawText("Metr", 460, yPosition-50, paint);
-                    canvas.drawText("Narx", 540, yPosition-50, paint);
-                    canvas.drawText("Jami", 620, yPosition-50, paint);
-
-                    titlePaint.setTextSize(28f);
-                    if (orderObject.getObjDescET()==null) {
-                        canvas.drawText(orderObject.getObjRoom() + " " + orderObject.getOrderRoom(), 720,
-                                yPosition - 50, titlePaint);
-                    } else {
-                        canvas.drawText(orderObject.getObjRoom() + " " + orderObject.getOrderRoom()
-                                + " " + orderObject.getObjDescET(), 720, yPosition - 50, paint);
-                    }
-
-                    canvas.drawLine(20, 200, 20, pageInfo.getPageHeight()-40, paint);
-                    canvas.drawLine(75, 200, 75, pageInfo.getPageHeight()-40, paint);  // name
-                    canvas.drawLine(450, 200, 450, pageInfo.getPageHeight()-40, paint);  // len
-                    canvas.drawLine(530, 200, 530, pageInfo.getPageHeight()-40, paint);  // price
-                    canvas.drawLine(610, 200, 610, pageInfo.getPageHeight()-40, paint);  // total
-                    canvas.drawLine(710, 200, 710, pageInfo.getPageHeight()-40, paint);  // end total
+            titlePaint.setTextSize(28f);
+            if (orderObject.getObjDescET()==null) {
+                canvas.drawText(orderObject.getObjRoom() + " " + orderObject.getOrderRoom(), 720,
+                        yPosition - 50, titlePaint);
+            } else {
+                canvas.drawText(orderObject.getObjRoom() + " " + orderObject.getOrderRoom()
+                        + " " + orderObject.getObjDescET(), 720, yPosition - 50, paint);
+            }
+            canvas.drawLine(20, 200, 20, pageInfo.getPageHeight()-40, paint);
+                    canvas.drawLine(75, 200, 75, (pageInfo.getPageHeight()/2f)-9, paint);  // name
+                    canvas.drawLine(450, 200, 450, (pageInfo.getPageHeight() / 2f)-9, paint);  // len
+                    canvas.drawLine(530, 200, 530, (pageInfo.getPageHeight()/2f)-9, paint);  // price
+                    canvas.drawLine(610, 200, 610, (pageInfo.getPageHeight()/2f)-9, paint);  // total
+                    canvas.drawLine(710, 200, 710, (pageInfo.getPageHeight()/2f)-9, paint);  // end total
                     canvas.drawLine(pageInfo.getPageWidth()-20, 200,
                             pageInfo.getPageWidth()-20, pageInfo.getPageHeight()-40, paint); // last
 
-                    if (yPosition==290) {
-                        canvas.drawLine(20, 200, pageInfo.getPageWidth()-20, 200, paint);
+            canvas.drawLine(20, 200, pageInfo.getPageWidth()-20, 200, paint);
                         canvas.drawLine(20, 260, pageInfo.getPageWidth()-20, 260, paint);
 
                         for (int i1 = yPosition-30; i1 < pageInfo.getPageHeight()/2; i1+=38) {
@@ -1055,79 +1048,8 @@ public class OrderDetail extends AppCompatActivity {
                             canvas.drawText(orderObject.getObjectPoshiv(), 625, lastValue, paint);
                         }
 
-                    } else if (yPosition==(pageInfo.getPageHeight() / 2+80)){
-                        canvas.drawLine(20, yPosition-89, pageInfo.getPageWidth()-20,
-                                yPosition-89, paint);
-                        canvas.drawLine(20, yPosition-40, pageInfo.getPageWidth()-20,
-                                yPosition-40, paint);
 
-                        for (int i1 = yPosition-40; i1 < pageInfo.getPageHeight()-40; i1+=38) {
-                            canvas.drawLine(20, i1, 710, i1, paint);
-                        }
 
-                        paint.setTextSize(20f);
-                        canvas.drawText("Eni: ", 720, yPosition-10, paint);
-                        canvas.drawText("Bo'yi: ", 720, yPosition-10+28, paint);
-                        canvas.drawText("Nisha: ", 720, yPosition-10+28*2, paint);
-
-                        canvas.drawText("Eni: ", 950, yPosition-10, paint);
-                        canvas.drawText("Bo'yi: ", 950, yPosition-10+28, paint);
-                        canvas.drawText("Nisha: ", 950, yPosition-10+28*2, paint);
-
-                        paint.setTextSize(25f);
-                        int number = 1;
-                        for (ModelProductObject productObject : productObjectsArrayList){
-                            if (productObject.getObjectOrderId().equals(orderObject.getOrderObjectId())){
-                                ModelProduct product = productList.stream().filter(p ->
-                                        p.getPrId().equals(productObject.getProductId())).findFirst().orElse(null);
-                                if (product!=null){
-                                    if (productObject.getProductTypeProductOrder().startsWith("T")) {
-                                        canvas.drawText("Tyul:  " + productObject.getTitleProductObject(), 90, yPosition - 10, paint);
-                                    } else if (productObject.getProductTypeProductOrder().startsWith("P")) {
-                                        canvas.drawText("Port:  " + productObject.getTitleProductObject(), 90, yPosition - 10, paint);
-                                    } else if (productObject.getProductTypeProductOrder().startsWith("O")) {
-                                        canvas.drawText("Odno:  " + productObject.getTitleProductObject(), 90, yPosition - 10, paint);
-                                    } else {
-                                        canvas.drawText(productObject.getTitleProductObject(), 90, yPosition, paint);
-                                    }
-
-                                    canvas.drawText(productObject.getLenProductObject(), 465, yPosition - 10, paint);
-                                    canvas.drawText(productObject.getProductPriceProductOrder(), 545, yPosition -10, paint);
-                                    float len = Float.parseFloat(productObject.getLenProductObject()) ;
-                                    float pr;
-                                    if (productObject.getProductPriceProductOrder()!=null) {
-                                        pr = Float.parseFloat(productObject.getProductPriceProductOrder());
-                                    } else {
-                                        pr = 0.0f;
-                                    }
-                                    pr = Float.parseFloat(productObject.getProductPriceProductOrder()) ;
-                                    canvas.drawText(String.valueOf(pr*len), 625, yPosition - 10, paint);
-                                    canvas.drawText(String.valueOf(number), 40, yPosition - 10, paint);
-                                    yPosition += 38;
-                                    number++;
-                                } else {
-                                    Toast.makeText(context, "Berilgan Id product topilmadi", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
-
-                        if (orderObject.getObjectUstanovka()!=null){
-                            int spacing = 38;
-                            int lastValue = (pageInfo.getPageHeight()-40 - spacing) / spacing * spacing-5;
-                            canvas.drawText("Ustanovka", 90, lastValue, paint);
-                            canvas.drawText(orderObject.getObjectUstanovka(), 625, lastValue, paint);
-                        }
-                        if (orderObject.getObjectPoshiv()!=null){
-                            int spacing = 38;
-                            int lastValue = (pageInfo.getPageHeight()-80 - spacing) / spacing * spacing-4;
-                            canvas.drawText("Poshiv", 90, lastValue, paint);
-                            canvas.drawText(orderObject.getObjectPoshiv(), 625, lastValue, paint);
-                        }
-                    }
-                    canvas.drawLine(20, pageInfo.getPageHeight()-40,
-                            pageInfo.getPageWidth()-20, pageInfo.getPageHeight()-40, paint); // bottom line
-                }
-            }
             pdfDocument.finishPage(page);
             pageNumber++;
         }
