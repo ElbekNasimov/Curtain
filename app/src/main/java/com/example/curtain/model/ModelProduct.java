@@ -3,7 +3,7 @@ package com.example.curtain.model;
 public class ModelProduct {
 
     private String prId, prTitle, prCat, prBarcode, prDesc, prPrice, prCost, created_at, created_by, prHeight, prMass, prComp,
-            prOldPrice, prDiscNote, prEditAt, prEditBy, prColor, isAbbos, isPodzakaz;
+            prOldPrice, prDiscNote, prEditAt, prEditBy, prColor, isAbbos, isPodzakaz, isCheck;
 
     public ModelProduct() {
     }
@@ -11,7 +11,7 @@ public class ModelProduct {
     public ModelProduct(String prId, String prTitle, String prCat, String prPrice, String prCost, String prBarcode,
                         String prDesc, String created_at, String created_by, String prOldPrice, String prHeight, String prMass,
                         String prComp, String prDiscNote, String prEditAt, String prEditBy, String prColor,
-                        String isAbbos, String isPodzakaz) {
+                        String isAbbos, String isPodzakaz, String isCheck) {
         this.prId = prId;
         this.prTitle = prTitle;
         this.prCat = prCat;
@@ -31,6 +31,7 @@ public class ModelProduct {
         this.prColor = prColor;
         this.isAbbos = isAbbos;
         this.isPodzakaz = isPodzakaz;
+        this.isCheck = isCheck;
     }
 
     public String getPrHeight() {
@@ -175,5 +176,13 @@ public class ModelProduct {
 
     public void setIsPodzakaz(String isPodzakaz) {
         this.isPodzakaz = isPodzakaz;
+    }
+
+    public String getIsCheck() {
+        return isCheck;
+    }
+
+    public void setIsCheck(String isCheck) {
+        this.isCheck = isCheck;
     }
 }

@@ -169,4 +169,6 @@
     <string name="turkiya">Turkiya ?</string>
     <string name="abbos_akanikimi">Abbos akanikimi ?</string>
     <string name="topilishi">Topilishi</string>
+    <string name="isCheck">Tekshirildi</string>
+    <string name="unChecked">Tekshirilmagan</string>
 </resources>

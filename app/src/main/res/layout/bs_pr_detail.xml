@@ -92,11 +92,19 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="30dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginBottom="30dp"
             android:text="@string/product_details"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
+        <TextView
+            android:id="@+id/checkTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/nameTV"
+            android:layout_centerHorizontal="true"
+            android:text="@string/unChecked"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
     </RelativeLayout>
 
     <LinearLayout

@@ -96,7 +96,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
 
     class HolderProduct extends RecyclerView.ViewHolder{
         // holds views of recView
-        private TextView discNoteTV, titleTV, discPriceTV, priceTV, topishlishiTV, colorTV;
+        private TextView discNoteTV, titleTV, discPriceTV, priceTV, topishlishiTV, colorTV, isCheckTV;
 
         public HolderProduct(@NonNull View itemView) {
             super(itemView);
@@ -107,6 +107,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             titleTV = itemView.findViewById(R.id.titleTV);
             colorTV = itemView.findViewById(R.id.colorTV);
             topishlishiTV = itemView.findViewById(R.id.topishlishiTV);
+            isCheckTV = itemView.findViewById(R.id.isCheckTV);
         }
     }
 
@@ -131,6 +132,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         String prCost = modelProduct.getPrCost();
         String isAbbos = modelProduct.getIsAbbos();
         String isPodzakaz = modelProduct.getIsPodzakaz();
+        String isCheck = modelProduct.getIsCheck();
 
         // if psCost equals null, set titleTV to red
         if (prCost!=null){
@@ -146,11 +148,11 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         holder.topishlishiTV.setVisibility(View.GONE);
 
         if (isAbbos != null){
-        if (isAbbos.equals("true")){
-            holder.topishlishiTV.setText("A");
-            holder.topishlishiTV.setTextColor(Color.RED);
-            holder.topishlishiTV.setVisibility(View.VISIBLE);
-        }
+            if (isAbbos.equals("true")){
+                holder.topishlishiTV.setText("A");
+                holder.topishlishiTV.setTextColor(Color.RED);
+                holder.topishlishiTV.setVisibility(View.VISIBLE);
+            }
         }
         if (isPodzakaz != null) {
             if (isPodzakaz.equals("true")) {
@@ -185,6 +187,15 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             } else {
                 holder.discNoteTV.setText(R.string.sale);
             }
+        }
+
+        // check if isCheck is null or empty
+        if (isCheck != null && isCheck.equals("true")) {
+            holder.isCheckTV.setVisibility(View.VISIBLE);
+            holder.isCheckTV.setText("Tekshirildi");
+            holder.isCheckTV.setTextColor(Color.parseColor("#43A047"));
+        } else {
+            holder.isCheckTV.setVisibility(View.GONE);
         }
 
         holder.itemView.setOnClickListener(view -> {
@@ -224,6 +235,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         TextView cutPartsListTV = view.findViewById(R.id.cutPartsListTV);
         TextView colorTV = view.findViewById(R.id.colorTV);
         TextView companyTV = view.findViewById(R.id.companyTV);
+        TextView checkTV = view.findViewById(R.id.checkTV);
 
         String price = modelProduct.getPrPrice();
         String cost = modelProduct.getPrCost();
@@ -239,6 +251,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
         String prId = modelProduct.getPrId();
         String color = modelProduct.getPrColor();
         String company = modelProduct.getPrComp();
+        String check = modelProduct.getIsCheck();
 
         partsList = new ArrayList<>();
 
@@ -260,6 +273,15 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             }
         } else {
             priceTV.setVisibility(View.GONE);
+        }
+
+        if (check != null && check.equals("true")) {
+            checkTV.setVisibility(View.VISIBLE);
+            checkTV.setText("Tekshirildi");
+            checkTV.setTextColor(Color.parseColor("#43A047"));
+        } else {
+            checkTV.setText("Tekshirilmagan");
+            checkTV.setVisibility(View.VISIBLE);
         }
 
         costTV.setVisibility(View.GONE);
@@ -569,89 +591,119 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                     })
                     .setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.dismiss()).show();
         });
-    }
 
-    private void downloadExcel(String prId) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("Products")
-                .whereEqualTo("prId", prId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<DocumentSnapshot> document = task.getResult().getDocuments();
-                        if (document != null && !document.isEmpty()){
-                            createExcelFile(document);
-                        } else {
-                            progressDialog.dismiss();
-                            Toast.makeText(context, " excel saqlashda Ma'lumot topilmadi", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        progressDialog.dismiss();
-                        Exception exception = task.getException();
-                        if (exception != null) {
-                            Toast.makeText(context, "excel saqlashda xatolik " + exception.getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(context, "No'malum xatolik excel saqlashda",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }).addOnFailureListener(e -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(context, "Excel saqlashda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-    }
+        if (sharedUserType.equals("superAdmin") || sharedUserType.equals("admin")) {
+            checkTV.setOnClickListener(view5 -> {
+                progressDialog.show();
+                // toggle isCheck status
 
-    private void createExcelFile(List<DocumentSnapshot> documents) {
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Product");
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Tekshirish").setMessage("Rostdan tekshirildimi??")
+                        .setPositiveButton("Tekshirish", (dialog, which) -> {
+                            String newIsCheckStatus = modelProduct.getIsCheck() != null && modelProduct.getIsCheck().equals("true") ? "false" : "true";
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put("isCheck", newIsCheckStatus);
 
-        // sarlavha qatorini yozish
-        Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("Nomi");
-        headerRow.createCell(1).setCellValue("Barcode");
-        headerRow.createCell(2).setCellValue("Narxi");
-        headerRow.createCell(3).setCellValue("Eni");
-
-        // ma'lumotlarni yozish
-        int rowNum = 1;
-        for (DocumentSnapshot document: documents){
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(document.getString("prTitle"));
-            row.createCell(1).setCellValue(document.getString("prBarcode"));
-            row.createCell(2).setCellValue(document.getString("prPrice"));
-            row.createCell(3).setCellValue(document.getString("prHeight"));
+                            DocumentReference productRef = firebaseFirestore.collection("Products").document(prId);
+                            productRef.update(hashMap).addOnSuccessListener(unused -> {
+                                progressDialog.dismiss();
+                                bottomSheetDialog.dismiss();
+                                Toast.makeText(context, "Tekshirildi holati o'zgartirildi", Toast.LENGTH_SHORT).show();
+                                modelProduct.setIsCheck(newIsCheckStatus);
+                                notifyItemChanged(position); // UI ni yangilash
+                            }).addOnFailureListener(e -> {
+                                progressDialog.dismiss();
+                                Toast.makeText(context, "Tekshirildi holatini o'zgartirishda xatolik: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                        }).setNegativeButton("No", (dialog, which) -> dialog.dismiss()).show();
+            });
         }
+    }
+    /**
+     * Download product data as an Excel file.
+     * @param prId Product ID to filter the data.
+     */
+    private void downloadExcel(String prId) {
+    progressDialog.show();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    db.collection("Products")
+            .whereEqualTo("prId", prId)
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
+                if (documents == null || documents.isEmpty()) {
+                    showError("Excel saqlashda ma'lumot topilmadi");
+                } else {
+                    // Fayl nomi uchun prTitle ni birinchi documentdan olamiz
+                    String prTitle = getString(documents.get(0), "prTitle");
+                    createExcelFile(documents, prTitle);
+                }
+            })
+            .addOnFailureListener(e -> showError("Excel saqlashda xatolik: " + (e != null ? e.getMessage() : "Noma'lum xatolik")));
+    }
 
-        // Excel faylini saqlash
+    private void showError(String message) {
+        progressDialog.dismiss();
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+    }
+
+    private String getString(DocumentSnapshot doc, String key) {
+        Object value = doc.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private void createExcelFile(List<DocumentSnapshot> documents, String prTitle) {
+        Workbook workbook = new XSSFWorkbook();
+        FileOutputStream fileOut = null;
         try {
-            File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                    "Smetalar");
-            if (!directory.exists()) {
-                directory.mkdirs();
+            // Sheet va sarlavha
+            Sheet sheet = workbook.createSheet("Product");
+            String[] headers = {"Nomi", "Barcode", "Narxi", "Eni"};
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
             }
-            File file = new File(directory, "product.xlsx");
-            if (!file.exists()) {
-                file.createNewFile();
+
+            // Ma'lumotlarni yozish
+            int rowNum = 1;
+            for (DocumentSnapshot doc : documents) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(getString(doc, "prTitle"));
+                row.createCell(1).setCellValue(getString(doc, "prBarcode"));
+                row.createCell(2).setCellValue("100" + getString(doc, "prPrice"));
+                row.createCell(3).setCellValue(getString(doc, "prHeight"));
             }
-            FileOutputStream fileOut = new FileOutputStream(file);
+
+            // Fayl nomini tozalash (harflar va raqamlar, bo'sh joylarni _ bilan almashtiramiz)
+            String safeTitle = (prTitle != null && !prTitle.trim().isEmpty()) ? prTitle.trim().replaceAll("[^a-zA-Z0-9]", "_") : "unknown";
+            File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Smetalar");
+            if (!dir.exists() && !dir.mkdirs()) {
+                throw new IOException("Fayl papkasini yaratib bo'lmadi: " + dir.getAbsolutePath());
+            }
+            File file = new File(dir, "product_" + safeTitle + ".xlsx");
+            fileOut = new FileOutputStream(file, false); // overwrite
             workbook.write(fileOut);
-            fileOut.close();
-            workbook.close();
-            progressDialog.dismiss();
-            Toast.makeText(context, "Excel fayl saqlandi", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            progressDialog.dismiss();
-            Toast.makeText(context, "Excel faylni saqlashda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+            String visiblePath;
+            if (file.getAbsolutePath().startsWith(Environment.getExternalStorageDirectory().getAbsolutePath())) {
+                visiblePath = file.getAbsolutePath().substring(Environment.getExternalStorageDirectory().getAbsolutePath().length());
+            } else {
+                visiblePath = file.getAbsolutePath();
+            }
+            Toast.makeText(context, "Excel fayl saqlandi: " + visiblePath, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            showError("Excel faylni saqlashda xatolik: " + (e.getMessage() != null ? e.getMessage() : "Noma'lum xatolik"));
         } finally {
-            progressDialog.dismiss();
+            try {
+                if (fileOut != null) fileOut.close();
+            } catch (IOException ignored) {}
             try {
                 workbook.close();
-            } catch (IOException e){
-                Toast.makeText(context, "Workbookni yopishda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            } catch (IOException ignored) {}
+            progressDialog.dismiss();
         }
     }
+
 
     private void loadParts(String prId, RecyclerView partRV, TextView noPartsTxt) {
         progressDialog.setMessage("Yuklanmoqda...");

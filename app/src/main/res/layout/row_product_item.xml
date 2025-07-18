@@ -72,13 +72,29 @@
                     android:textColor="@color/black" />
             </RelativeLayout>
 
-            <TextView
-                android:id="@+id/titleTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title"
-                android:textSize="22sp"
-                android:textColor="@color/black" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/titleTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title"
+                    android:textSize="22sp"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/isCheckTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/isCheck"
+                    android:layout_marginStart="10dp"
+                    android:layout_toEndOf="@id/titleTV"
+
+                    android:textSize="20sp"
+                    android:textColor="@color/black" />
+            </RelativeLayout>
         </LinearLayout>
 
     </RelativeLayout>
