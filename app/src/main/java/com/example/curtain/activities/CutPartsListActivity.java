@@ -1,18 +1,17 @@
 package com.example.curtain.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.curtain.R;
 import com.example.curtain.adapter.AdapterCutPartsList;
+import com.example.curtain.databinding.ActivityCutPartsListBinding;
 import com.example.curtain.model.ModelCutPartsList;
 import com.example.curtain.utilities.NetworkChangeListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -23,38 +22,26 @@ import java.util.ArrayList;
 
 public class CutPartsListActivity extends AppCompatActivity {
 
-    private RecyclerView partCPLRV;
-    private TextView noCutPartsListTV;
-    private FirebaseFirestore firestore;
+    private ActivityCutPartsListBinding binding;
+    private final FirebaseFirestore firestore = FirebaseFirestore.getInstance();
     private AdapterCutPartsList adapterCutPartsList;
-    private ArrayList<ModelCutPartsList> cutPartsList;
     private ProgressDialog progressDialog;
     private String prID;
-
-    NetworkChangeListener networkChangeListener = new NetworkChangeListener();
+    private final NetworkChangeListener networkChangeListener = new NetworkChangeListener();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cut_parts_list);
-
-        init();
-
-        loadCutParts();
-        noCutPartsListTV.setVisibility(View.GONE);
-
-    }
-
-    private void init() {
-        partCPLRV = findViewById(R.id.partCPLRV);
-        noCutPartsListTV = findViewById(R.id.noCutPartsListTV);
-
-        firestore = FirebaseFirestore.getInstance();
-
-        cutPartsList = new ArrayList<>();
+        binding = ActivityCutPartsListBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         prID = getIntent().getStringExtra("prId");
 
+        initProgressDialog();
+        loadCutParts();
+    }
+
+    private void initProgressDialog() {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(this.getResources().getString(R.string.loading));
         progressDialog.setCanceledOnTouchOutside(false);
@@ -62,27 +49,46 @@ public class CutPartsListActivity extends AppCompatActivity {
 
     private void loadCutParts() {
         progressDialog.show();
+
         CollectionReference partsRef = firestore.collection("CutPartProduct");
-        partsRef.whereEqualTo("productId", prID).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                progressDialog.dismiss();
-                cutPartsList.clear();
-                for (DocumentSnapshot snapshot : task.getResult()){
-                    ModelCutPartsList modelCutPartsList = snapshot.toObject(ModelCutPartsList.class);
-                    cutPartsList.add(modelCutPartsList);
-                }
-                if (cutPartsList.isEmpty()){
-                    partCPLRV.setVisibility(View.GONE);
-                    noCutPartsListTV.setVisibility(View.VISIBLE);
-                }
-                adapterCutPartsList = new AdapterCutPartsList(CutPartsListActivity.this, cutPartsList);
-                partCPLRV.setAdapter(adapterCutPartsList);
-            } else {
-                progressDialog.dismiss();
-                Toast.makeText(CutPartsListActivity.this, "qismlar yuklashda xato " +
-                        task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        partsRef.whereEqualTo("productId", prID)
+                .get()
+                .addOnCompleteListener(task -> {
+                    try {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            ArrayList<ModelCutPartsList> cutPartsList = new ArrayList<>();
+                            for (DocumentSnapshot snapshot : task.getResult()){
+                                ModelCutPartsList modelCutPartsList = snapshot.toObject(ModelCutPartsList.class);
+                                if (modelCutPartsList != null) {
+                                    cutPartsList.add(modelCutPartsList);
+                                }
+                            }
+                            updateUI(cutPartsList);
+                        } else {
+                            showToast("qismlar yuklashda xato " + (task.getException() != null ?
+                                    task.getException().getMessage() : "No'malum xato"));
+
+                        }
+                    } finally {
+                        progressDialog.dismiss();
+                    }
+                });
+    }
+
+    private void updateUI(ArrayList<ModelCutPartsList> cutPartsList) {
+        boolean isEmpty = cutPartsList == null || cutPartsList.isEmpty();
+        binding.partCPLRV.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        binding.noCutPartsListTV.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+
+        if (adapterCutPartsList == null) {
+            adapterCutPartsList = new AdapterCutPartsList(this);
+            binding.partCPLRV.setAdapter(adapterCutPartsList);
+        }
+        adapterCutPartsList.submitList(cutPartsList);
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override

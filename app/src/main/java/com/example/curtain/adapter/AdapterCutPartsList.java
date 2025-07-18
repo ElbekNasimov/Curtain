@@ -9,57 +9,54 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.curtain.R;
+import com.example.curtain.databinding.RowCutPartsListBinding;
 import com.example.curtain.model.ModelCutPartsList;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-public class AdapterCutPartsList extends RecyclerView.Adapter<AdapterCutPartsList.HolderCutPartsList> {
-    private Context context;
-    private ArrayList<ModelCutPartsList> cutPartsList;
-
-    private FirebaseFirestore firestore;
-    public AdapterCutPartsList(Context context, ArrayList<ModelCutPartsList> cutPartsList) {
+public class AdapterCutPartsList extends ListAdapter<ModelCutPartsList, AdapterCutPartsList.HolderCutPartsList> {
+    private final Context context;
+    private final FirebaseFirestore firestore;
+    public AdapterCutPartsList(Context context) {
+        super(new DiffCallback());
         this.context = context;
-        this.cutPartsList = cutPartsList;
+        this.firestore = FirebaseFirestore.getInstance();
     }
 
     @NonNull
     @Override
-    public AdapterCutPartsList.HolderCutPartsList onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.row_cut_parts_list, parent, false);
-        return new HolderCutPartsList(view);
+    public HolderCutPartsList onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        RowCutPartsListBinding binding = RowCutPartsListBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new HolderCutPartsList(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull HolderCutPartsList holder, int position) {
+        ModelCutPartsList modelCutPartsList = getItem(position);
 
-        firestore = FirebaseFirestore.getInstance();
+        holder.binding.quanCPLTV.setText(modelCutPartsList.getPartCutPrObjLen());
+        holder.binding.measCPLTV.setText("m");
+        try {
 
-        final ModelCutPartsList modelCutPartsList = cutPartsList.get(position);
+            Date prDate = new Date(Long.parseLong(modelCutPartsList.getCutIdPartProductOrder()));
+            SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+            holder.binding.cutDateCPLTV.setText(sdfFormat.format(prDate));
+        } catch (Exception e){
+            holder.binding.cutDateCPLTV.setText("???");
 
-        String orderId = modelCutPartsList.getOrderId();
-        String quantity = modelCutPartsList.getPartCutPrObjLen();
-        String cutDate = modelCutPartsList.getCutIdPartProductOrder();
+        }
 
-        holder.quanCPLTV.setText(quantity);
-
-        Date prDate = new Date(Long.parseLong(cutDate));
-        SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-        String date = sdfFormat.format(prDate);
-        holder.cutDateCPLTV.setText(date);
-
-        holder.measCPLTV.setText("m");
-
-        holder.itemView.setOnClickListener(view -> {
+        holder.binding.getRoot().setOnClickListener(view -> {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
             LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
             View dialogView = inflater.inflate(R.layout.dialog_cut_parts_list_info, null);
@@ -68,46 +65,45 @@ public class AdapterCutPartsList extends RecyclerView.Adapter<AdapterCutPartsLis
             TextView infoOrderByNameTV = dialogView.findViewById(R.id.infoOrderByNameTV);
             TextView infoOrderNameTV = dialogView.findViewById(R.id.infoOrderNameTV);
             TextView infoOrderNumberTV = dialogView.findViewById(R.id.infoOrderNumberTV);
-
-            DocumentReference orderRef = firestore.collection("Orders").document(orderId);
-            orderRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot doc = task.getResult();
-                    if (doc.exists()){
-                        infoOrderByNameTV.setText(String.format("Dizayner: %s", doc.getString("created_by").toUpperCase()));
-                        infoOrderNameTV.setText(String.format("Klient: %s", doc.getString("orderName").toUpperCase()));
-                        infoOrderNumberTV.setText(String.format("Smeta: %s", doc.getString("orderNumber").toUpperCase()));
-                    } else {
-                        Toast.makeText(context, "Tegishli ma'lumot topilmadi", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(context, "xatolik " + task.getException(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
+            firestore.collection("Orders").document(modelCutPartsList.getOrderId())
+                    .get().addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            DocumentSnapshot doc = task.getResult();
+                            infoOrderByNameTV.setText(String.format("Dizayner: "+ safeToUpper(doc.getString("created_by"))));
+                            infoOrderNameTV.setText(String.format("Klient: %s", safeToUpper(doc.getString("orderName"))));
+                            infoOrderNumberTV.setText(String.format("Smeta: %s", safeToUpper(doc.getString("orderNumber"))));
+                        } else {
+                            Toast.makeText(context, "Ma'lumot topilmadi " + task.getException(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
             alertDialog.setView(dialogView).setPositiveButton("Ok", (dialogInterface, i) -> dialogInterface.dismiss());
 
-            alertDialog.setView(dialogView);
-            AlertDialog dialog = alertDialog.create();
-            dialog.show();
+            alertDialog.create().show();
         });
     }
 
+    private String safeToUpper(String str) {
+        return str != null ? str.toUpperCase(Locale.getDefault()) : "N/A";
+    }
 
-    public class HolderCutPartsList extends RecyclerView.ViewHolder{
+    static class HolderCutPartsList extends RecyclerView.ViewHolder{
+        RowCutPartsListBinding binding;
 
-        TextView quanCPLTV, measCPLTV, cutDateCPLTV;
-
-        public HolderCutPartsList(@NonNull View itemView) {
-            super(itemView);
-            quanCPLTV = itemView.findViewById(R.id.quanCPLTV);
-            measCPLTV = itemView.findViewById(R.id.measCPLTV);
-            cutDateCPLTV = itemView.findViewById(R.id.cutDateCPLTV);
+        public HolderCutPartsList(RowCutPartsListBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return cutPartsList.size();
+    static class DiffCallback extends DiffUtil.ItemCallback<ModelCutPartsList>{
+        @Override
+        public boolean areItemsTheSame(@NonNull ModelCutPartsList oldItem, @NonNull ModelCutPartsList newItem) {
+            return oldItem.getCutIdPartProductOrder().equals(newItem.getCutIdPartProductOrder());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull ModelCutPartsList oldItem, @NonNull ModelCutPartsList newItem) {
+            return oldItem.equals(newItem);
+        }
     }
 }
