@@ -574,7 +574,7 @@ public class AdapterProductObject  extends RecyclerView.Adapter<AdapterProductOb
     private void changeLenPrOrder(String chosenPartIdPrOrder, String chosenPartPrOrder, String partCutPrObjLen) {
         HashMap<String, Object> hashMap = new HashMap<>();
         float cutPartLen = Float.parseFloat(chosenPartPrOrder) - Float.parseFloat(partCutPrObjLen);
-        hashMap.put("partLen", ""+cutPartLen);
+        hashMap.put("partLen", ""+String.format("%.1f",cutPartLen));
         DocumentReference partRef = firestore.collection("Parts").document(chosenPartIdPrOrder);
         partRef.update(hashMap).addOnSuccessListener(unused ->
                         Log.d("AdapterProductOrder", "Bajarildi"))

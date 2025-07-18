@@ -59,10 +59,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
     // write function, that must check all data every week. If partProduct has two len=0, func remove one of them
     // har hafta part uzunligini tekshiradigan funksiya yozish kerak, agar len=0 bittadan ko'p bo'lsa, ularni o'chirsin
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
     private RelativeLayout productsRL, ordersRL;
