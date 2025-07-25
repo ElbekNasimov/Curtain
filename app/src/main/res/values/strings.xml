@@ -171,4 +171,7 @@
     <string name="topilishi">Topilishi</string>
     <string name="isCheck">Tekshirildi</string>
     <string name="unChecked">Tekshirilmagan</string>
+    <string name="maksimal_0m">Maksimal: 0m</string>
+    <string name="uzunlik_m">Uzunlik (m)</string>
+    <string name="ostatka_olindi">Bor</string>
 </resources>

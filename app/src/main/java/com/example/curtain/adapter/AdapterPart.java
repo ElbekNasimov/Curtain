@@ -44,12 +44,12 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
     @NonNull
     @Override
     public AdapterPart.HolderPart onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_product_detail, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_part_detail, parent, false);
         return new HolderPart(view);
     }
 
     class HolderPart extends RecyclerView.ViewHolder {
-        private TextView quanTV, measTV, locTV, isReservePartTV, byReservedPartTV;
+        private TextView quanTV, measTV, locTV, isReservePartTV, byReservedPartTV, inStockTV;
         private ImageButton editPartBtn, delPartBtn;
 
         public HolderPart(@NonNull View itemView) {
@@ -62,6 +62,7 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
             delPartBtn = itemView.findViewById(R.id.delPartBtn);
             isReservePartTV = itemView.findViewById(R.id.isReservePartTV);
             byReservedPartTV = itemView.findViewById(R.id.byReservedPartTV);
+            inStockTV = itemView.findViewById(R.id.inStockTV);
         }
     }
 
@@ -72,6 +73,7 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
         String qty = modelPart.getPartLen();
         String loc = modelPart.getPartLoc();
         String meas = modelPart.getPartMeas();
+        String inStock = modelPart.getIsStock();
 
         String partId = modelPart.getPartId();
         String isReserve = modelPart.getIsReservePart();
@@ -84,6 +86,7 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
         holder.quanTV.setText(qty != null ? qty : "0");
         holder.measTV.setText(meas != null ? meas : "");
         holder.locTV.setText(loc != null ? loc : "");
+        holder.inStockTV.setText(inStock != null ? inStock : "");
 
         sharedPreferences = context.getApplicationContext().getSharedPreferences("USER_TYPE", context.MODE_PRIVATE);
 
@@ -118,6 +121,37 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
             holder.delPartBtn.setVisibility(View.GONE);
             holder.editPartBtn.setVisibility(View.GONE);
         }
+
+        if (sharedUserType.equals("superAdmin")) {
+            holder.quanTV.setOnClickListener(view -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Kusok holati")
+                        .setMessage("Shu kusok bormi?")
+                        .setPositiveButton("Ha", (dialog, which) -> {
+                            // Firestorega "isStock": "bor" yoziladi
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put("isStock", "bor");
+
+                            partRef.update(hashMap)
+                                    .addOnSuccessListener(unused -> {
+                                        Toast.makeText(context, "Kusok mavjud deb belgilandi", Toast.LENGTH_SHORT).show();
+                                        modelPart.setIsStock("bor"); // Modelni yangilash
+                                        notifyItemChanged(position); // UI yangilash (agar kerak bo‘lsa)
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(context, "Xatolik: Ma'lumot saqlanmadi\n" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+
+                        })
+                        .setNegativeButton("Yo‘q", (dialog, which) -> {
+                            dialog.dismiss(); // hech narsa qilinmaydi
+                        })
+                        .show();
+            });
+        } else {
+            holder.quanTV.setOnClickListener(null); // SuperAdmin emas, hech narsa qilinmaydi
+        }
+
 
         holder.delPartBtn.setOnClickListener(view ->{
             AlertDialog.Builder builder = new AlertDialog.Builder(context);

@@ -76,6 +76,14 @@
                 android:layout_marginStart="8dp"
                 android:textColor="@color/black" />
             <TextView
+                android:id="@+id/inStockTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ostatka_olindi"
+                android:textSize="18sp"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/colorGreen" />
+            <TextView
                 android:id="@+id/locTV"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

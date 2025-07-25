@@ -3,7 +3,7 @@ package com.example.curtain.model;
 public class ModelPart {
 
     private String created_at, created_by, partLen, partLoc, partMeas, prId, partId, prTitle, partEditAt, partEditBy,
-    isReservePart, byReservedPart;
+    isReservePart, byReservedPart, isStock;
 
     public ModelPart() {
     }
@@ -18,7 +18,7 @@ public class ModelPart {
 
     public ModelPart(String created_at, String created_by, String partLen, String partLoc, String partMeas, String prId,
                      String partId, String prTitle, String partEditAt, String partEditBy, String isReservePart,
-                     String byReservedPart) {
+                     String byReservedPart, String isStock) {
         this.created_at = created_at;
         this.created_by = created_by;
         this.partLen = partLen;
@@ -31,6 +31,7 @@ public class ModelPart {
         this.partEditBy = partEditBy;
         this.isReservePart = isReservePart;
         this.byReservedPart = byReservedPart;
+        this.isStock = isStock;
     }
 
     public String getCreated_at() {
@@ -119,5 +120,11 @@ public class ModelPart {
 
     public void setByReservedPart(String byReservedPart) {
         this.byReservedPart = byReservedPart;
+    }
+    public String getIsStock() {
+        return isStock;
+    }
+    public void setIsStock(String isStock) {
+        this.isStock = isStock;
     }
 }
