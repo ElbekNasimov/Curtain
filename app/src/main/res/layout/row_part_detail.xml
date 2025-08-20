@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -55,43 +56,93 @@
             android:contentDescription="@string/todo" />
 
     </RelativeLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/quanTV"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-            <TextView
-                android:id="@+id/quanTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/quantity"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="@color/black" />
-            <TextView
-                android:id="@+id/measTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/meas"
-                android:textSize="18sp"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/black" />
-            <TextView
-                android:id="@+id/inStockTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ostatka_olindi"
-                android:textSize="18sp"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/colorGreen" />
-            <TextView
-                android:id="@+id/locTV"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/location"
-                android:gravity="end"
-                android:textSize="18sp"
-                android:textColor="@color/black" />
-        </LinearLayout>
+            android:text="@string/quantity"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@color/black" />
+        <TextView
+            android:id="@+id/measTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/meas"
+            android:textSize="18sp"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/inStockTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ostatka_olindi"
+            android:textSize="18sp"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/colorGreen" />
+        <TextView
+            android:id="@+id/locTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/location"
+            android:gravity="end"
+            android:textSize="18sp"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/descPartTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/description"
+        android:textSize="18sp"
+        android:textStyle="italic"
+
+        />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp"
+        android:padding="5dp"
+        >
+
+        <TextView
+            android:id="@+id/availableLengthTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Mavjud: 0m"
+            android:textSize="14sp"
+            android:textColor="@color/colorGreen"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/totalReservedTV"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Bron: 0m"
+            android:textSize="14sp"
+            android:textColor="@color/colorGreen"
+            android:textStyle="bold"
+            android:gravity="end" />
+    </LinearLayout>
+    <!-- YANGI: Nested RecyclerView rezervatsiyalar uchun -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/reservationsRV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:nestedScrollingEnabled="false"
+        android:visibility="gone" />
 </LinearLayout>
 </androidx.cardview.widget.CardView>

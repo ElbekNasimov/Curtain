@@ -167,25 +167,18 @@ public class Constants {
     public static final String [] productColor = {
             "Ivory",
             "Krem",
-            "Kulrang",
+            "Seriy",
             "Tilla",
             "Elektr",
-            "Jo'ja tilla",
-            "Krem-tilla",
-            "Krem-oq",
-            "To'q tilla",
             "Qora",
             "Roziviy",
             "Delfin",
             "Qizil",
             "Yashil",
             "Oq",
-            "Moviy",
             "Sariq",
-            "Jigarrang",
-            "Binafsha",
-            "Siyoh",
-            "Bej",
+            "Korechniviy",
+            "Fioletiviy",
     };
     public static String capitalizeFirstLetter(String input) {
         if (input == null || input.isEmpty()) {

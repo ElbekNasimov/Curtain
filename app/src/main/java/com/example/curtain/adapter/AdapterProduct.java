@@ -426,6 +426,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
             Spinner spinner = dialogView.findViewById(R.id.locSpinner);
             Spinner measSpinner = dialogView.findViewById(R.id.measSpinner);
             EditText dialAlenET = dialogView.findViewById(R.id.dialAlenET);
+            EditText dialDescET = dialogView.findViewById(R.id.dialDescET);
 
             ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
                     android.R.layout.simple_spinner_item, Constants.measurement);
@@ -473,6 +474,7 @@ public class AdapterProduct extends RecyclerView.Adapter<AdapterProduct.HolderPr
                         hashMap.put("prTitle", title);
                         hashMap.put("prId", prId);
                         hashMap.put("partLen", ""+dialAlenET.getText().toString().trim());
+                        hashMap.put("descPart", ""+dialDescET.getText().toString().trim());
                         hashMap.put("partMeas", measurement);
                         hashMap.put("partLoc", location);
 

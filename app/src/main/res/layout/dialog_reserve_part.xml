@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/maxLengthTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/maksimal_0m"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:paddingBottom="10dp"/>
+    <EditText
+        android:id="@+id/reserveLengthET"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="@string/uzunlik_m" />
+    <EditText
+        android:id="@+id/reserveClientET"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Kim uchun"
+        android:inputType="textPersonName"
+        android:layout_marginTop="10dp"/>
+
+</LinearLayout>

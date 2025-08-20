@@ -55,6 +55,23 @@
         app:errorEnabled="true"
         />
 
-
+    <EditText
+        android:id="@+id/dialDescET"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/description"
+        android:background="@drawable/shape_rect02"
+        android:drawableStart="@drawable/icon_dns_gray"
+        android:drawablePadding="5dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:inputType="text"
+        android:textSize="18sp"
+        android:importantForAutofill="no"
+        android:layout_gravity="center"
+        app:errorEnabled="true"
+        android:padding="10dp" />
 
 </LinearLayout>

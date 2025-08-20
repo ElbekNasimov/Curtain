@@ -198,7 +198,7 @@
         android:layout_height="200dp"
         android:layout_below="@id/toolbarLL"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/row_product_detail"/>
+        tools:listitem="@layout/row_part_detail"/>
     <TextView
         android:id="@+id/NoPartsTxt"
         android:layout_width="match_parent"

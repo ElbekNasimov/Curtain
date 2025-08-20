@@ -91,16 +91,16 @@ public class MainActivity extends AppCompatActivity {
 
         String userStatus = sharedPreferences.getString("user_status", "");
         String sharedUserType = getUserType(sharedPreferences);
-        if (userStatus.equals("ENABLE")){
+        if (userStatus.equals("ENABLE")) {
             checkUser();
-        } else if (userStatus.equals("DISABLE")){
+        } else if (userStatus.equals("DISABLE")) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         } else {
             checkUser();
         }
 
-        String select="Hammasi";
+        String select = "Hammasi";
         loadProducts(select);
 
 
@@ -112,24 +112,24 @@ public class MainActivity extends AppCompatActivity {
         usersListTV.setVisibility(View.GONE);
         otchotTV.setVisibility(View.GONE);
 
-        if (sharedUserType.equals(Constants.userTypes[4])){
+        if (sharedUserType.equals(Constants.userTypes[4])) {
             usersListTV.setVisibility(View.VISIBLE);
             otchotTV.setVisibility(View.VISIBLE);
         }
 
-        if (sharedUserType.equals("dizayner") || sharedUserType.equals("bichuvchi")){
+        if (sharedUserType.equals("dizayner") || sharedUserType.equals("bichuvchi")) {
             addProductBtn.setVisibility(View.GONE);
         } else {
-            addProductBtn.setOnClickListener(v ->{
+            addProductBtn.setOnClickListener(v -> {
                 startActivity(new Intent(MainActivity.this, AddProduct.class));
             });
         }
 
-        if (sharedUserType.equals("sklad") || sharedUserType.equals("bichuvchi")){
+        if (sharedUserType.equals("sklad") || sharedUserType.equals("bichuvchi")) {
             addOrderBtn.setVisibility(View.GONE);
         }
 
-        if (sharedUserType.equals("viewer")){
+        if (sharedUserType.equals("viewer")) {
             addOrderBtn.setVisibility(View.GONE);
             addProductBtn.setVisibility(View.GONE);
         }
@@ -151,9 +151,10 @@ public class MainActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (adapterProduct!=null){
+                if (adapterProduct != null) {
                     adapterProduct.getFilter().filter(s);
                 }
             }
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (adapterOrder!=null){
+                if (adapterOrder != null) {
                     adapterOrder.getFilter().filter(charSequence);
                 }
             }
@@ -205,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
         scannerPrBtn.setOnClickListener(view -> scanBarcode());
 
-        if (!sharedUserType.equals("superAdmin")){
+        if (!sharedUserType.equals("superAdmin")) {
             excelPrintBtn.setVisibility(View.GONE);
         }
 
@@ -217,14 +218,14 @@ public class MainActivity extends AppCompatActivity {
 
         logoutBtn.setOnClickListener(view -> {
 //            if (sharedUserType.equals("superAdmin")) {
-                progressDialog.setMessage(getResources().getString(R.string.wait));
-                SharedPreferences preferences = getSharedPreferences("USER_TYPE", MODE_PRIVATE);
-                preferences.edit().remove("user_type").apply();
-                preferences.edit().remove("username").apply();
-                preferences.edit().remove("user_status").apply();
-                mAuth.signOut();
-                finishAffinity();
-                checkUser();
+            progressDialog.setMessage(getResources().getString(R.string.wait));
+            SharedPreferences preferences = getSharedPreferences("USER_TYPE", MODE_PRIVATE);
+            preferences.edit().remove("user_type").apply();
+            preferences.edit().remove("username").apply();
+            preferences.edit().remove("user_status").apply();
+            mAuth.signOut();
+            finishAffinity();
+            checkUser();
 //            } else {
 //                Toast.makeText(MainActivity.this, "Sizga ruxsat berilmagan", Toast.LENGTH_SHORT).show();
 //            }
@@ -238,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         List<DocumentSnapshot> documents = task.getResult().getDocuments();
-                        if (documents != null && !documents.isEmpty()){
+                        if (documents != null && !documents.isEmpty()) {
                             createExcelFile(documents);
                         } else {
                             progressDialog.dismiss();
@@ -256,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }).addOnFailureListener(e -> {
-                   progressDialog.dismiss();
+                    progressDialog.dismiss();
                     Toast.makeText(this, "Excel saqlashda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
@@ -274,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
 
         // ma'lumotlarni yozish
         int rowNum = 1;
-        for (DocumentSnapshot document: documents){
+        for (DocumentSnapshot document : documents) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(document.getString("prTitle"));
             row.createCell(1).setCellValue(document.getString("prBarcode"));
@@ -306,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
             progressDialog.dismiss();
             try {
                 workbook.close();
-            } catch (IOException e){
+            } catch (IOException e) {
                 Toast.makeText(this, "Workbookni yopishda xatolik " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
@@ -315,7 +316,8 @@ public class MainActivity extends AppCompatActivity {
     private String getUserType(SharedPreferences sharedPreferences) {
         return sharedPreferences.getString("user_type", "");
     }
-    private void init(){
+
+    private void init() {
 
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -358,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkUser() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null){
+        if (currentUser == null) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
         } else {
@@ -368,32 +370,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void loadProducts(String selected){
+    private void loadProducts(String selected) {
         progressDialog.show();
         String sharedUserType = sharedPreferences.getString("user_type", "");
-        CollectionReference collectionReference  = firebaseFirestore.collection("Products");
+        CollectionReference collectionReference = firebaseFirestore.collection("Products");
         collectionReference.addSnapshotListener((snapshots, error) -> {
-            if (error!=null){
+            if (error != null) {
                 progressDialog.dismiss();
                 Toast.makeText(MainActivity.this, "mahsulotlar yuklashda xato "
                         + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
             assert snapshots != null;
-            if (snapshots.isEmpty()){
+            if (snapshots.isEmpty()) {
 //                    Process data from all documents in the snapshot
                 progressDialog.dismiss();
                 productRV.setVisibility(View.GONE);
                 emptyTV.setVisibility(View.VISIBLE);
             }
-                progressDialog.dismiss();
-                emptyTV.setVisibility(View.GONE);
+            progressDialog.dismiss();
+            emptyTV.setVisibility(View.GONE);
 
             productList.clear();
-            for (QueryDocumentSnapshot documentSnapshot:snapshots){
+            for (QueryDocumentSnapshot documentSnapshot : snapshots) {
                 ModelProduct modelProduct = documentSnapshot.toObject(ModelProduct.class);
-                if (selected.equals("Hammasi") || selected.equals("")){
+                if (selected.equals("Hammasi") || selected.equals("")) {
                     productList.add(modelProduct);
-                } else if (selected.equals(modelProduct.getPrCat())){
+                } else if (selected.equals(modelProduct.getPrCat())) {
                     productList.add(modelProduct);
                 }
             }
@@ -445,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showProductsUI(){
+    private void showProductsUI() {
         // show products UI and hide orders UI
         productsRL.setVisibility(View.VISIBLE);
         ordersRL.setVisibility(View.GONE);
@@ -455,6 +457,7 @@ public class MainActivity extends AppCompatActivity {
         tabOrdersTV.setTextColor(getResources().getColor(R.color.white));
         tabOrdersTV.setBackgroundColor(getResources().getColor(android.R.color.transparent));
     }
+
     private void showOrdersUI() {
         // show orders UI and hide products UI
         productsRL.setVisibility(View.GONE);
@@ -474,6 +477,7 @@ public class MainActivity extends AppCompatActivity {
         options.setCaptureActivity(CaptureAct.class); // Assuming CaptureAct extends AppCompatActivity
         barLauncher.launch(options);
     }
+
     ActivityResultLauncher<ScanOptions> barLauncher =
             registerForActivityResult(new ScanContract(), result -> {
                 if (result.getContents() != null) {
@@ -487,17 +491,17 @@ public class MainActivity extends AppCompatActivity {
     private void filterProductsByBarcode(String barcode) {
         CollectionReference collectionReference = firebaseFirestore.collection("Products");
         collectionReference.whereEqualTo("prBarcode", barcode).get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()){
+            if (!task.isSuccessful()) {
 //                    Handle error
                 Toast.makeText(MainActivity.this, "Error fetching product "
                         + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
-            if (task.getResult().isEmpty()){
+            if (task.getResult().isEmpty()) {
                 Toast.makeText(MainActivity.this, "Yo'q", Toast.LENGTH_SHORT).show();
                 return;
             }
             productList.clear();
-            for (QueryDocumentSnapshot documentSnapshot : task.getResult()){
+            for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                 ModelProduct modelProduct = documentSnapshot.toObject(ModelProduct.class);
                 productList.add(modelProduct);
             }
@@ -512,7 +516,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (doubleBackToExitPressedOnce){
+        if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
             return;
         }

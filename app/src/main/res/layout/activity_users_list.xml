@@ -29,6 +29,7 @@
             android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
+
     </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -14,18 +14,25 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.curtain.R;
 import com.example.curtain.constants.Constants;
 import com.example.curtain.model.ModelPart;
+import com.example.curtain.model.ModelReservation;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.UUID;
 
-public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
+public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart> implements AdapterReservation.OnReservationChangeListener{
 
     public ArrayList<ModelPart> partList;
     private Context context;
@@ -49,8 +56,12 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
     }
 
     class HolderPart extends RecyclerView.ViewHolder {
-        private TextView quanTV, measTV, locTV, isReservePartTV, byReservedPartTV, inStockTV;
+        private TextView quanTV, measTV, locTV, isReservePartTV, byReservedPartTV, descPartTV, inStockTV;
         private ImageButton editPartBtn, delPartBtn;
+        private TextView availableLengthTV, totalReservedTV;
+        private RecyclerView reservationRV;
+
+
 
         public HolderPart(@NonNull View itemView) {
             super(itemView);
@@ -62,7 +73,12 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
             delPartBtn = itemView.findViewById(R.id.delPartBtn);
             isReservePartTV = itemView.findViewById(R.id.isReservePartTV);
             byReservedPartTV = itemView.findViewById(R.id.byReservedPartTV);
+            descPartTV = itemView.findViewById(R.id.descPartTV);
             inStockTV = itemView.findViewById(R.id.inStockTV);
+
+            availableLengthTV = itemView.findViewById(R.id.availableLengthTV);
+            totalReservedTV = itemView.findViewById(R.id.totalReservedTV);
+            reservationRV = itemView.findViewById(R.id.reservationsRV);
         }
     }
 
@@ -74,18 +90,22 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
         String loc = modelPart.getPartLoc();
         String meas = modelPart.getPartMeas();
         String inStock = modelPart.getIsStock();
-
         String partId = modelPart.getPartId();
-        String isReserve = modelPart.getIsReservePart();
         String byReserved = modelPart.getByReservedPart();
-        String formattedByReserved = byReserved != null ? Constants.capitalizeFirstLetter(byReserved) : "";
+        String descPart = modelPart.getDescPart();
 
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         DocumentReference partRef = firestore.collection("Parts").document(partId);
 
-        holder.quanTV.setText(qty != null ? qty : "0");
+        holder.quanTV.setText(qty != null ? qty : "");
         holder.measTV.setText(meas != null ? meas : "");
         holder.locTV.setText(loc != null ? loc : "");
+        if (descPart != null && !descPart.isEmpty()) {
+            holder.descPartTV.setText(descPart);
+            holder.descPartTV.setVisibility(View.VISIBLE); // Agar ilgari GONE bo‘lgan bo‘lsa, yana ko‘rsatsin
+        } else {
+            holder.descPartTV.setVisibility(View.GONE);
+        }
         holder.inStockTV.setText(inStock != null ? inStock : "");
 
         sharedPreferences = context.getApplicationContext().getSharedPreferences("USER_TYPE", context.MODE_PRIVATE);
@@ -93,35 +113,39 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
         String sharedUserType = sharedPreferences.getString("user_type", "");
         String sharedUserName = sharedPreferences.getString("username", "");
 
-        if (isReserve != null && isReserve.equals("true") && !byReserved.isEmpty()) {
-            // Agar mahsulot bron qilingan bo'lsa
-            if (sharedUserName.equals(byReserved) || sharedUserType.equals("superAdmin")) {
-                // Agar foydalanuvchi bron qilgan foydalanuvchi yoki superAdmin bo'lsa
-                holder.isReservePartTV.setText("Bron qaytarish");
-                holder.isReservePartTV.setEnabled(true);
-                holder.isReservePartTV.setOnClickListener(v -> cancelReservation(partId, position));
-            } else {
-                // Boshqa foydalanuvchilar uchun
-                holder.isReservePartTV.setText("Bron qilindi");
-                holder.isReservePartTV.setTextColor(context.getResources().getColor(R.color.red));
-                holder.isReservePartTV.setEnabled(false);
-            }
-            holder.byReservedPartTV.setText(String.format("%s tomonidan", formattedByReserved));
-            holder.byReservedPartTV.setVisibility(View.VISIBLE);
-        } else {
-            // Agar mahsulot bron qilinmagan bo'lsa
-            holder.isReservePartTV.setText("Bron qilish");
-            holder.isReservePartTV.setEnabled(true);
-            holder.isReservePartTV.setOnClickListener(v -> reservePart(partId, position, sharedUserName));
-            holder.byReservedPartTV.setVisibility(View.GONE);
-        }
+        // bronlarni ko'rsatish uchun
+        loadReservations(partId, modelPart, holder, position);
 
+        // availableLengthTV ni ko'rsatish
+        double availableLength = modelPart.calculateAvailableLength();
+        double totalReserved = modelPart.calculateReservedLength();
+
+        if (sharedUserType.equals("viewer")) {
+            holder.isReservePartTV.setVisibility(View.GONE);
+        }
+            // bron bekor qilish button
+            if (availableLength > 0) {
+                holder.isReservePartTV.setText("Bron qilish");
+                holder.isReservePartTV.setEnabled(true);
+                holder.isReservePartTV.setOnClickListener(v -> {
+
+                    showPartialReservationDialog(partId, position, sharedUserName, availableLength);
+
+                });
+            } else {
+                holder.isReservePartTV.setText("To'liq bron qilingan");
+                holder.isReservePartTV.setEnabled(false);
+                holder.isReservePartTV.setTextColor(context.getResources().getColor(R.color.red));
+            }
+
+        // admin buttons visibility
         if (sharedUserType == null || !sharedUserType.equals("sklad") && !sharedUserType.equals("admin")
                 && !sharedUserType.equals("superAdmin")){
             holder.delPartBtn.setVisibility(View.GONE);
             holder.editPartBtn.setVisibility(View.GONE);
         }
 
+        // partni ostatkasi, agar ostatkada bo'lsa, shu orqali "bor" so'zi chiqadi
         if (sharedUserType.equals("superAdmin")) {
             holder.quanTV.setOnClickListener(view -> {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -152,7 +176,6 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
             holder.quanTV.setOnClickListener(null); // SuperAdmin emas, hech narsa qilinmaydi
         }
 
-
         holder.delPartBtn.setOnClickListener(view ->{
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle("Kusok o'chirish").setMessage("O'chirmoqchimisiz?")
@@ -160,11 +183,9 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
                         // delete
                         partRef.delete().addOnCompleteListener(task -> {
                             if (task.isSuccessful()){
-
                                 partList.remove(position); // Ro'yxatdan o'chirish
                                 notifyItemRemoved(position); // UI ni yangilash
                                 notifyItemRangeChanged(position, partList.size());
-
                                 Toast.makeText(context, "Kusok o'chirildi", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(context, "kusok o'chirishda xato "
@@ -176,7 +197,6 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
         });
 
         holder.editPartBtn.setOnClickListener(view -> {
-
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
             LayoutInflater inflater = LayoutInflater.from(context.getApplicationContext());
             View dialogView = inflater.inflate(R.layout.dialog_edit_part, null);
@@ -209,61 +229,147 @@ public class AdapterPart extends RecyclerView.Adapter<AdapterPart.HolderPart>{
 
     }
 
-    private void reservePart(String partId, int position, String sharedUserName) {
+    private void loadReservations(String partId, ModelPart modelPart, HolderPart holder, int position) {
+        FirebaseFirestore.getInstance()
+                .collection("Parts").document(partId)
+                .collection("Reservations")
+                .whereEqualTo("status", "active").get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+
+                    ArrayList<ModelReservation> reservations = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        ModelReservation reservation = document.toObject(ModelReservation.class);
+                        if (reservation != null) {
+                            reservations.add(reservation);
+                        }
+                    }
+
+                    modelPart.setReservations(reservations);
+
+                    // Nested RecyclerView uchun adapterni o'rnatish
+                    if (reservations.size()>0) {
+                        holder.reservationRV.setVisibility(View.VISIBLE);
+                        holder.byReservedPartTV.setVisibility(View.VISIBLE);
+
+                        AdapterReservation adapterReservation = new AdapterReservation(context, reservations, partId, this);
+                        holder.reservationRV.setLayoutManager(new LinearLayoutManager(context));
+                        holder.reservationRV.setAdapter(adapterReservation);
+
+                        holder.byReservedPartTV.setText(String.format("%d ta bron qilgan:", reservations.size()));
+
+                    } else {
+                        holder.reservationRV.setVisibility(View.GONE);
+                        holder.byReservedPartTV.setVisibility(View.GONE);
+                    }
+                    // available length ko'rsatish
+                    double availableLength = modelPart.calculateAvailableLength();
+                    double totalReserved = modelPart.calculateReservedLength();
+
+                    holder.availableLengthTV.setText("Mavjud uzunlik: " + availableLength);
+                    holder.totalReservedTV.setText(String.format("Bron: %.1fm", totalReserved));
+
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(context, "Bronlarni yuklashda xatolik: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // Partial reservation dialog
+    private void showPartialReservationDialog(String partId, int position, String designerName, double maxLength) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View alertDialogView = inflater.inflate(R.layout.dialog_reserve_part, null);
+
+        TextView maxLengthTV = alertDialogView.findViewById(R.id.maxLengthTV);
+        EditText reserveLengthET = alertDialogView.findViewById(R.id.reserveLengthET);
+        EditText reserveClientET = alertDialogView.findViewById(R.id.reserveClientET);
+
+        maxLengthTV.setText(String.format("Maksimal: %.1fm", maxLength));
+        new AlertDialog.Builder(context).setView(alertDialogView).setTitle("Bron qilish")
+                .setMessage("Necha metr bron qilmoqchisiz?")
+                .setPositiveButton("Bron qilish", ((dialog, which) -> {
+                    String lengthStr = reserveLengthET.getText().toString().trim();
+                    String reservedFor = reserveClientET.getText().toString().trim();
+
+                    if (TextUtils.isEmpty(lengthStr) || TextUtils.isEmpty(reservedFor)) {
+                        Toast.makeText(context, "Iltimos, bron qilish uchun uzunlik va mijoz nomini kiriting", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    try{
+                        double requestedLength = Double.parseDouble(lengthStr);
+                        if (requestedLength<=0) {
+                            Toast.makeText(context, "Iltimos, musbat uzunlik kiriting", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        if (requestedLength > maxLength) {
+                            Toast.makeText(context, "Bron qilish uchun maksimal uzunlikdan oshib ketdingiz", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        createPartialReservation(partId, position, designerName, lengthStr, reservedFor);
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(context, "Iltimos, to'g'ri uzunlik kiriting", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                })).setNegativeButton("Bekor qilish", (dialog, which) -> dialog.dismiss()).show();
+    }
+
+    private void createPartialReservation(String partId, int position, String designerName,
+                                         String requestedLength, String reservedFor){
         ProgressDialog progressDialog = new ProgressDialog(context);
         progressDialog.setMessage("Bron qilinmoqda...");
         progressDialog.setCancelable(false); // Foydalanuvchi dialogni bekor qila olmasin
         progressDialog.show(); // Dialogni ko'rsatish
 
-        DocumentReference partRef = FirebaseFirestore.getInstance().collection("Parts").document(partId);
-        HashMap<String, Object> updates = new HashMap<>();
-        updates.put("isReservePart", "true");
-        updates.put("byReservedPart", sharedUserName);
+        String reservationId = UUID.randomUUID().toString(); // Yangi bron ID yaratish
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        partRef.update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    progressDialog.dismiss(); // Dialogni yopish
-                    // Ma'lumotlarni yangilash
-                    partList.get(position).setIsReservePart("true");
-                    partList.get(position).setByReservedPart(sharedUserName);
-                    notifyItemChanged(position); // UI ni yangilash
-                    Toast.makeText(context, "Bron qilindi", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    progressDialog.dismiss(); // Dialogni yopish
-                    Toast.makeText(context, "Bron qilishda xatolik", Toast.LENGTH_SHORT).show();
-                });
+        HashMap<String, Object> reservationData = new HashMap<>();
+        reservationData.put("reservationId", reservationId);
+        reservationData.put("reservedBy", designerName);
+        reservationData.put("reservedLength", requestedLength);
+        reservationData.put("reservedFor", reservedFor);
+        reservationData.put("reservedDate", currentDate);
+        reservationData.put("status", "active");
+        reservationData.put("reservedPartId", partId);
+
+        FirebaseFirestore.getInstance()
+                .collection("Parts").document(partId)
+                .collection("Reservations").document(reservationId)
+                .set(reservationData)
+                        .addOnSuccessListener(aVoid -> {
+                            // Bron muvaffaqiyatli yaratildi
+                            progressDialog.dismiss(); // Dialogni yopish
+                            ModelReservation newReservation = new ModelReservation(
+                                    reservationId, designerName, requestedLength, reservedFor,
+                                    currentDate, "active", partId);
+
+                            if (partList.get(position).getReservations() == null) {
+                                partList.get(position).setReservations(new ArrayList<>());
+                            }
+                            partList.get(position).getReservations().add(newReservation);
+                            notifyItemChanged(position); // UI ni yangilash
+
+                            Toast.makeText(context, "Bron yaratildi", Toast.LENGTH_SHORT).show();
+                        }).addOnFailureListener(e -> {
+                            // Bron yaratishda xatolik
+                            progressDialog.dismiss(); // Dialogni yopish
+                            Toast.makeText(context, "Bron yaratishda xatolik: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+
+        progressDialog.dismiss(); // Dialogni yopish
+        Toast.makeText(context, "Bron qilindi", Toast.LENGTH_SHORT).show();
     }
 
-    private void cancelReservation(String partId, int position) {
-        ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage("Bron bekor qilinmoqda...");
-        progressDialog.setCancelable(false); // Foydalanuvchi dialogni bekor qila olmasin
-        progressDialog.show(); // Dialogni ko'rsatish
-
-        DocumentReference partRef = FirebaseFirestore.getInstance().collection("Parts").document(partId);
-        HashMap<String, Object> updates = new HashMap<>();
-        updates.put("isReservePart", "false");
-        updates.put("byReservedPart", "");
-
-        partRef.update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    progressDialog.dismiss(); // Dialogni yopish
-                    // Ma'lumotlarni yangilash
-                    partList.get(position).setIsReservePart("false");
-                    partList.get(position).setByReservedPart("");
-                    notifyItemChanged(position); // UI ni yangilash
-                    Toast.makeText(context, "Bron bekor qilindi", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    progressDialog.dismiss(); // Dialogni yopish
-                    Toast.makeText(context, "Bronni bekor qilishda xatolik", Toast.LENGTH_SHORT).show();
-                });
+    @Override
+    public void onReservationChanged() {
+        // Bu metod AdapterReservation dan chaqiriladi, agar bronlar o'zgargan bo'lsa
+        notifyDataSetChanged(); // Adapterni yangilash
     }
 
     @Override
     public int getItemCount() {
         return partList.size();
     }
-
 }
